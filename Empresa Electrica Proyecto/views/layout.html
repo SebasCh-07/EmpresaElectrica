@@ -1,0 +1,74 @@
+<!-- ========================================
+     LAYOUT - Plataforma TAT
+     Estructura principal de la aplicación
+     ======================================== -->
+
+<!-- Pantalla Principal del Sistema -->
+<div id="mainScreen" class="screen">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button id="menuToggle" class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Plataforma TAT</h1>
+        </div>
+        <div class="header-right">
+            <div class="notifications">
+                <button id="notificationsBtn" class="btn-icon">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationCount" class="notification-badge">0</span>
+                </button>
+            </div>
+            <span id="userInfo" class="user-info"></span>
+            <button id="logoutBtn" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <nav class="nav-menu">
+            <ul id="navMenu">
+                <!-- El menú se genera dinámicamente según el rol -->
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Las secciones se cargan dinámicamente desde views/ -->
+    </main>
+</div>
+
+<!-- Modales -->
+<div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Título del Modal</h3>
+            <button id="closeModal" class="btn-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Contenido del modal -->
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <!-- Botones del modal -->
+        </div>
+    </div>
+</div>
+
+<!-- Notificaciones -->
+<div id="notificationsPanel" class="notifications-panel">
+    <div class="notifications-header">
+        <h3>Notificaciones</h3>
+        <button id="closeNotifications" class="btn-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="notifications-list" id="notificationsList">
+        <!-- Se llena dinámicamente -->
+    </div>
+</div>

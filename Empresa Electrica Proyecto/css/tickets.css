@@ -1,0 +1,561 @@
+/* ========================================
+   TICKETS - Plataforma TAT
+   Estilos específicos para tickets
+   ======================================== */
+
+/* Tarjetas de tickets */
+.ticket-card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-base);
+}
+
+.ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-light);
+}
+
+.ticket-header h4 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: var(--font-size-lg);
+}
+
+.ticket-info {
+    margin-bottom: var(--spacing-md);
+}
+
+.ticket-info p {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-secondary);
+}
+
+.ticket-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+}
+
+.tickets-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Estados de tickets específicos */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 15px;
+    letter-spacing: 0.5px;
+}
+
+.status-abierto {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-enproceso {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-precerrado {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-cerrado {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Prioridades específicas */
+.priority-alta {
+    color: var(--danger-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.priority-alta::before {
+    content: "🔴";
+    margin-right: var(--spacing-xs);
+}
+
+.priority-media {
+    color: var(--warning-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.priority-media::before {
+    content: "🟡";
+    margin-right: var(--spacing-xs);
+}
+
+.priority-baja {
+    color: var(--success-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.priority-baja::before {
+    content: "🟢";
+    margin-right: var(--spacing-xs);
+}
+
+/* Badges de tipo de ticket */
+.badge-soporte {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+    color: var(--text-light);
+}
+
+.badge-inspeccion {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb347 100%);
+    color: var(--text-primary);
+}
+
+.badge-responsabilidad {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: var(--text-light);
+}
+
+/* Formulario técnico */
+.phases-form {
+    background-color: var(--bg-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.phase-form-item {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.phase-form-item label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.phase-form-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+
+.phase-form-item small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.phase-details {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-light);
+}
+
+.phase-details textarea {
+    width: 100%;
+    min-height: 80px;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Fases de mantenimiento */
+.phases-list {
+    background-color: var(--bg-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.phase-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+}
+
+.phase-item:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.phase-item.completed {
+    background-color: #e8f5e8;
+    border-color: var(--success-color);
+}
+
+.phase-item i {
+    font-size: var(--font-size-lg);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.phase-item.completed i {
+    color: var(--success-color);
+}
+
+.phase-content {
+    flex: 1;
+}
+
+.phase-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+}
+
+.phase-date {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.phase-observations {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+    font-style: italic;
+}
+
+/* Tabla de valores */
+.valores-table {
+    margin-top: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.valores-table table {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.valores-table th {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.valores-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Evidencias */
+.evidencias-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.evidencia-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+}
+
+.evidencia-item:hover {
+    background-color: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.evidencia-item i {
+    color: var(--primary-color);
+    font-size: var(--font-size-lg);
+}
+
+.evidencia-item span {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.evidencias-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.evidencia-preview {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    font-size: var(--font-size-sm);
+}
+
+.evidencia-preview i {
+    color: var(--primary-color);
+}
+
+.evidencia-preview button {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.evidencia-preview button:hover {
+    background-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+/* Solicitudes */
+.solicitud-info {
+    background-color: var(--bg-light);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.solicitud-info p {
+    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.solicitud-info strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Formulario de encuesta */
+.encuesta-form {
+    background-color: var(--bg-primary);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.encuesta-question {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.encuesta-question h4 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+}
+
+.encuesta-question p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.encuesta-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.encuesta-option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.encuesta-option:hover {
+    background-color: #e3f2fd;
+    border-color: var(--primary-color);
+}
+
+.encuesta-option input[type="radio"] {
+    accent-color: var(--primary-color);
+}
+
+.encuesta-option label {
+    cursor: pointer;
+    flex: 1;
+    margin: 0;
+    font-weight: 500;
+}
+
+.encuesta-scale {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.encuesta-scale input[type="range"] {
+    flex: 1;
+    accent-color: var(--primary-color);
+}
+
+.encuesta-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+/* Comentarios adicionales */
+.comentarios-adicionales {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 2px solid var(--border-light);
+}
+
+.comentarios-adicionales label {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.comentarios-adicionales textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Estados de carga */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--bg-light);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive para tickets */
+@media (max-width: 768px) {
+    .ticket-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .ticket-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .ticket-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .phase-item {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .phase-item i {
+        align-self: flex-start;
+    }
+    
+    .encuesta-options {
+        gap: var(--spacing-xs);
+    }
+    
+    .encuesta-option {
+        padding: var(--spacing-sm);
+    }
+    
+    .encuesta-scale {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .valores-table {
+        overflow-x: auto;
+    }
+    
+    .evidencias-preview {
+        flex-direction: column;
+    }
+    
+    .evidencia-preview {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .ticket-card {
+        padding: var(--spacing-md);
+    }
+    
+    .form-container {
+        padding: var(--spacing-md);
+    }
+    
+    .encuesta-form {
+        padding: var(--spacing-lg);
+    }
+    
+    .encuesta-question {
+        padding: var(--spacing-md);
+    }
+    
+    .phases-form {
+        padding: var(--spacing-md);
+    }
+    
+    .phase-form-item {
+        padding: var(--spacing-sm);
+    }
+}

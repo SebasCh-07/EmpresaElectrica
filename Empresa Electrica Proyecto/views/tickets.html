@@ -1,0 +1,61 @@
+<!-- ========================================
+     TICKETS - Plataforma TAT
+     Gestión de tickets
+     ======================================== -->
+
+<div id="tickets" class="content-section">
+    <div class="section-header">
+        <h2>Gestión de Tickets</h2>
+        <div class="header-actions">
+            <button id="addTicketBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Ticket
+            </button>
+            <button id="exportTicketsBtn" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Exportar
+            </button>
+        </div>
+    </div>
+    <div class="filters">
+        <select id="estadoFilter">
+            <option value="">Todos los estados</option>
+            <option value="Abierto">Abierto</option>
+            <option value="En Proceso">En Proceso</option>
+            <option value="Pre-cerrado">Pre-cerrado</option>
+            <option value="Cerrado">Cerrado</option>
+        </select>
+        <select id="prioridadFilter">
+            <option value="">Todas las prioridades</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+        </select>
+        <select id="tipoFilter">
+            <option value="">Todos los tipos</option>
+            <option value="Soporte">Soporte</option>
+            <option value="Inspección">Inspección</option>
+            <option value="Responsabilidad">Responsabilidad</option>
+        </select>
+        <button id="filterBtn" class="btn btn-secondary">Filtrar</button>
+        <button id="clearFiltersBtn" class="btn btn-outline">Limpiar</button>
+    </div>
+    <div class="table-container">
+        <table id="ticketsTable" class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Equipo</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Técnico</th>
+                    <th>Fecha Visita</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="ticketsTableBody">
+                <!-- Se llena dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>

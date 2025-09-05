@@ -1,0 +1,40 @@
+<!-- ========================================
+     GEOLOCALIZACION - Plataforma TAT
+     Ubicación de técnicos
+     ======================================== -->
+
+<div id="geolocalizacion" class="content-section">
+    <div class="section-header">
+        <h2>Ubicación de Técnicos</h2>
+        <div class="header-actions">
+            <button id="refreshLocationBtn" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+        </div>
+    </div>
+    <div id="mapContainer" class="map-container">
+        <div id="map" class="map">
+            <div class="map-placeholder">
+                <h3>Mapa de Ubicaciones</h3>
+                <p>Visualizando ubicación de técnicos en tiempo real</p>
+                <div class="tecnicos-map">
+                    <!-- Marcadores de técnicos se generan dinámicamente -->
+                </div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-color disponible"></div>
+                        <span>Disponible</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color en-campo"></div>
+                        <span>En Campo</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color en-oficina"></div>
+                        <span>En Oficina</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
