@@ -1,453 +1,419 @@
-/* ========================================
-   DASHBOARD - Plataforma TAT
-   Funcionalidades del dashboard
-   ======================================== */
+// Dashboard para cada rol
 
-// Extender la clase principal con métodos del dashboard
-Object.assign(PlataformaTAT.prototype, {
+const loadDashboard = (container) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const role = currentUser.role;
     
-    loadDashboard() {
-        const dashboardContent = document.getElementById('dashboardContent');
-        const tickets = getData('tickets', []);
-        const clientes = getData('clientes', []);
-        const tecnicos = getData('tecnicos', []);
-        const solicitudes = getData('solicitudes', []);
+    switch (role) {
+        case 'admin':
+            loadAdminDashboard(container);
+            break;
+        case 'mesa_ayuda':
+            loadMesaAyudaDashboard(container);
+            break;
+        case 'tecnico':
+            loadTecnicoDashboard(container);
+            break;
+        case 'cliente':
+            loadClienteDashboard(container);
+            break;
+        default:
+            container.innerHTML = '<div class="error-message"><h3>Rol no válido</h3></div>';
+    }
+};
 
-        let content = '';
-
-        if (this.currentUser.rol === 'Administrador') {
-            content = this.renderAdminDashboard(tickets, clientes, tecnicos, solicitudes);
-        } else if (this.currentUser.rol === 'Mesa de Ayuda') {
-            content = this.renderMesaDashboard(tickets, tecnicos, solicitudes);
-        } else if (this.currentUser.rol === 'Técnico') {
-            content = this.renderTecnicoDashboard(tickets, solicitudes);
-        } else if (this.currentUser.rol === 'Cliente') {
-            content = this.renderClienteDashboard(tickets);
-        }
-
-        dashboardContent.innerHTML = content;
-    },
-
-    renderAdminDashboard(tickets, clientes, tecnicos, solicitudes) {
-        const ticketsAbiertos = tickets.filter(t => t.estado === 'Abierto').length;
-        const ticketsEnProceso = tickets.filter(t => t.estado === 'En Proceso').length;
-        const ticketsPreCerrados = tickets.filter(t => t.estado === 'Pre-cerrado').length;
-        const ticketsCerrados = tickets.filter(t => t.estado === 'Cerrado').length;
-        const totalClientes = clientes.length;
-        const tecnicosDisponibles = tecnicos.filter(t => t.estado === 'Disponible').length;
-        const solicitudesPendientes = solicitudes.filter(s => s.estado === 'Pendiente').length;
-        const ticketsRecientes = this.getTicketsRecientes(tickets, 5);
-        const ticketsUrgentes = this.getTicketsUrgentes(tickets, 5);
-
-        return `
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3>Tickets Abiertos</h3>
-                    <div class="number">${ticketsAbiertos}</div>
-                    <div class="label">Requieren atención</div>
+const loadAdminDashboard = (container) => {
+    const stats = DataManager.getStats();
+    const recentTickets = DataManager.getAllTickets().slice(0, 5);
+    const technicians = DataManager.getUsersByRole('tecnico');
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard Administrador</h1>
+            <p>Vista general del sistema y gestión completa</p>
+        </div>
+        
+        <div class="page-content">
+            <!-- Estadísticas principales -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalTickets}</div>
+                    <div class="stat-label">Total Tickets</div>
+                    <i class="fas fa-ticket-alt stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Tickets En Proceso</h3>
-                    <div class="number">${ticketsEnProceso}</div>
-                    <div class="label">En trabajo</div>
+                <div class="stat-card warning">
+                    <div class="stat-number">${stats.pendingTickets}</div>
+                    <div class="stat-label">Pendientes</div>
+                    <i class="fas fa-clock stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Tickets Pre-cerrados</h3>
-                    <div class="number">${ticketsPreCerrados}</div>
-                    <div class="label">Esperando encuesta</div>
+                <div class="stat-card info">
+                    <div class="stat-number">${stats.inProgressTickets}</div>
+                    <div class="stat-label">En Progreso</div>
+                    <i class="fas fa-tools stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Tickets Cerrados</h3>
-                    <div class="number">${ticketsCerrados}</div>
-                    <div class="label">Completados</div>
+                <div class="stat-card success">
+                    <div class="stat-number">${stats.completedTickets}</div>
+                    <div class="stat-label">Completados</div>
+                    <i class="fas fa-check-circle stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Total Clientes</h3>
-                    <div class="number">${totalClientes}</div>
-                    <div class="label">Registrados</div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalClients}</div>
+                    <div class="stat-label">Clientes</div>
+                    <i class="fas fa-users stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Técnicos Disponibles</h3>
-                    <div class="number">${tecnicosDisponibles}</div>
-                    <div class="label">Listos para asignar</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Solicitudes Pendientes</h3>
-                    <div class="number">${solicitudesPendientes}</div>
-                    <div class="label">Por aprobar</div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalTechnicians}</div>
+                    <div class="stat-label">Técnicos</div>
+                    <i class="fas fa-tools stat-icon"></i>
                 </div>
             </div>
             
-            <div class="dashboard-details">
-                <div class="dashboard-section">
-                    <h3>Tickets Recientes</h3>
-                    <div class="tickets-list">
-                        ${ticketsRecientes.map(ticket => `
-                            <div class="ticket-item">
-                                <div class="ticket-info">
-                                    <span class="ticket-id">#${ticket.id}</span>
-                                    <span class="ticket-cliente">${ticket.cliente}</span>
-                                    <span class="ticket-equipo">${ticket.equipo}</span>
+            <div class="grid-2">
+                <!-- Tickets recientes -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-ticket-alt"></i> Tickets Recientes</h3>
+                        <p>Últimos tickets creados en el sistema</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="ticket-list">
+                            ${recentTickets.map(ticket => `
+                                <div class="ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
+                                    <div class="ticket-header">
+                                        <span class="ticket-id">${ticket.id}</span>
+                                        <span class="priority-badge priority-${ticket.priority}">
+                                            <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
+                                            ${ticket.priority.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="ticket-title">${ticket.title}</div>
+                                        <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                        <div class="ticket-meta">
+                                            <div class="ticket-client">
+                                                <i class="fas fa-user"></i>
+                                                ${ticket.clientName}
+                                            </div>
+                                            <div class="ticket-date">
+                                                <i class="fas fa-calendar"></i>
+                                                ${Utils.formatRelativeDate(ticket.createdAt)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="ticket-status">
-                                    <span class="status-badge status-${ticket.estado.toLowerCase().replace(' ', '')}">${ticket.estado}</span>
-                                    <span class="priority-${ticket.prioridad.toLowerCase()}">${ticket.prioridad}</span>
-                                </div>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" onclick="app.navigateTo('tickets')">
+                            Ver Todos los Tickets
+                        </button>
                     </div>
                 </div>
                 
-                <div class="dashboard-section">
-                    <h3>Tickets Urgentes</h3>
-                    <div class="tickets-list">
-                        ${ticketsUrgentes.map(ticket => `
-                            <div class="ticket-item urgent">
-                                <div class="ticket-info">
-                                    <span class="ticket-id">#${ticket.id}</span>
-                                    <span class="ticket-cliente">${ticket.cliente}</span>
-                                    <span class="ticket-equipo">${ticket.equipo}</span>
-                                </div>
-                                <div class="ticket-status">
-                                    <span class="status-badge status-${ticket.estado.toLowerCase().replace(' ', '')}">${ticket.estado}</span>
-                                    <span class="priority-${ticket.prioridad.toLowerCase()}">${ticket.prioridad}</span>
-                                </div>
-                            </div>
-                        `).join('')}
+                <!-- Estado de técnicos -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tools"></i> Estado de Técnicos</h3>
+                        <p>Disponibilidad y ubicación de técnicos</p>
                     </div>
-                </div>
-            </div>
-        `;
-    },
-
-    renderMesaDashboard(tickets, tecnicos, solicitudes) {
-        const ticketsPendientes = tickets.filter(t => t.estado === 'Abierto').length;
-        const tecnicosDisponibles = tecnicos.filter(t => t.estado === 'Disponible').length;
-        const solicitudesPendientes = solicitudes.filter(s => s.estado === 'Pendiente').length;
-        const ticketsSinAsignar = tickets.filter(t => t.estado === 'Abierto' && !t.tecnicoId).length;
-
-        return `
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3>Tickets Pendientes</h3>
-                    <div class="number">${ticketsPendientes}</div>
-                    <div class="label">Sin asignar</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Tickets Sin Asignar</h3>
-                    <div class="number">${ticketsSinAsignar}</div>
-                    <div class="label">Requieren técnico</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Técnicos Disponibles</h3>
-                    <div class="number">${tecnicosDisponibles}</div>
-                    <div class="label">Listos para asignar</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Solicitudes Pendientes</h3>
-                    <div class="number">${solicitudesPendientes}</div>
-                    <div class="label">Por aprobar</div>
-                </div>
-            </div>
-            
-            <div class="dashboard-details">
-                <div class="dashboard-section">
-                    <h3>Acciones Rápidas</h3>
-                    <div class="quick-actions">
-                        <button class="btn btn-primary" onclick="app.showAddTicketModal()">
-                            <i class="fas fa-plus"></i> Nuevo Ticket
-                        </button>
-                        <button class="btn btn-success" onclick="app.showSection('tickets')">
-                            <i class="fas fa-ticket-alt"></i> Ver Tickets
-                        </button>
-                        <button class="btn btn-info" onclick="app.showSection('solicitudes')">
-                            <i class="fas fa-clipboard-list"></i> Ver Solicitudes
-                        </button>
-                        <button class="btn btn-warning" onclick="app.showSection('geolocalizacion')">
-                            <i class="fas fa-map"></i> Ver Ubicaciones
+                    <div class="card-body">
+                        <div class="technician-list">
+                            ${technicians.map(tech => `
+                                <div class="technician-item">
+                                    <div class="technician-info">
+                                        <div class="technician-avatar">${tech.avatar}</div>
+                                        <div class="technician-details">
+                                            <h4>${tech.name}</h4>
+                                            <p>${tech.specializations ? tech.specializations.join(', ') : 'Sin especializaciones'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="technician-status">
+                                        <div class="status-indicator ${tech.status}"></div>
+                                        <span class="status-badge status-${tech.status}">
+                                            ${tech.status === 'disponible' ? 'Disponible' : 
+                                              tech.status === 'ocupado' ? 'Ocupado' : 'Desconectado'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary" onclick="app.navigateTo('geolocalizacion')">
+                            Ver Mapa
                         </button>
                     </div>
                 </div>
             </div>
-        `;
-    },
+        </div>
+    `;
+};
 
-    renderTecnicoDashboard(tickets, solicitudes) {
-        const misTickets = tickets.filter(t => t.tecnicoId === this.currentUser.id);
-        const ticketsAsignados = misTickets.length;
-        const ticketsEnProceso = misTickets.filter(t => t.estado === 'En Proceso').length;
-        const misSolicitudes = solicitudes.filter(s => s.tecnicoId === this.currentUser.id);
-        const ticketsCompletados = misTickets.filter(t => t.estado === 'Cerrado').length;
-
-        return `
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3>Mis Tickets</h3>
-                    <div class="number">${ticketsAsignados}</div>
-                    <div class="label">Asignados a mí</div>
+const loadMesaAyudaDashboard = (container) => {
+    const pendingTickets = DataManager.getTicketsByStatus('pendiente');
+    const assignedTickets = DataManager.getTicketsByStatus('asignado');
+    const availableTechnicians = DataManager.getAvailableTechnicians();
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <h1><i class="fas fa-headset"></i> Dashboard Mesa de Ayuda</h1>
+            <p>Gestión de tickets y asignación a técnicos</p>
+        </div>
+        
+        <div class="page-content">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card warning">
+                    <div class="stat-number">${pendingTickets.length}</div>
+                    <div class="stat-label">Tickets Pendientes</div>
+                    <i class="fas fa-clock stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>En Proceso</h3>
-                    <div class="number">${ticketsEnProceso}</div>
-                    <div class="label">Trabajando actualmente</div>
+                <div class="stat-card info">
+                    <div class="stat-number">${assignedTickets.length}</div>
+                    <div class="stat-label">Tickets Asignados</div>
+                    <i class="fas fa-user-check stat-icon"></i>
                 </div>
-                <div class="dashboard-card">
-                    <h3>Completados</h3>
-                    <div class="number">${ticketsCompletados}</div>
-                    <div class="label">Este mes</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Mis Solicitudes</h3>
-                    <div class="number">${misSolicitudes.length}</div>
-                    <div class="label">Herramientas y viáticos</div>
+                <div class="stat-card success">
+                    <div class="stat-number">${availableTechnicians.length}</div>
+                    <div class="stat-label">Técnicos Disponibles</div>
+                    <i class="fas fa-tools stat-icon"></i>
                 </div>
             </div>
             
-            <div class="dashboard-details">
-                <div class="dashboard-section">
-                    <h3>Mis Tickets Activos</h3>
-                    <div class="tickets-list">
-                        ${misTickets.filter(t => t.estado !== 'Cerrado').map(ticket => `
-                            <div class="ticket-item">
-                                <div class="ticket-info">
-                                    <span class="ticket-id">#${ticket.id}</span>
-                                    <span class="ticket-cliente">${ticket.cliente}</span>
-                                    <span class="ticket-equipo">${ticket.equipo}</span>
-                                </div>
-                                <div class="ticket-status">
-                                    <span class="status-badge status-${ticket.estado.toLowerCase().replace(' ', '')}">${ticket.estado}</span>
-                                    <span class="priority-${ticket.prioridad.toLowerCase()}">${ticket.prioridad}</span>
-                                </div>
-                                <div class="ticket-actions">
-                                    <button class="btn btn-sm btn-primary" onclick="app.viewTicket(${ticket.id})">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
+            <div class="grid-2">
+                <!-- Tickets pendientes de asignación -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Tickets Pendientes</h3>
+                        <p>Tickets que requieren asignación a técnicos</p>
                     </div>
-                </div>
-            </div>
-        `;
-    },
-
-    renderClienteDashboard(tickets) {
-        const misTickets = tickets.filter(t => t.clienteId === this.currentUser.id);
-        const ticketsAbiertos = misTickets.filter(t => t.estado === 'Abierto' || t.estado === 'En Proceso').length;
-        const ticketsCerrados = misTickets.filter(t => t.estado === 'Cerrado').length;
-        const ticketsPreCerrados = misTickets.filter(t => t.estado === 'Pre-cerrado').length;
-
-        return `
-            <div class="dashboard-grid">
-                <div class="dashboard-card">
-                    <h3>Mis Tickets Activos</h3>
-                    <div class="number">${ticketsAbiertos}</div>
-                    <div class="label">En proceso</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Tickets Pre-cerrados</h3>
-                    <div class="number">${ticketsPreCerrados}</div>
-                    <div class="label">Esperando encuesta</div>
-                </div>
-                <div class="dashboard-card">
-                    <h3>Tickets Cerrados</h3>
-                    <div class="number">${ticketsCerrados}</div>
-                    <div class="label">Completados</div>
-                </div>
-            </div>
-            
-            <div class="dashboard-details">
-                <div class="dashboard-section">
-                    <h3>Mis Tickets Recientes</h3>
-                    <div class="tickets-list">
-                        ${misTickets.slice(0, 5).map(ticket => `
-                            <div class="ticket-item">
-                                <div class="ticket-info">
-                                    <span class="ticket-id">#${ticket.id}</span>
-                                    <span class="ticket-equipo">${ticket.equipo}</span>
-                                    <span class="ticket-fecha">${formatDate(ticket.fechaCreacion)}</span>
+                    <div class="card-body">
+                        ${pendingTickets.length === 0 ? 
+                            '<p class="text-center text-muted">No hay tickets pendientes</p>' :
+                            pendingTickets.map(ticket => `
+                                <div class="ticket-card" onclick="showAssignmentModal('${ticket.id}')">
+                                    <div class="ticket-header">
+                                        <span class="ticket-id">${ticket.id}</span>
+                                        <span class="priority-badge priority-${ticket.priority}">
+                                            <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
+                                            ${ticket.priority.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="ticket-title">${ticket.title}</div>
+                                        <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                        <div class="ticket-meta">
+                                            <div class="ticket-client">
+                                                <i class="fas fa-user"></i>
+                                                ${ticket.clientName}
+                                            </div>
+                                            <div class="ticket-date">
+                                                <i class="fas fa-calendar"></i>
+                                                ${Utils.formatRelativeDate(ticket.createdAt)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="ticket-status">
-                                    <span class="status-badge status-${ticket.estado.toLowerCase().replace(' ', '')}">${ticket.estado}</span>
-                                    <span class="priority-${ticket.prioridad.toLowerCase()}">${ticket.prioridad}</span>
-                                </div>
-                                <div class="ticket-actions">
-                                    <button class="btn btn-sm btn-primary" onclick="app.viewTicket(${ticket.id})">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
+                            `).join('')
+                        }
                     </div>
                 </div>
                 
-                <div class="dashboard-section">
-                    <h3>Acciones Rápidas</h3>
-                    <div class="quick-actions">
-                        <button class="btn btn-primary" onclick="app.showAddTicketModal()">
+                <!-- Técnicos disponibles -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tools"></i> Técnicos Disponibles</h3>
+                        <p>Técnicos listos para recibir asignaciones</p>
+                    </div>
+                    <div class="card-body">
+                        ${availableTechnicians.length === 0 ? 
+                            '<p class="text-center text-muted">No hay técnicos disponibles</p>' :
+                            availableTechnicians.map(tech => `
+                                <div class="technician-item">
+                                    <div class="technician-info">
+                                        <div class="technician-avatar">${tech.avatar}</div>
+                                        <div class="technician-details">
+                                            <h4>${tech.name}</h4>
+                                            <p>${tech.specializations ? tech.specializations.join(', ') : 'Sin especializaciones'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="technician-status">
+                                        <div class="status-indicator"></div>
+                                        <span class="status-badge status-disponible">Disponible</span>
+                                    </div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+};
+
+const loadTecnicoDashboard = (container) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const myTickets = DataManager.getTicketsByTechnician(currentUser.id);
+    const inProgressTickets = myTickets.filter(t => t.status === 'en_curso');
+    const pendingTickets = myTickets.filter(t => t.status === 'asignado');
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <h1><i class="fas fa-tools"></i> Dashboard Técnico</h1>
+            <p>Gestión de tus asignaciones y trabajos</p>
+        </div>
+        
+        <div class="page-content">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card warning">
+                    <div class="stat-number">${pendingTickets.length}</div>
+                    <div class="stat-label">Asignados</div>
+                    <i class="fas fa-user-check stat-icon"></i>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-number">${inProgressTickets.length}</div>
+                    <div class="stat-label">En Progreso</div>
+                    <i class="fas fa-tools stat-icon"></i>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-number">${myTickets.filter(t => t.status === 'finalizado').length}</div>
+                    <div class="stat-label">Completados</div>
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+            
+            <!-- Mis tickets -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-ticket-alt"></i> Mis Tickets</h3>
+                    <p>Tickets asignados a ti</p>
+                </div>
+                <div class="card-body">
+                    ${myTickets.length === 0 ? 
+                        '<p class="text-center text-muted">No tienes tickets asignados</p>' :
+                        myTickets.map(ticket => `
+                            <div class="ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
+                                <div class="ticket-header">
+                                    <span class="ticket-id">${ticket.id}</span>
+                                    <span class="status-badge status-${ticket.status}">
+                                        <i class="${Utils.getStatusIcon(ticket.status)}"></i>
+                                        ${ticket.status.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="ticket-body">
+                                    <div class="ticket-title">${ticket.title}</div>
+                                    <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-client">
+                                            <i class="fas fa-user"></i>
+                                            ${ticket.clientName}
+                                        </div>
+                                        <div class="ticket-date">
+                                            <i class="fas fa-calendar"></i>
+                                            ${Utils.formatRelativeDate(ticket.createdAt)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+};
+
+const loadClienteDashboard = (container) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const myTickets = DataManager.getTicketsByClient(currentUser.id);
+    const pendingTickets = myTickets.filter(t => t.status === 'pendiente');
+    const inProgressTickets = myTickets.filter(t => t.status === 'en_curso');
+    const completedTickets = myTickets.filter(t => t.status === 'finalizado');
+    
+    container.innerHTML = `
+        <div class="page-header">
+            <h1><i class="fas fa-user"></i> Dashboard Cliente</h1>
+            <p>Gestión de tus solicitudes de servicio</p>
+        </div>
+        
+        <div class="page-content">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card warning">
+                    <div class="stat-number">${pendingTickets.length}</div>
+                    <div class="stat-label">Pendientes</div>
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-number">${inProgressTickets.length}</div>
+                    <div class="stat-label">En Progreso</div>
+                    <i class="fas fa-tools stat-icon"></i>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-number">${completedTickets.length}</div>
+                    <div class="stat-label">Completados</div>
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+            
+            <!-- Acciones rápidas -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                    <p>Acciones disponibles para ti</p>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.navigateTo('ticket-form')">
                             <i class="fas fa-plus"></i> Nuevo Ticket
                         </button>
-                        <button class="btn btn-success" onclick="app.showSection('tickets')">
-                            <i class="fas fa-ticket-alt"></i> Ver Mis Tickets
-                        </button>
-                        <button class="btn btn-warning" onclick="app.showSection('encuesta')">
-                            <i class="fas fa-star"></i> Encuestas Pendientes
+                        <button class="btn btn-secondary" onclick="app.navigateTo('tickets')">
+                            <i class="fas fa-list"></i> Ver Mis Tickets
                         </button>
                     </div>
                 </div>
             </div>
-        `;
-    },
-
-    getTicketsRecientes(tickets, limit = 5) {
-        return tickets
-            .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion))
-            .slice(0, limit);
-    },
-
-    getTicketsUrgentes(tickets, limit = 5) {
-        return tickets
-            .filter(t => t.prioridad === 'Alta' && t.estado !== 'Cerrado')
-            .sort((a, b) => new Date(a.fechaCreacion) - new Date(b.fechaCreacion))
-            .slice(0, limit);
-    },
-
-    refreshDashboard() {
-        this.loadDashboard();
-        this.showAlert('Dashboard actualizado', 'success');
-    }
-});
-
-// Estilos adicionales para el dashboard
-const dashboardStyles = `
-    .dashboard-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: var(--spacing-lg);
-        margin-top: var(--spacing-xl);
-    }
-    
-    .dashboard-section {
-        background-color: var(--bg-primary);
-        padding: var(--spacing-lg);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .dashboard-section h3 {
-        color: var(--primary-color);
-        margin-bottom: var(--spacing-md);
-        font-size: var(--font-size-lg);
-        border-bottom: 2px solid var(--border-light);
-        padding-bottom: var(--spacing-sm);
-    }
-    
-    .tickets-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-    
-    .ticket-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--spacing-md);
-        background-color: var(--bg-light);
-        border-radius: var(--border-radius);
-        border: 1px solid var(--border-light);
-        transition: all var(--transition-fast);
-    }
-    
-    .ticket-item:hover {
-        background-color: var(--bg-primary);
-        box-shadow: var(--shadow-sm);
-    }
-    
-    .ticket-item.urgent {
-        border-left: 4px solid var(--danger-color);
-        background-color: #fff5f5;
-    }
-    
-    .ticket-info {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-xs);
-        flex: 1;
-    }
-    
-    .ticket-id {
-        font-weight: 600;
-        color: var(--primary-color);
-        font-size: var(--font-size-sm);
-    }
-    
-    .ticket-cliente {
-        color: var(--text-primary);
-        font-size: var(--font-size-sm);
-    }
-    
-    .ticket-equipo {
-        color: var(--text-secondary);
-        font-size: var(--font-size-xs);
-    }
-    
-    .ticket-fecha {
-        color: var(--text-muted);
-        font-size: var(--font-size-xs);
-    }
-    
-    .ticket-status {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-xs);
-        align-items: flex-end;
-    }
-    
-    .ticket-actions {
-        margin-left: var(--spacing-sm);
-    }
-    
-    .quick-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
-    }
-    
-    .quick-actions .btn {
-        flex: 1;
-        min-width: 150px;
-        justify-content: center;
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-details {
-            grid-template-columns: 1fr;
-        }
-        
-        .ticket-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--spacing-sm);
-        }
-        
-        .ticket-status {
-            align-items: flex-start;
-            flex-direction: row;
-            gap: var(--spacing-sm);
-        }
-        
-        .quick-actions {
-            flex-direction: column;
-        }
-        
-        .quick-actions .btn {
-            min-width: auto;
-        }
-    }
-`;
-
-// Agregar estilos al documento
-const styleSheet = document.createElement('style');
-styleSheet.textContent = dashboardStyles;
-document.head.appendChild(styleSheet);
+            
+            <!-- Mis tickets recientes -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-ticket-alt"></i> Mis Tickets Recientes</h3>
+                    <p>Últimos tickets que has creado</p>
+                </div>
+                <div class="card-body">
+                    ${myTickets.length === 0 ? 
+                        '<p class="text-center text-muted">No has creado ningún ticket aún</p>' :
+                        myTickets.slice(0, 5).map(ticket => `
+                            <div class="ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
+                                <div class="ticket-header">
+                                    <span class="ticket-id">${ticket.id}</span>
+                                    <span class="status-badge status-${ticket.status}">
+                                        <i class="${Utils.getStatusIcon(ticket.status)}"></i>
+                                        ${ticket.status.replace('_', ' ').toUpperCase()}
+                                    </span>
+                                </div>
+                                <div class="ticket-body">
+                                    <div class="ticket-title">${ticket.title}</div>
+                                    <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                    <div class="ticket-meta">
+                                        <div class="ticket-date">
+                                            <i class="fas fa-calendar"></i>
+                                            ${Utils.formatRelativeDate(ticket.createdAt)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" onclick="app.navigateTo('tickets')">
+                        Ver Todos Mis Tickets
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+};

@@ -1,0 +1,478 @@
+/* Electrical Company Theme Styles */
+
+/* Electrical Color Palette */
+:root {
+    /* Electrical Primary Colors */
+    --electrical-blue: #1e3a8a;
+    --electrical-blue-light: #1e40af;
+    --electrical-blue-dark: #1e3a8a;
+    --electrical-gray: #374151;
+    --electrical-gray-light: #4b5563;
+    --electrical-green: #059669;
+    --electrical-green-light: #10b981;
+    
+    /* Electrical Gradients */
+    --electrical-gradient-primary: linear-gradient(135deg, #1e3a8a 0%, #374151 50%, #059669 100%);
+    --electrical-gradient-secondary: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #374151 100%);
+    --electrical-gradient-warning: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    --electrical-gradient-danger: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+    
+    /* Electrical Patterns */
+    --electrical-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Electrical Background Overlay */
+.electrical-bg {
+    position: relative;
+    overflow: hidden;
+}
+
+.electrical-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--electrical-pattern);
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.electrical-bg > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Electrical Header Styles */
+.electrical-header {
+    background: var(--electrical-gradient-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.electrical-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(55, 65, 81, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(30, 58, 138, 0.05) 0%, transparent 50%);
+    animation: electricalPulse 8s ease-in-out infinite;
+}
+
+@keyframes electricalPulse {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% { 
+        transform: scale(1.1) rotate(180deg);
+        opacity: 0.6;
+    }
+}
+
+/* Electrical Logo Animation */
+.electrical-logo {
+    position: relative;
+    display: inline-block;
+}
+
+.electrical-logo i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+@keyframes electricalFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Electrical Button Styles */
+.btn-electrical {
+    background: var(--electrical-gradient-primary);
+    color: white;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-electrical::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-electrical:hover::before {
+    left: 100%;
+}
+
+.btn-electrical:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.3);
+}
+
+/* Electrical Card Styles */
+.electrical-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(30, 64, 175, 0.1);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 8px 32px rgba(30, 64, 175, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.electrical-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--electrical-gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.electrical-card:hover::before {
+    opacity: 1;
+}
+
+.electrical-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(30, 64, 175, 0.15);
+    border-color: rgba(30, 64, 175, 0.2);
+}
+
+/* Electrical Status Indicators */
+.status-electrical {
+    background: var(--electrical-gradient-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+}
+
+.status-high-voltage {
+    background: var(--electrical-gradient-warning);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+    animation: voltagePulse 2s ease-in-out infinite;
+}
+
+@keyframes voltagePulse {
+    0%, 100% { 
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+        transform: scale(1.05);
+    }
+}
+
+.status-maintenance {
+    background: var(--electrical-gradient-danger);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+/* Electrical Progress Bar */
+.electrical-progress {
+    background: var(--gray-200);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+}
+
+.electrical-progress-fill {
+    background: var(--electrical-gradient-primary);
+    height: 100%;
+    border-radius: 50px;
+    position: relative;
+    overflow: hidden;
+}
+
+.electrical-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    animation: electricalShimmer 2s linear infinite;
+}
+
+@keyframes electricalShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Electrical Form Elements */
+.electrical-input {
+    border: 2px solid rgba(30, 64, 175, 0.2);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+}
+
+.electrical-input:focus {
+    border-color: var(--electrical-blue);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    transform: translateY(-1px);
+}
+
+.electrical-input:focus::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid var(--electrical-blue);
+    border-radius: var(--radius-lg);
+    animation: electricalFocus 0.6s ease-out;
+}
+
+@keyframes electricalFocus {
+    0% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1.05);
+        opacity: 0;
+    }
+}
+
+/* Electrical Navigation */
+.electrical-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 2px solid rgba(30, 64, 175, 0.1);
+}
+
+.electrical-nav-item {
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.electrical-nav-item::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--electrical-gradient-primary);
+    transition: width var(--transition-normal);
+}
+
+.electrical-nav-item:hover::before,
+.electrical-nav-item.active::before {
+    width: 100%;
+}
+
+.electrical-nav-item:hover {
+    color: var(--electrical-blue);
+    transform: translateY(-1px);
+}
+
+/* Electrical Dashboard Cards */
+.electrical-dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(30, 64, 175, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+}
+
+.electrical-dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--electrical-gradient-primary);
+}
+
+.electrical-dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(30, 64, 175, 0.15);
+}
+
+.electrical-dashboard-card .card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--electrical-gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.electrical-dashboard-card .card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--electrical-blue);
+    margin-bottom: 0.5rem;
+}
+
+.electrical-dashboard-card .card-label {
+    color: var(--gray-600);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Electrical Alert Styles */
+.electrical-alert {
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.electrical-alert::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--electrical-gradient-primary);
+}
+
+.electrical-alert-warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(249, 115, 22, 0.1));
+    border-left: 4px solid var(--electrical-yellow);
+}
+
+.electrical-alert-danger {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(249, 115, 22, 0.1));
+    border-left: 4px solid var(--electrical-orange);
+}
+
+.electrical-alert-info {
+    background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(59, 130, 246, 0.1));
+    border-left: 4px solid var(--electrical-blue);
+}
+
+/* Electrical Loading Animation */
+.electrical-loading {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(30, 64, 175, 0.2);
+    border-top: 4px solid var(--electrical-blue);
+    border-radius: 50%;
+    animation: electricalSpin 1s linear infinite;
+}
+
+@keyframes electricalSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Electrical Map Styles */
+.electrical-map {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(30, 64, 175, 0.1);
+    border: 2px solid rgba(30, 64, 175, 0.1);
+}
+
+/* Electrical Table Styles */
+.electrical-table {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(30, 64, 175, 0.1);
+}
+
+.electrical-table th {
+    background: var(--electrical-gradient-primary);
+    color: white;
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+}
+
+.electrical-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(30, 64, 175, 0.1);
+}
+
+.electrical-table tr:hover {
+    background: rgba(30, 64, 175, 0.05);
+}
+
+/* Responsive Electrical Theme */
+@media (max-width: 768px) {
+    .electrical-dashboard-card {
+        padding: 1.5rem;
+    }
+    
+    .electrical-dashboard-card .card-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .electrical-dashboard-card .card-value {
+        font-size: 1.5rem;
+    }
+    
+    .electrical-card {
+        border-radius: var(--radius-lg);
+    }
+    
+    .electrical-table th,
+    .electrical-table td {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .electrical-dashboard-card {
+        padding: 1rem;
+    }
+    
+    .electrical-dashboard-card .card-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .electrical-dashboard-card .card-value {
+        font-size: 1.25rem;
+    }
+}

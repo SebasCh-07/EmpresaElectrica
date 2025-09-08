@@ -1,153 +1,4 @@
-// Archivo principal de la aplicación
-
-// Inicialización de la aplicación
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Sistema de Gestión de Empresa Eléctrica iniciado');
-    
-    // Configurar eventos globales
-    setupGlobalEvents();
-    
-    // Inicializar funcionalidades específicas
-    initializeFeatures();
-});
-
-const setupGlobalEvents = () => {
-    // Prevenir envío de formularios por defecto
-    document.addEventListener('submit', (e) => {
-        if (e.target.tagName === 'FORM' && !e.target.hasAttribute('data-no-prevent')) {
-            e.preventDefault();
-        }
-    });
-    
-    // Manejar clics en enlaces de navegación
-    document.addEventListener('click', (e) => {
-        if (e.target.matches('.nav-link')) {
-            e.preventDefault();
-            const view = e.target.dataset.view;
-            if (view && window.app) {
-                window.app.navigateTo(view);
-            }
-        }
-    });
-    
-    // Manejar teclas de acceso rápido
-    document.addEventListener('keydown', (e) => {
-        // Ctrl + K para búsqueda rápida
-        if (e.ctrlKey && e.key === 'k') {
-            e.preventDefault();
-            const searchInput = document.querySelector('input[type="text"]');
-            if (searchInput) {
-                searchInput.focus();
-            }
-        }
-        
-        // Escape para cerrar modales
-        if (e.key === 'Escape') {
-            const modals = document.querySelectorAll('.modal.show');
-            modals.forEach(modal => {
-                modal.classList.remove('show');
-                modal.style.display = 'none';
-            });
-        }
-    });
-};
-
-const initializeFeatures = () => {
-    // Inicializar tooltips si es necesario
-    initializeTooltips();
-    
-    // Configurar notificaciones
-    setupNotifications();
-    
-    // Inicializar funcionalidades de mapa
-    setupMapFeatures();
-};
-
-const initializeTooltips = () => {
-    // Agregar tooltips a elementos con data-tooltip
-    document.querySelectorAll('[data-tooltip]').forEach(element => {
-        element.addEventListener('mouseenter', showTooltip);
-        element.addEventListener('mouseleave', hideTooltip);
-    });
-};
-
-const showTooltip = (e) => {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    tooltip.textContent = e.target.dataset.tooltip;
-    document.body.appendChild(tooltip);
-    
-    const rect = e.target.getBoundingClientRect();
-    tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
-    tooltip.style.top = rect.top - tooltip.offsetHeight - 5 + 'px';
-    
-    setTimeout(() => tooltip.classList.add('show'), 10);
-};
-
-const hideTooltip = () => {
-    const tooltip = document.querySelector('.tooltip');
-    if (tooltip) {
-        tooltip.remove();
-    }
-};
-
-const setupNotifications = () => {
-    // Configurar notificaciones push si está disponible
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-    
-    // Simular notificaciones en tiempo real
-    setInterval(() => {
-        if (Math.random() < 0.1) { // 10% de probabilidad cada 30 segundos
-            showRandomNotification();
-        }
-    }, 30000);
-};
-
-const showRandomNotification = () => {
-    const notifications = [
-        { message: 'Nuevo ticket creado', type: 'info' },
-        { message: 'Ticket asignado a técnico', type: 'success' },
-        { message: 'Trabajo completado', type: 'success' },
-        { message: 'Técnico desconectado', type: 'warning' }
-    ];
-    
-    const notification = notifications[Math.floor(Math.random() * notifications.length)];
-    Utils.showToast(notification.message, notification.type);
-};
-
-const setupMapFeatures = () => {
-    // Configurar actualización de ubicación de técnicos
-    setInterval(updateTechnicianLocations, 60000); // Cada minuto
-};
-
-const updateTechnicianLocations = () => {
-    const technicians = DataManager.getUsersByRole('tecnico');
-    
-    technicians.forEach(tech => {
-        if (tech.status === 'ocupado' && Math.random() < 0.3) {
-            // Simular movimiento del técnico
-            const currentLocation = tech.location;
-            const newLocation = {
-                lat: currentLocation.lat + (Math.random() - 0.5) * 0.01,
-                lng: currentLocation.lng + (Math.random() - 0.5) * 0.01
-            };
-            
-            DataManager.updateTechnicianLocation(tech.id, newLocation);
-            
-            // Actualizar mapa si está visible
-            if (window.technicianMap) {
-                updateMapMarkers();
-            }
-        }
-    });
-};
-
-const updateMapMarkers = () => {
-    // Esta función actualizaría los marcadores del mapa
-    // Se implementaría cuando el mapa esté visible
-};
+// Funciones compartidas entre todas las aplicaciones
 
 // Funciones de utilidad global
 window.showAssignmentModal = (ticketId) => {
@@ -356,7 +207,7 @@ window.showVisitFormModal = (ticketId) => {
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3>Formulario de Visita - ${ticketId}</h3>
+                <h3>Formulario de Visita - ${ticket.id}</h3>
                 <button class="modal-close" onclick="this.closest('.modal').remove()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -528,48 +379,6 @@ window.submitVisitForm = (event, ticketId) => {
     }
 };
 
-window.submitRubric = (event, ticketId) => {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const rubricData = {};
-    
-    for (const [key, value] of formData.entries()) {
-        if (rubricData[key]) {
-            if (Array.isArray(rubricData[key])) {
-                rubricData[key].push(value);
-            } else {
-                rubricData[key] = [rubricData[key], value];
-            }
-        } else {
-            rubricData[key] = value;
-        }
-    }
-    
-    // Actualizar ticket con rúbrica completada
-    DataManager.updateTicket(ticketId, {
-        status: 'semi_finalizado',
-        rubric: rubricData,
-        completedAt: new Date().toISOString()
-    });
-    
-    // Agregar comentario
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    DataManager.addCommentToTicket(ticketId, {
-        author: currentUser.name,
-        authorRole: currentUser.role,
-        content: 'Rúbrica completada. Trabajo listo para encuesta del cliente.'
-    });
-    
-    Utils.showToast('Rúbrica completada exitosamente', 'success');
-    document.querySelector('.modal').remove();
-    
-    // Recargar vista del ticket
-    if (currentTicketId === ticketId) {
-        loadTicketDetailById(ticketId);
-    }
-};
-
 window.showSurveyModal = (ticketId) => {
     const modal = document.createElement('div');
     modal.className = 'modal show';
@@ -603,6 +412,41 @@ window.showSurveyModal = (ticketId) => {
     `;
     
     document.body.appendChild(modal);
+};
+
+const renderSurveyQuestion = (question) => {
+    switch (question.type) {
+        case 'rating':
+            return `
+                <div class="rating-scale">
+                    ${Array.from({length: question.scale}, (_, i) => `
+                        <div class="rating-option">
+                            <input type="radio" name="${question.id}" value="${i + 1}" required>
+                            <label>${i + 1}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        case 'radio':
+            return `
+                <div class="form-group">
+                    ${question.options.map(option => `
+                        <div class="form-check">
+                            <input type="radio" name="${question.id}" value="${option.value}" required>
+                            <label>${option.label}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        case 'textarea':
+            return `
+                <div class="form-group">
+                    <textarea name="${question.id}" placeholder="Escribe tu respuesta aquí..."></textarea>
+                </div>
+            `;
+        default:
+            return '';
+    }
 };
 
 window.submitSurvey = (event, ticketId) => {
@@ -871,7 +715,9 @@ window.cancelTicket = (ticketId) => {
     if (confirm('¿Estás seguro de que quieres cancelar este ticket?')) {
         DataManager.updateTicket(ticketId, { status: 'cancelado' });
         Utils.showToast('Ticket cancelado', 'success');
-        app.navigateTo('tickets');
+        if (window.app) {
+            window.app.navigateTo('tickets');
+        }
     }
 };
 

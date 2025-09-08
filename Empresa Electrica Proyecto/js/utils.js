@@ -1,321 +1,151 @@
-/* ========================================
-   UTILS - Plataforma TAT
-   Utilidades y funciones auxiliares
-   ======================================== */
+// Utilidades generales del sistema
 
-// Funciones de formato
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
+// Formatear fechas
+const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
         year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
-}
-
-function formatDateTime(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
+        month: 'short',
+        day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
     });
-}
+};
 
-function formatCurrency(amount) {
-    if (amount === null || amount === undefined) return 'N/A';
-    return new Intl.NumberFormat('es-EC', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(amount);
-}
-
-function formatNumber(number) {
-    if (number === null || number === undefined) return 'N/A';
-    return new Intl.NumberFormat('es-EC').format(number);
-}
-
-// Funciones de validación
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-function validatePhone(phone) {
-    const re = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    return re.test(phone);
-}
-
-function validateRequired(value) {
-    return value !== null && value !== undefined && value.toString().trim() !== '';
-}
-
-function validateMinLength(value, minLength) {
-    return value && value.toString().length >= minLength;
-}
-
-function validateMaxLength(value, maxLength) {
-    return !value || value.toString().length <= maxLength;
-}
-
-// Funciones de datos
-function getData(key, defaultValue = null) {
-    try {
-        const stored = localStorage.getItem(CONFIG.STORAGE_PREFIX + key);
-        return stored ? JSON.parse(stored) : defaultValue;
-    } catch (error) {
-        console.error('Error al obtener datos:', error);
-        return defaultValue;
+// Formatear fecha relativa
+const formatRelativeDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+        return 'Hace un momento';
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `Hace ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
+    } else {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `Hace ${days} día${days > 1 ? 's' : ''}`;
     }
-}
+};
 
-function saveData(key, data) {
-    try {
-        localStorage.setItem(CONFIG.STORAGE_PREFIX + key, JSON.stringify(data));
-        return true;
-    } catch (error) {
-        console.error('Error al guardar datos:', error);
-        return false;
-    }
-}
-
-function removeData(key) {
-    try {
-        localStorage.removeItem(CONFIG.STORAGE_PREFIX + key);
-        return true;
-    } catch (error) {
-        console.error('Error al eliminar datos:', error);
-        return false;
-    }
-}
-
-function clearAllData() {
-    try {
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-            if (key.startsWith(CONFIG.STORAGE_PREFIX)) {
-                localStorage.removeItem(key);
-            }
-        });
-        return true;
-    } catch (error) {
-        console.error('Error al limpiar datos:', error);
-        return false;
-    }
-}
-
-// Funciones de generación de IDs
-function generateId() {
+// Generar ID único
+const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
+};
 
-function generateTicketId() {
-    const tickets = getData('tickets', []);
-    return tickets.length > 0 ? Math.max(...tickets.map(t => t.id)) + 1 : 1;
-}
+// Validar email
+const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
 
-// Funciones de notificaciones
-function createNotification(userId, title, message, type = 'info', priority = 'media') {
-    const notifications = getData('notificaciones', []);
-    const notification = {
-        id: generateId(),
-        usuarioId: userId,
-        titulo: title,
-        mensaje: message,
-        tipo: type,
-        leida: false,
-        fecha: new Date().toISOString(),
-        prioridad: priority
+// Validar teléfono
+const isValidPhone = (phone) => {
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+};
+
+// Sanitizar HTML
+const sanitizeHTML = (str) => {
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+};
+
+// Mostrar notificación toast
+const showToast = (message, type = 'info', duration = 5000) => {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const iconMap = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
     };
     
-    notifications.push(notification);
-    saveData('notificaciones', notifications);
+    toast.innerHTML = `
+        <i class="${iconMap[type]} toast-icon"></i>
+        <div class="toast-content">
+            <div class="toast-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
     
-    // Actualizar contador si el usuario actual está logueado
-    if (window.app && window.app.currentUser && window.app.currentUser.id === userId) {
-        window.app.loadNotifications();
-    }
-}
-
-function markNotificationAsRead(notificationId) {
-    const notifications = getData('notificaciones', []);
-    const notification = notifications.find(n => n.id === notificationId);
-    if (notification) {
-        notification.leida = true;
-        saveData('notificaciones', notifications);
-        return true;
-    }
-    return false;
-}
-
-// Funciones de filtrado y búsqueda
-function filterArray(array, filters) {
-    return array.filter(item => {
-        return Object.keys(filters).every(key => {
-            if (!filters[key]) return true;
-            
-            const itemValue = item[key];
-            const filterValue = filters[key].toString().toLowerCase();
-            
-            if (typeof itemValue === 'string') {
-                return itemValue.toLowerCase().includes(filterValue);
-            } else if (typeof itemValue === 'number') {
-                return itemValue.toString().includes(filterValue);
-            } else if (Array.isArray(itemValue)) {
-                return itemValue.some(val => 
-                    val.toString().toLowerCase().includes(filterValue)
-                );
+    document.body.appendChild(toast);
+    
+    // Mostrar toast
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+    
+    // Auto-remover
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
             }
-            
-            return false;
-        });
-    });
-}
+        }, 300);
+    }, duration);
+};
 
-function sortArray(array, key, direction = 'asc') {
-    return array.sort((a, b) => {
-        let aVal = a[key];
-        let bVal = b[key];
-        
-        // Manejar valores nulos/undefined
-        if (aVal === null || aVal === undefined) aVal = '';
-        if (bVal === null || bVal === undefined) bVal = '';
-        
-        // Convertir a string para comparación
-        aVal = aVal.toString().toLowerCase();
-        bVal = bVal.toString().toLowerCase();
-        
-        if (direction === 'asc') {
-            return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-        } else {
-            return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-        }
-    });
-}
+// Confirmar acción
+const confirmAction = (message, callback) => {
+    if (confirm(message)) {
+        callback();
+    }
+};
 
-// Funciones de paginación
-function paginateArray(array, page = 1, pageSize = 10) {
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+// Cargar contenido dinámicamente
+const loadContent = (url, containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
     
-    return {
-        data: array.slice(startIndex, endIndex),
-        pagination: {
-            currentPage: page,
-            pageSize: pageSize,
-            totalItems: array.length,
-            totalPages: Math.ceil(array.length / pageSize),
-            hasNext: endIndex < array.length,
-            hasPrev: page > 1
-        }
+    container.innerHTML = '<div class="loading-container"><div class="loading"></div><p>Cargando...</p></div>';
+    
+    // Simular carga (en una aplicación real, aquí harías una petición AJAX)
+    setTimeout(() => {
+        // El contenido se cargará desde los archivos de vistas
+        loadViewContent(url, containerId);
+    }, 500);
+};
+
+// Cargar contenido de vista
+const loadViewContent = (viewName, containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Mapear nombres de vista a funciones de carga
+    const viewLoaders = {
+        'dashboard': loadDashboard,
+        'tickets': loadTicketsView,
+        'ticket-detail': loadTicketDetail,
+        'ticket-form': loadTicketForm,
+        'clientes': loadClientsView,
+        'tecnicos': loadTechniciansView,
+        'geolocalizacion': loadGeolocationView,
+        'encuesta': loadSurveyView,
+        'equipos': loadTeamsView
     };
-}
-
-// Funciones de exportación
-function exportToCSV(data, filename = 'export.csv') {
-    if (!data || data.length === 0) return;
     
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-        headers.join(','),
-        ...data.map(row => 
-            headers.map(header => {
-                const value = row[header];
-                return typeof value === 'string' && value.includes(',') 
-                    ? `"${value}"` 
-                    : value;
-            }).join(',')
-        )
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+    const loader = viewLoaders[viewName];
+    if (loader) {
+        loader(container);
+    } else {
+        container.innerHTML = '<div class="error-message"><h3>Vista no encontrada</h3><p>La vista solicitada no existe.</p></div>';
+    }
+};
 
-function exportToJSON(data, filename = 'export.json') {
-    const jsonContent = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonContent], { type: 'application/json' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// Funciones de archivos
-function downloadFile(content, filename, mimeType = 'text/plain') {
-    const blob = new Blob([content], { type: mimeType });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Limpiar URL
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-}
-
-function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = e => reject(e);
-        reader.readAsText(file);
-    });
-}
-
-function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = e => reject(e);
-        reader.readAsDataURL(file);
-    });
-}
-
-// Funciones de URL y navegación
-function getUrlParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
-function setUrlParameter(name, value) {
-    const url = new URL(window.location);
-    url.searchParams.set(name, value);
-    window.history.pushState({}, '', url);
-}
-
-function removeUrlParameter(name) {
-    const url = new URL(window.location);
-    url.searchParams.delete(name);
-    window.history.pushState({}, '', url);
-}
-
-// Funciones de tiempo
-function debounce(func, wait) {
+// Debounce function
+const debounce = (func, wait) => {
     let timeout;
     return function executedFunction(...args) {
         const later = () => {
@@ -325,9 +155,10 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
-}
+};
 
-function throttle(func, limit) {
+// Throttle function
+const throttle = (func, limit) => {
     let inThrottle;
     return function() {
         const args = arguments;
@@ -338,241 +169,188 @@ function throttle(func, limit) {
             setTimeout(() => inThrottle = false, limit);
         }
     };
-}
+};
 
-// Funciones de animación
-function fadeIn(element, duration = 300) {
-    element.style.opacity = '0';
-    element.style.display = 'block';
-    
-    let start = performance.now();
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - start;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        element.style.opacity = progress;
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
+// Copiar al portapapeles
+const copyToClipboard = (text) => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copiado al portapapeles', 'success');
+        });
+    } else {
+        // Fallback para navegadores más antiguos
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast('Copiado al portapapeles', 'success');
+    }
+};
+
+// Formatear moneda
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+    }).format(amount);
+};
+
+// Formatear duración
+const formatDuration = (hours) => {
+    if (hours < 1) {
+        return `${Math.round(hours * 60)} minutos`;
+    } else if (hours < 24) {
+        return `${hours} hora${hours > 1 ? 's' : ''}`;
+    } else {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        let result = `${days} día${days > 1 ? 's' : ''}`;
+        if (remainingHours > 0) {
+            result += ` y ${remainingHours} hora${remainingHours > 1 ? 's' : ''}`;
         }
+        return result;
     }
-    
-    requestAnimationFrame(animate);
-}
+};
 
-function fadeOut(element, duration = 300) {
-    let start = performance.now();
-    const initialOpacity = parseFloat(getComputedStyle(element).opacity);
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - start;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        element.style.opacity = initialOpacity * (1 - progress);
-        
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            element.style.display = 'none';
-        }
-    }
-    
-    requestAnimationFrame(animate);
-}
-
-// Funciones de validación de formularios
-function validateForm(formElement) {
-    const errors = [];
-    const formData = new FormData(formElement);
-    
-    // Validar campos requeridos
-    const requiredFields = formElement.querySelectorAll('[required]');
-    requiredFields.forEach(field => {
-        if (!validateRequired(field.value)) {
-            errors.push(`El campo ${field.name || field.id} es requerido`);
-        }
-    });
-    
-    // Validar emails
-    const emailFields = formElement.querySelectorAll('input[type="email"]');
-    emailFields.forEach(field => {
-        if (field.value && !validateEmail(field.value)) {
-            errors.push(`El campo ${field.name || field.id} debe ser un email válido`);
-        }
-    });
-    
-    // Validar teléfonos
-    const phoneFields = formElement.querySelectorAll('input[type="tel"]');
-    phoneFields.forEach(field => {
-        if (field.value && !validatePhone(field.value)) {
-            errors.push(`El campo ${field.name || field.id} debe ser un teléfono válido`);
-        }
-    });
-    
-    return {
-        isValid: errors.length === 0,
-        errors: errors
-    };
-}
-
-// Funciones de manipulación del DOM
-function createElement(tag, attributes = {}, content = '') {
-    const element = document.createElement(tag);
-    
-    Object.keys(attributes).forEach(key => {
-        if (key === 'className') {
-            element.className = attributes[key];
-        } else if (key === 'innerHTML') {
-            element.innerHTML = attributes[key];
-        } else {
-            element.setAttribute(key, attributes[key]);
-        }
-    });
-    
-    if (content) {
-        element.textContent = content;
-    }
-    
-    return element;
-}
-
-function removeElement(element) {
-    if (element && element.parentNode) {
-        element.parentNode.removeChild(element);
-    }
-}
-
-function toggleClass(element, className) {
-    if (element) {
-        element.classList.toggle(className);
-    }
-}
-
-function addClass(element, className) {
-    if (element) {
-        element.classList.add(className);
-    }
-}
-
-function removeClass(element, className) {
-    if (element) {
-        element.classList.remove(className);
-    }
-}
-
-// Funciones de estadísticas
-function calculateStatistics(data, key) {
-    if (!data || data.length === 0) return null;
-    
-    const values = data.map(item => item[key]).filter(val => val !== null && val !== undefined);
-    
-    if (values.length === 0) return null;
-    
-    const sorted = values.sort((a, b) => a - b);
-    const sum = values.reduce((acc, val) => acc + val, 0);
-    
-    return {
-        count: values.length,
-        sum: sum,
-        average: sum / values.length,
-        min: sorted[0],
-        max: sorted[sorted.length - 1],
-        median: sorted.length % 2 === 0 
-            ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-            : sorted[Math.floor(sorted.length / 2)]
-    };
-}
-
-// Funciones de colores
-function getStatusColor(status) {
+// Obtener color de prioridad
+const getPriorityColor = (priority) => {
     const colors = {
-        'Abierto': '#dc3545',
-        'En Proceso': '#ffc107',
-        'Pre-cerrado': '#17a2b8',
-        'Cerrado': '#28a745',
-        'Alta': '#dc3545',
-        'Media': '#ffc107',
-        'Baja': '#28a745'
+        baja: 'success',
+        media: 'warning',
+        alta: 'danger',
+        critica: 'danger'
     };
-    return colors[status] || '#6c757d';
-}
+    return colors[priority] || 'secondary';
+};
 
-function getPriorityColor(priority) {
+// Obtener color de estado
+const getStatusColor = (status) => {
     const colors = {
-        'Alta': '#dc3545',
-        'Media': '#ffc107',
-        'Baja': '#28a745'
+        pendiente: 'warning',
+        asignado: 'info',
+        en_curso: 'primary',
+        semi_finalizado: 'secondary',
+        finalizado: 'success',
+        cancelado: 'danger'
     };
-    return colors[priority] || '#6c757d';
-}
+    return colors[status] || 'secondary';
+};
 
-// Funciones de configuración
-function getConfig(key, defaultValue = null) {
-    return CONFIG[key] || defaultValue;
-}
+// Obtener icono de estado
+const getStatusIcon = (status) => {
+    const icons = {
+        pendiente: 'fas fa-clock',
+        asignado: 'fas fa-user-check',
+        en_curso: 'fas fa-tools',
+        semi_finalizado: 'fas fa-check-circle',
+        finalizado: 'fas fa-check-double',
+        cancelado: 'fas fa-times-circle'
+    };
+    return icons[status] || 'fas fa-question-circle';
+};
 
-function setConfig(key, value) {
-    CONFIG[key] = value;
-}
+// Obtener icono de prioridad
+const getPriorityIcon = (priority) => {
+    const icons = {
+        baja: 'fas fa-arrow-down',
+        media: 'fas fa-minus',
+        alta: 'fas fa-arrow-up',
+        critica: 'fas fa-exclamation-triangle'
+    };
+    return icons[priority] || 'fas fa-question-circle';
+};
 
-// Funciones de logging
-function log(level, message, data = null) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+// Validar formulario
+const validateForm = (formData, rules) => {
+    const errors = {};
     
-    switch (level) {
-        case 'error':
-            console.error(logMessage, data);
-            break;
-        case 'warn':
-            console.warn(logMessage, data);
-            break;
-        case 'info':
-            console.info(logMessage, data);
-            break;
-        default:
-            console.log(logMessage, data);
+    for (const field in rules) {
+        const rule = rules[field];
+        const value = formData[field];
+        
+        if (rule.required && (!value || value.trim() === '')) {
+            errors[field] = `${rule.label} es requerido`;
+            continue;
+        }
+        
+        if (value && rule.minLength && value.length < rule.minLength) {
+            errors[field] = `${rule.label} debe tener al menos ${rule.minLength} caracteres`;
+            continue;
+        }
+        
+        if (value && rule.maxLength && value.length > rule.maxLength) {
+            errors[field] = `${rule.label} no puede tener más de ${rule.maxLength} caracteres`;
+            continue;
+        }
+        
+        if (value && rule.pattern && !rule.pattern.test(value)) {
+            errors[field] = rule.message || `${rule.label} tiene un formato inválido`;
+            continue;
+        }
+        
+        if (value && rule.custom && !rule.custom(value)) {
+            errors[field] = rule.message || `${rule.label} no es válido`;
+        }
     }
-}
+    
+    return errors;
+};
 
-// Exportar funciones globalmente
-window.formatDate = formatDate;
-window.formatDateTime = formatDateTime;
-window.formatCurrency = formatCurrency;
-window.formatNumber = formatNumber;
-window.validateEmail = validateEmail;
-window.validatePhone = validatePhone;
-window.validateRequired = validateRequired;
-window.getData = getData;
-window.saveData = saveData;
-window.removeData = removeData;
-window.generateId = generateId;
-window.createNotification = createNotification;
-window.filterArray = filterArray;
-window.sortArray = sortArray;
-window.paginateArray = paginateArray;
-window.exportToCSV = exportToCSV;
-window.exportToJSON = exportToJSON;
-window.downloadFile = downloadFile;
-window.readFileAsText = readFileAsText;
-window.readFileAsDataURL = readFileAsDataURL;
-window.getUrlParameter = getUrlParameter;
-window.setUrlParameter = setUrlParameter;
-window.removeUrlParameter = removeUrlParameter;
-window.debounce = debounce;
-window.throttle = throttle;
-window.fadeIn = fadeIn;
-window.fadeOut = fadeOut;
-window.validateForm = validateForm;
-window.createElement = createElement;
-window.removeElement = removeElement;
-window.toggleClass = toggleClass;
-window.addClass = addClass;
-window.removeClass = removeClass;
-window.calculateStatistics = calculateStatistics;
-window.getStatusColor = getStatusColor;
-window.getPriorityColor = getPriorityColor;
-window.getConfig = getConfig;
-window.setConfig = setConfig;
-window.log = log;
+// Mostrar errores de formulario
+const showFormErrors = (errors, formElement) => {
+    // Limpiar errores anteriores
+    formElement.querySelectorAll('.error-message').forEach(error => error.remove());
+    formElement.querySelectorAll('.form-group').forEach(group => {
+        group.classList.remove('has-error');
+    });
+    
+    // Mostrar nuevos errores
+    for (const field in errors) {
+        const input = formElement.querySelector(`[name="${field}"]`);
+        if (input) {
+            const formGroup = input.closest('.form-group');
+            formGroup.classList.add('has-error');
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = errors[field];
+            formGroup.appendChild(errorDiv);
+        }
+    }
+};
+
+// Limpiar errores de formulario
+const clearFormErrors = (formElement) => {
+    formElement.querySelectorAll('.error-message').forEach(error => error.remove());
+    formElement.querySelectorAll('.form-group').forEach(group => {
+        group.classList.remove('has-error');
+    });
+};
+
+// Exportar funciones para uso global
+window.Utils = {
+    formatDate,
+    formatRelativeDate,
+    generateId,
+    isValidEmail,
+    isValidPhone,
+    sanitizeHTML,
+    showToast,
+    confirmAction,
+    loadContent,
+    loadViewContent,
+    debounce,
+    throttle,
+    copyToClipboard,
+    formatCurrency,
+    formatDuration,
+    getPriorityColor,
+    getStatusColor,
+    getStatusIcon,
+    getPriorityIcon,
+    validateForm,
+    showFormErrors,
+    clearFormErrors
+};
