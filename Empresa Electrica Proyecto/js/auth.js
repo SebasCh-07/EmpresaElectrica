@@ -105,3 +105,4 @@ window.logout = () => {
         auth.logout();
     }
 };
+

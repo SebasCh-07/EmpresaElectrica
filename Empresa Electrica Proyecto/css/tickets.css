@@ -541,15 +541,93 @@
 }
 
 /* Responsive Ticket Styles */
+@media (max-width: 1200px) {
+    .ticket-detail-header {
+        padding: 2.5rem 2rem;
+    }
+    
+    .ticket-detail-title {
+        font-size: 1.8rem;
+    }
+    
+    .ticket-detail-meta {
+        gap: 2rem;
+    }
+    
+    .ticket-detail-body {
+        padding: 2rem;
+    }
+    
+    .ticket-info-grid {
+        gap: 1.75rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .ticket-detail-header {
+        padding: 2rem 1.75rem;
+    }
+    
+    .ticket-detail-title {
+        font-size: 1.7rem;
+    }
+    
+    .ticket-detail-meta {
+        gap: 1.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .ticket-detail-body {
+        padding: 1.75rem;
+    }
+    
+    .ticket-info-grid {
+        gap: 1.5rem;
+    }
+    
+    .form-row-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 @media (max-width: 768px) {
+    .ticket-detail-header {
+        padding: 1.75rem 1.5rem;
+    }
+    
+    .ticket-detail-title {
+        font-size: 1.5rem;
+    }
+    
     .ticket-detail-meta {
         flex-direction: column;
         gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .ticket-detail-body {
+        padding: 1.5rem;
+    }
+    
+    .ticket-detail-section h4 {
+        font-size: 1rem;
     }
     
     .ticket-info-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+    
+    .ticket-info-item {
+        padding: 0.625rem 0;
+    }
+    
+    .ticket-info-label {
+        font-size: 0.9rem;
+    }
+    
+    .ticket-info-value {
+        font-size: 0.9rem;
     }
     
     .form-row-3,
@@ -575,6 +653,12 @@
     .progress-step-circle {
         margin-right: 1rem;
         margin-bottom: 0;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .progress-step-label {
+        font-size: 0.85rem;
     }
     
     .viaticos-header {
@@ -583,10 +667,292 @@
         gap: 1rem;
     }
     
+    .viaticos-header h4 {
+        font-size: 1rem;
+    }
+    
     .comment-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+    
+    .comment-author {
+        font-size: 0.9rem;
+    }
+    
+    .comment-date {
+        font-size: 0.75rem;
+    }
+    
+    .comment-content {
+        font-size: 0.9rem;
+    }
+    
+    .file-upload {
+        padding: 1.5rem;
+    }
+    
+    .file-upload i {
+        font-size: 1.75rem;
+    }
+    
+    .file-upload p {
+        font-size: 0.9rem;
+    }
+    
+    .uploaded-file {
+        padding: 0.625rem;
+    }
+    
+    .uploaded-file-name {
+        font-size: 0.9rem;
+    }
+    
+    .uploaded-file-size {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ticket-detail-header {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .ticket-detail-title {
+        font-size: 1.3rem;
+    }
+    
+    .ticket-detail-meta {
+        font-size: 0.8rem;
+    }
+    
+    .ticket-detail-body {
+        padding: 1.25rem;
+    }
+    
+    .ticket-detail-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .ticket-detail-section h4 {
+        font-size: 0.95rem;
+    }
+    
+    .ticket-info-item {
+        padding: 0.5rem 0;
+    }
+    
+    .ticket-info-label {
+        font-size: 0.85rem;
+    }
+    
+    .ticket-info-value {
+        font-size: 0.85rem;
+    }
+    
+    .progress-step-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+    
+    .progress-step-label {
+        font-size: 0.8rem;
+    }
+    
+    .viaticos-header h4 {
+        font-size: 0.95rem;
+    }
+    
+    .viaticos-toggle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .toggle-switch {
+        width: 45px;
+        height: 22px;
+    }
+    
+    .toggle-switch::before {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .toggle-switch.active::before {
+        transform: translateX(23px);
+    }
+    
+    .viaticos-form {
+        padding: 1.25rem;
+    }
+    
+    .comment-form {
+        padding: 1.25rem;
+    }
+    
+    .comment-form textarea {
+        min-height: 80px;
+        padding: 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .comment-item {
+        padding: 0.875rem;
+    }
+    
+    .comment-author {
+        font-size: 0.85rem;
+    }
+    
+    .comment-date {
+        font-size: 0.7rem;
+    }
+    
+    .comment-content {
+        font-size: 0.85rem;
+    }
+    
+    .file-upload {
+        padding: 1.25rem;
+    }
+    
+    .file-upload i {
+        font-size: 1.5rem;
+    }
+    
+    .file-upload p {
+        font-size: 0.85rem;
+    }
+    
+    .uploaded-file {
+        padding: 0.5rem;
+    }
+    
+    .uploaded-file-name {
+        font-size: 0.85rem;
+    }
+    
+    .uploaded-file-size {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .ticket-detail-header {
+        padding: 1.25rem 1rem;
+    }
+    
+    .ticket-detail-title {
+        font-size: 1.2rem;
+    }
+    
+    .ticket-detail-meta {
+        font-size: 0.75rem;
+    }
+    
+    .ticket-detail-body {
+        padding: 1rem;
+    }
+    
+    .ticket-detail-section h4 {
+        font-size: 0.9rem;
+    }
+    
+    .ticket-info-item {
+        padding: 0.375rem 0;
+    }
+    
+    .ticket-info-label {
+        font-size: 0.8rem;
+    }
+    
+    .ticket-info-value {
+        font-size: 0.8rem;
+    }
+    
+    .progress-step-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+    
+    .progress-step-label {
+        font-size: 0.75rem;
+    }
+    
+    .viaticos-header h4 {
+        font-size: 0.9rem;
+    }
+    
+    .toggle-switch {
+        width: 40px;
+        height: 20px;
+    }
+    
+    .toggle-switch::before {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .toggle-switch.active::before {
+        transform: translateX(20px);
+    }
+    
+    .viaticos-form {
+        padding: 1rem;
+    }
+    
+    .comment-form {
+        padding: 1rem;
+    }
+    
+    .comment-form textarea {
+        min-height: 70px;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .comment-item {
+        padding: 0.75rem;
+    }
+    
+    .comment-author {
+        font-size: 0.8rem;
+    }
+    
+    .comment-date {
+        font-size: 0.65rem;
+    }
+    
+    .comment-content {
+        font-size: 0.8rem;
+    }
+    
+    .file-upload {
+        padding: 1rem;
+    }
+    
+    .file-upload i {
+        font-size: 1.25rem;
+    }
+    
+    .file-upload p {
+        font-size: 0.8rem;
+    }
+    
+    .uploaded-file {
+        padding: 0.375rem;
+    }
+    
+    .uploaded-file-name {
+        font-size: 0.8rem;
+    }
+    
+    .uploaded-file-size {
+        font-size: 0.65rem;
     }
 }
 

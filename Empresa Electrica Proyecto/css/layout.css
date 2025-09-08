@@ -531,9 +531,75 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .app-container {
+        grid-template-columns: 260px 1fr;
+    }
+    
+    .navbar {
+        padding: 0 2rem;
+    }
+    
+    .nav-brand {
+        font-size: 1.2rem;
+    }
+    
+    .nav-brand i {
+        font-size: 1.6rem;
+    }
+    
+    .main-content {
+        padding: 2rem;
+    }
+    
+    .content-area {
+        padding: 2rem;
+    }
+    
+    .nav-menu a {
+        padding: 1rem 1.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .nav-menu i {
+        font-size: 1.1rem;
+        margin-right: 0.875rem;
+    }
+}
+
 @media (max-width: 1024px) {
     .app-container {
-        grid-template-columns: 200px 1fr;
+        grid-template-columns: 240px 1fr;
+    }
+    
+    .navbar {
+        padding: 0 1.75rem;
+    }
+    
+    .nav-brand {
+        font-size: 1.1rem;
+    }
+    
+    .nav-brand i {
+        font-size: 1.5rem;
+    }
+    
+    .main-content {
+        padding: 1.75rem;
+    }
+    
+    .content-area {
+        padding: 1.75rem;
+    }
+    
+    .nav-menu a {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .nav-menu i {
+        font-size: 1rem;
+        margin-right: 0.75rem;
     }
     
     .grid-4 {
@@ -543,6 +609,23 @@
     .grid-3 {
         grid-template-columns: 1fr 1fr;
     }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+    }
+    
+    .stat-card {
+        padding: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -551,10 +634,41 @@
             "navbar"
             "main";
         grid-template-columns: 1fr;
-        grid-template-rows: 60px 1fr;
+        grid-template-rows: 65px 1fr;
     }
     
     .sidebar {
+        position: fixed;
+        top: 65px;
+        left: -280px;
+        width: 280px;
+        height: calc(100vh - 65px);
+        z-index: 999;
+        transition: left 0.3s ease;
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .sidebar.mobile-open {
+        left: 0;
+    }
+    
+    .navbar {
+        padding: 0 1.25rem;
+    }
+    
+    .nav-brand {
+        font-size: 1rem;
+    }
+    
+    .nav-brand i {
+        font-size: 1.4rem;
+    }
+    
+    .nav-user {
+        gap: 0.875rem;
+    }
+    
+    .nav-user span {
         display: none;
     }
     
@@ -562,38 +676,59 @@
         padding: 1rem;
     }
     
+    .content-area {
+        padding: 1rem;
+        min-height: calc(100vh - 130px);
+    }
+    
+    .nav-menu a {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.8rem;
+    }
+    
+    .nav-menu i {
+        font-size: 0.95rem;
+        margin-right: 0.65rem;
+    }
+    
     .grid-2,
     .grid-3,
     .grid-4 {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
     
     .form-row {
         grid-template-columns: 1fr;
     }
     
-    .navbar {
-        padding: 0 1rem;
-    }
-    
-    .nav-user {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
     .stats-grid {
         grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-content {
-        padding: 0.5rem;
+        gap: 1rem;
     }
     
-    .page-header,
-    .page-content {
+    .stat-card {
         padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .page-header {
+        padding: 1.25rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .page-content {
+        padding: 1.25rem;
     }
     
     .card-header,
@@ -602,7 +737,207 @@
     }
     
     .modal-content {
+        width: 90%;
+        margin: 5% auto;
+        max-height: 85vh;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.25rem;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-container {
+        grid-template-rows: 60px 1fr;
+    }
+    
+    .sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+        width: 100%;
+        left: -100%;
+    }
+    
+    .navbar {
+        padding: 0 0.875rem;
+    }
+    
+    .nav-brand {
+        font-size: 0.95rem;
+    }
+    
+    .nav-brand i {
+        font-size: 1.2rem;
+    }
+    
+    .nav-user {
+        gap: 0.65rem;
+    }
+    
+    .main-content {
+        padding: 0.875rem;
+    }
+    
+    .content-area {
+        padding: 0.875rem;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .nav-menu a {
+        padding: 0.65rem 1rem;
+        font-size: 0.75rem;
+    }
+    
+    .nav-menu i {
+        font-size: 0.9rem;
+        margin-right: 0.55rem;
+    }
+    
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .page-content {
+        padding: 1rem;
+    }
+    
+    .card-header,
+    .card-body {
+        padding: 0.875rem;
+    }
+    
+    .stat-card {
+        padding: 0.875rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .modal-content {
         width: 95%;
-        margin: 10% auto;
+        margin: 2.5% auto;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 0.875rem 1rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.875rem 1rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .navbar {
+        padding: 0 0.65rem;
+    }
+    
+    .nav-brand {
+        font-size: 0.9rem;
+    }
+    
+    .nav-brand i {
+        font-size: 1.1rem;
+    }
+    
+    .main-content {
+        padding: 0.65rem;
+    }
+    
+    .content-area {
+        padding: 0.65rem;
+    }
+    
+    .nav-menu a {
+        padding: 0.55rem 0.875rem;
+        font-size: 0.7rem;
+    }
+    
+    .nav-menu i {
+        font-size: 0.85rem;
+        margin-right: 0.5rem;
+    }
+    
+    .page-header {
+        padding: 0.875rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .page-content {
+        padding: 0.875rem;
+    }
+    
+    .card-header,
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.1rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 1% auto;
+    }
+    
+    .modal-header {
+        padding: 0.75rem 0.875rem;
+    }
+    
+    .modal-header h3 {
+        font-size: 0.95rem;
+    }
+    
+    .modal-body {
+        padding: 0.875rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 0.875rem;
     }
 }

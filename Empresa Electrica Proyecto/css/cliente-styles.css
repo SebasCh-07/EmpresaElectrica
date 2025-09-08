@@ -497,6 +497,49 @@
 }
 
 /* Responsive Design para Cliente */
+@media (max-width: 1200px) {
+    .cliente-dashboard {
+        padding: 1.75rem;
+    }
+    
+    .cliente-welcome {
+        padding: 2.25rem;
+    }
+    
+    .cliente-welcome h1 {
+        font-size: 1.8rem;
+    }
+    
+    .cliente-stats {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cliente-dashboard {
+        padding: 1.5rem;
+    }
+    
+    .cliente-welcome {
+        padding: 2rem;
+    }
+    
+    .cliente-welcome h1 {
+        font-size: 1.7rem;
+    }
+    
+    .cliente-stats {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+    }
+    
+    .cliente-form-container,
+    .cliente-tickets-container {
+        padding: 1.75rem;
+    }
+}
+
 @media (max-width: 768px) {
     .cliente-dashboard {
         padding: 1rem;
@@ -511,9 +554,26 @@
         font-size: 1.5rem;
     }
     
+    .cliente-welcome p {
+        font-size: 1rem;
+    }
+    
     .cliente-stats {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+    
+    .cliente-stat-card {
+        padding: 1.25rem;
+    }
+    
+    .cliente-stat-number {
+        font-size: 1.75rem;
+    }
+    
+    .cliente-form-container,
+    .cliente-tickets-container {
+        padding: 1.5rem;
     }
     
     .cliente-form-grid {
@@ -531,6 +591,19 @@
         justify-content: center;
     }
     
+    .cliente-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .cliente-tab {
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .cliente-ticket-card {
+        padding: 1.25rem;
+    }
+    
     .cliente-ticket-meta {
         flex-direction: column;
         align-items: stretch;
@@ -544,16 +617,105 @@
     .cliente-ticket-actions {
         justify-content: center;
     }
+    
+    .cliente-survey-container {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .cliente-survey-options {
+        flex-direction: column;
+    }
+    
+    .cliente-survey-option {
+        min-width: auto;
+    }
+    
+    .cliente-survey-actions {
+        flex-direction: column;
+    }
+    
+    .cliente-notification {
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
 }
 
 @media (max-width: 480px) {
+    .cliente-dashboard {
+        padding: 0.75rem;
+    }
+    
     .cliente-welcome {
         padding: 1.5rem 1rem;
     }
     
+    .cliente-welcome h1 {
+        font-size: 1.3rem;
+    }
+    
+    .cliente-welcome p {
+        font-size: 0.95rem;
+    }
+    
+    .cliente-stat-card {
+        padding: 1rem;
+    }
+    
+    .cliente-stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .cliente-stat-label {
+        font-size: 0.85rem;
+    }
+    
     .cliente-form-container,
     .cliente-tickets-container {
-        padding: 1.5rem;
+        padding: 1.25rem;
+    }
+    
+    .cliente-form-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .cliente-form-header p {
+        font-size: 0.9rem;
+    }
+    
+    .cliente-form-label {
+        font-size: 0.85rem;
+    }
+    
+    .cliente-form-input,
+    .cliente-form-select,
+    .cliente-form-textarea {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .cliente-form-submit {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .cliente-tickets-title {
+        font-size: 1.1rem;
+    }
+    
+    .cliente-tickets-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .cliente-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .cliente-tab-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
     }
     
     .cliente-ticket-card {
@@ -566,6 +728,22 @@
         align-items: flex-start;
     }
     
+    .cliente-ticket-id {
+        font-size: 0.85rem;
+    }
+    
+    .cliente-ticket-fecha {
+        font-size: 0.8rem;
+    }
+    
+    .cliente-ticket-titulo {
+        font-size: 1rem;
+    }
+    
+    .cliente-ticket-descripcion {
+        font-size: 0.85rem;
+    }
+    
     .cliente-ticket-meta {
         flex-direction: column;
         gap: 0.75rem;
@@ -575,6 +753,161 @@
         flex-direction: column;
         gap: 0.5rem;
         align-items: flex-start;
+    }
+    
+    .cliente-action-btn {
+        padding: 0.4rem 0.875rem;
+        font-size: 0.8rem;
+    }
+    
+    .cliente-survey-container {
+        padding: 1.5rem 1rem;
+        margin: 0.5rem;
+    }
+    
+    .cliente-survey-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .cliente-survey-header p {
+        font-size: 0.9rem;
+    }
+    
+    .cliente-star {
+        font-size: 1.75rem;
+    }
+    
+    .cliente-survey-question h4 {
+        font-size: 0.95rem;
+    }
+    
+    .cliente-survey-option {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.85rem;
+    }
+    
+    .cliente-survey-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .cliente-notification {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .cliente-notification-title {
+        font-size: 1rem;
+    }
+    
+    .cliente-notification-message {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .cliente-dashboard {
+        padding: 0.5rem;
+    }
+    
+    .cliente-welcome {
+        padding: 1.25rem 0.875rem;
+    }
+    
+    .cliente-welcome h1 {
+        font-size: 1.2rem;
+    }
+    
+    .cliente-welcome p {
+        font-size: 0.9rem;
+    }
+    
+    .cliente-stat-card {
+        padding: 0.875rem;
+    }
+    
+    .cliente-stat-number {
+        font-size: 1.25rem;
+    }
+    
+    .cliente-stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .cliente-form-container,
+    .cliente-tickets-container {
+        padding: 1rem;
+    }
+    
+    .cliente-form-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .cliente-form-header p {
+        font-size: 0.85rem;
+    }
+    
+    .cliente-form-input,
+    .cliente-form-select,
+    .cliente-form-textarea {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .cliente-form-submit {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .cliente-tab {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.85rem;
+    }
+    
+    .cliente-ticket-card {
+        padding: 0.875rem;
+    }
+    
+    .cliente-ticket-titulo {
+        font-size: 0.95rem;
+    }
+    
+    .cliente-ticket-descripcion {
+        font-size: 0.8rem;
+    }
+    
+    .cliente-action-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    .cliente-survey-container {
+        padding: 1.25rem 0.875rem;
+    }
+    
+    .cliente-star {
+        font-size: 1.5rem;
+    }
+    
+    .cliente-survey-option {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .cliente-survey-btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .cliente-notification {
+        padding: 1rem 1.25rem;
+    }
+    
+    .cliente-notification-title {
+        font-size: 0.95rem;
+    }
+    
+    .cliente-notification-message {
+        font-size: 0.8rem;
     }
 }
 
