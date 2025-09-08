@@ -352,6 +352,18 @@ const getPriorityLabel = (priority) => {
     return priorityLabels[priority] || priority;
 };
 
+// Obtener etiqueta de tipo de trabajo
+const getWorkTypeLabel = (workType) => {
+    const workTypeLabels = {
+        'soporte': 'Soporte Técnico',
+        'inspeccion': 'Inspección',
+        'responsabilidad': 'Responsabilidad',
+        'mantenimiento': 'Mantenimiento',
+        'instalacion': 'Instalación'
+    };
+    return workTypeLabels[workType] || workType;
+};
+
 // Exportar funciones para uso global
 window.Utils = {
     formatDate,
@@ -375,6 +387,7 @@ window.Utils = {
     getPriorityIcon,
     getStatusLabel,
     getPriorityLabel,
+    getWorkTypeLabel,
     validateForm,
     showFormErrors,
     clearFormErrors

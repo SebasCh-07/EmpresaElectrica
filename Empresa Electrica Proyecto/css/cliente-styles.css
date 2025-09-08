@@ -1310,3 +1310,19 @@
         font-size: 1.5rem;
     }
 }
+
+/* Estilos para botones deshabilitados */
+.cliente-action-btn.disabled {
+    background: var(--gray-200);
+    color: var(--gray-400);
+    border-color: var(--gray-200);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.cliente-action-btn.disabled:hover {
+    background: var(--gray-200);
+    color: var(--gray-400);
+    border-color: var(--gray-200);
+    transform: none;
+}

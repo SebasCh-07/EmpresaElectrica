@@ -1253,3 +1253,275 @@
         font-size: 0.9rem;
     }
 }
+
+/* Modal de Detalles de Asignación */
+.tecnico-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.tecnico-details-container {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.tecnico-details-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: color var(--transition-normal);
+}
+
+.tecnico-details-close:hover {
+    color: var(--gray-600);
+}
+
+.tecnico-details-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.tecnico-details-header h2 {
+    color: var(--gray-800);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.tecnico-details-ticket-id {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 500;
+    background: var(--primary-light);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    display: inline-block;
+}
+
+.tecnico-details-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.tecnico-details-section {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--gray-200);
+}
+
+.tecnico-details-section h3 {
+    color: var(--gray-800);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tecnico-details-section h3 i {
+    color: var(--primary-color);
+}
+
+.tecnico-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.tecnico-details-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tecnico-details-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.tecnico-details-item label {
+    color: var(--gray-600);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tecnico-details-item span {
+    color: var(--gray-800);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.tecnico-details-description {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Historial de Visitas */
+.tecnico-visitas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tecnico-visita-item {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    transition: all var(--transition-normal);
+}
+
+.tecnico-visita-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tecnico-visita-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.tecnico-visita-fecha {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.tecnico-visita-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tecnico-visita-trabajo,
+.tecnico-visita-observaciones {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tecnico-visita-trabajo strong,
+.tecnico-visita-observaciones strong {
+    color: var(--gray-700);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.tecnico-visita-trabajo p,
+.tecnico-visita-observaciones p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.tecnico-visita-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    color: var(--gray-500);
+    font-size: 0.85rem;
+}
+
+.tecnico-visita-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tecnico-visita-meta i {
+    color: var(--primary-color);
+}
+
+/* Acciones del Modal */
+.tecnico-details-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 2px solid var(--gray-200);
+}
+
+/* Responsive para Modal */
+@media (max-width: 768px) {
+    .tecnico-details-container {
+        padding: 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .tecnico-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tecnico-details-actions {
+        flex-direction: column;
+    }
+    
+    .tecnico-visita-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .tecnico-visita-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tecnico-details-container {
+        padding: 1rem;
+        margin: 0.25rem;
+    }
+    
+    .tecnico-details-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .tecnico-details-section {
+        padding: 1rem;
+    }
+    
+    .tecnico-details-section h3 {
+        font-size: 1rem;
+    }
+}

@@ -21,13 +21,13 @@ window.showAssignmentModal = (ticketId) => {
                 <div class="assignment-modal">
                     <form onsubmit="submitAssignment(event, '${ticketId}')">
                         <div class="form-group">
-                            <label for="visit-date">Fecha de Visita *</label>
-                            <input type="datetime-local" id="visit-date" name="visitDate" required>
+                            <label for="assign-visit-date">Fecha de Visita *</label>
+                            <input type="datetime-local" id="assign-visit-date" name="visitDate" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="priority-assignment">Prioridad *</label>
-                            <select id="priority-assignment" name="priority" required>
+                            <label for="assign-priority">Prioridad *</label>
+                            <select id="assign-priority" name="priority" required>
                                 <option value="baja">Baja</option>
                                 <option value="media">Media</option>
                                 <option value="alta" selected>Alta</option>
@@ -74,7 +74,7 @@ window.showAssignmentModal = (ticketId) => {
     // Establecer fecha mínima como mañana
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('visit-date').min = tomorrow.toISOString().slice(0, 16);
+    document.getElementById('assign-visit-date').min = tomorrow.toISOString().slice(0, 16);
 };
 
 window.selectTechnicianOption = (technicianId) => {
@@ -95,10 +95,16 @@ window.submitAssignment = (event, ticketId) => {
     event.preventDefault();
     
     const formData = new FormData(event.target);
-    const technicianId = parseInt(formData.get('technicianId'));
+    let technicianId = parseInt(formData.get('technicianId'));
     const visitDate = formData.get('visitDate');
     const priority = formData.get('priority');
     
+    // Forzar asignación al único usuario de rol técnico disponible para login
+    const soleTech = (DataManager.getUsersByRole('tecnico') || [])[0];
+    if (soleTech) {
+        technicianId = soleTech.id;
+    }
+
     const technician = DataManager.getUserById(technicianId);
     const ticket = DataManager.getTicketById(ticketId);
     
@@ -114,10 +120,28 @@ window.submitAssignment = (event, ticketId) => {
         });
         
         // Actualizar estado del técnico
-        DataManager.updateTechnicianLocation(technicianId, {
-            ...technician.location,
-            status: 'ocupado'
-        });
+        DataManager.updateTechnicianStatus(technicianId, 'ocupado');
+
+        // Sincronizar localStorage de tickets para apps que aún lo lean (compat)
+        try {
+            const lsTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const idx = lsTickets.findIndex(t => t.id === ticketId);
+            const merged = {
+                id: ticketId,
+                title: ticket.title,
+                description: ticket.description,
+                clientName: ticket.clientName,
+                clientAddress: ticket.clientAddress,
+                clientPhone: ticket.clientPhone,
+                priority: priority,
+                status: 'asignado',
+                assignedTechnicianId: technicianId,
+                assignedTechnicianName: technician.name,
+                createdAt: ticket.createdAt
+            };
+            if (idx === -1) lsTickets.push(merged); else lsTickets[idx] = { ...lsTickets[idx], ...merged };
+            localStorage.setItem('tickets', JSON.stringify(lsTickets));
+        } catch (_) {}
         
         // Agregar comentario
         DataManager.addCommentToTicket(ticketId, {
@@ -395,7 +419,7 @@ window.showSurveyModal = (ticketId) => {
                     ${mockData.config.surveyQuestions.map((question, index) => `
                         <div class="survey-question">
                             <h4>${index + 1}. ${question.question}</h4>
-                            ${renderSurveyQuestion(question)}
+                            ${renderSurveyQuestionShared(question)}
                         </div>
                     `).join('')}
                     <div class="modal-footer">
@@ -414,7 +438,7 @@ window.showSurveyModal = (ticketId) => {
     document.body.appendChild(modal);
 };
 
-const renderSurveyQuestion = (question) => {
+const renderSurveyQuestionShared = (question) => {
     switch (question.type) {
         case 'rating':
             return `

@@ -1,4 +1,4 @@
-// Datos de prueba para el sistema
+// Datos de prueba para el sistema (semilla inicial)
 const mockData = {
     // Usuarios del sistema
     users: [
@@ -47,6 +47,32 @@ const mockData = {
             specializations: ['Reparaciones', 'Instalaciones Domésticas'],
             location: { lat: 19.4326, lng: -99.1332 },
             status: 'ocupado'
+        },
+        {
+            id: 7,
+            username: 'tecnico3',
+            password: 'tecnico123',
+            role: 'tecnico',
+            name: 'Jorge Ramírez',
+            email: 'jorge@empresaelectrica.com',
+            phone: '+1234567896',
+            avatar: 'J',
+            specializations: ['Mantenimiento', 'Inspecciones'],
+            location: { lat: 19.44, lng: -99.14 },
+            status: 'disponible'
+        },
+        {
+            id: 8,
+            username: 'tecnico4',
+            password: 'tecnico123',
+            role: 'tecnico',
+            name: 'Sofía López',
+            email: 'sofia@empresaelectrica.com',
+            phone: '+1234567897',
+            avatar: 'S',
+            specializations: ['Soporte', 'Electricidad industrial'],
+            location: { lat: 19.45, lng: -99.12 },
+            status: 'disponible'
         },
         {
             id: 5,
@@ -370,54 +396,115 @@ const mockData = {
     }
 };
 
+// Claves de almacenamiento
+const STORAGE_KEYS = {
+    users: 'users',
+    tickets: 'tickets'
+};
+
+// Inicialización de almacenamiento con semilla si está vacío
+(() => {
+    try {
+        if (!localStorage.getItem(STORAGE_KEYS.users)) {
+            localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(mockData.users));
+        } else {
+            // Merge: agregar usuarios de semilla que no existan aún (por ID)
+            const existing = JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || '[]');
+            const byId = new Map(existing.map(u => [u.id, u]));
+            let changed = false;
+            mockData.users.forEach(u => {
+                if (!byId.has(u.id)) { existing.push(u); changed = true; }
+            });
+            if (changed) localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(existing));
+        }
+        if (!localStorage.getItem(STORAGE_KEYS.tickets)) {
+            localStorage.setItem(STORAGE_KEYS.tickets, JSON.stringify(mockData.tickets));
+        }
+    } catch (e) {
+        console.warn('No se pudo inicializar el almacenamiento local:', e);
+    }
+})();
+
+// Utilidad para emitir eventos de datos (tiempo real)
+const DataEvents = {
+    emit(eventName, detail) {
+        try {
+            const evt = new CustomEvent(eventName, { detail });
+            window.dispatchEvent(evt);
+        } catch (_) {}
+    }
+};
+
+// Acceso seguro a localStorage
+const Storage = {
+    get(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        } catch (_) {
+            return [];
+        }
+    },
+    set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+};
+
 // Funciones para manejar datos
 const DataManager = {
     // Obtener usuario por credenciales
     getUserByCredentials(username, password) {
-        return mockData.users.find(user => 
+        const users = Storage.get(STORAGE_KEYS.users);
+        return users.find(user => 
             user.username === username && user.password === password
         );
     },
 
     // Obtener usuario por ID
     getUserById(id) {
-        return mockData.users.find(user => user.id === id);
+        const users = Storage.get(STORAGE_KEYS.users);
+        return users.find(user => user.id === id);
     },
 
     // Obtener usuarios por rol
     getUsersByRole(role) {
-        return mockData.users.filter(user => user.role === role);
+        const users = Storage.get(STORAGE_KEYS.users);
+        return users.filter(user => user.role === role);
     },
 
     // Obtener todos los tickets
     getAllTickets() {
-        return mockData.tickets;
+        return Storage.get(STORAGE_KEYS.tickets);
     },
 
     // Obtener tickets por estado
     getTicketsByStatus(status) {
-        return mockData.tickets.filter(ticket => ticket.status === status);
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        return tickets.filter(ticket => ticket.status === status);
     },
 
     // Obtener tickets por cliente
     getTicketsByClient(clientId) {
-        return mockData.tickets.filter(ticket => ticket.clientId === clientId);
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        return tickets.filter(ticket => ticket.clientId === clientId);
     },
 
     // Obtener tickets por técnico
     getTicketsByTechnician(technicianId) {
-        return mockData.tickets.filter(ticket => ticket.assignedTechnicianId === technicianId);
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        return tickets.filter(ticket => ticket.assignedTechnicianId === technicianId);
     },
 
     // Obtener ticket por ID
     getTicketById(id) {
-        return mockData.tickets.find(ticket => ticket.id === id);
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        return tickets.find(ticket => ticket.id === id);
     },
 
     // Crear nuevo ticket
     createTicket(ticketData) {
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
         const newTicket = {
-            id: `TK-${String(mockData.tickets.length + 1).padStart(3, '0')}`,
+            id: `TK-${String(tickets.length + 1).padStart(3, '0')}`,
             ...ticketData,
             createdAt: new Date().toISOString(),
             status: 'pendiente',
@@ -431,30 +518,38 @@ const DataManager = {
             survey: null,
             comments: []
         };
-        mockData.tickets.push(newTicket);
+        tickets.push(newTicket);
+        Storage.set(STORAGE_KEYS.tickets, tickets);
+        DataEvents.emit('tickets:updated', { type: 'create', ticket: newTicket });
         return newTicket;
     },
 
     // Actualizar ticket
     updateTicket(id, updates) {
-        const ticketIndex = mockData.tickets.findIndex(ticket => ticket.id === id);
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        const ticketIndex = tickets.findIndex(ticket => ticket.id === id);
         if (ticketIndex !== -1) {
-            mockData.tickets[ticketIndex] = { ...mockData.tickets[ticketIndex], ...updates };
-            return mockData.tickets[ticketIndex];
+            tickets[ticketIndex] = { ...tickets[ticketIndex], ...updates, updatedAt: new Date().toISOString() };
+            Storage.set(STORAGE_KEYS.tickets, tickets);
+            DataEvents.emit('tickets:updated', { type: 'update', ticket: tickets[ticketIndex] });
+            return tickets[ticketIndex];
         }
         return null;
     },
 
     // Agregar comentario a ticket
     addCommentToTicket(ticketId, comment) {
-        const ticket = this.getTicketById(ticketId);
-        if (ticket) {
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+        if (ticketIndex !== -1) {
             const newComment = {
                 id: Date.now(),
                 ...comment,
                 createdAt: new Date().toISOString()
             };
-            ticket.comments.push(newComment);
+            tickets[ticketIndex].comments.push(newComment);
+            Storage.set(STORAGE_KEYS.tickets, tickets);
+            DataEvents.emit('tickets:updated', { type: 'comment', ticket: tickets[ticketIndex] });
             return newComment;
         }
         return null;
@@ -462,17 +557,31 @@ const DataManager = {
 
     // Obtener técnicos disponibles
     getAvailableTechnicians() {
-        return mockData.users.filter(user => 
-            user.role === 'tecnico' && user.status === 'disponible'
-        );
+        const users = Storage.get(STORAGE_KEYS.users);
+        return users.filter(user => user.role === 'tecnico' && user.status === 'disponible');
     },
 
     // Actualizar ubicación de técnico
     updateTechnicianLocation(technicianId, location) {
-        const technician = this.getUserById(technicianId);
-        if (technician) {
-            technician.location = location;
-            return technician;
+        const users = Storage.get(STORAGE_KEYS.users);
+        const idx = users.findIndex(u => u.id === technicianId);
+        if (idx !== -1) {
+            users[idx].location = location;
+            Storage.set(STORAGE_KEYS.users, users);
+            return users[idx];
+        }
+        return null;
+    },
+
+    // Actualizar estado del técnico (disponible/ocupado)
+    updateTechnicianStatus(technicianId, status) {
+        const users = Storage.get(STORAGE_KEYS.users);
+        const idx = users.findIndex(u => u.id === technicianId && u.role === 'tecnico');
+        if (idx !== -1) {
+            users[idx].status = status;
+            Storage.set(STORAGE_KEYS.users, users);
+            DataEvents.emit('technicians:updated', { id: technicianId, status });
+            return users[idx];
         }
         return null;
     },
@@ -480,7 +589,7 @@ const DataManager = {
     // Obtener estadísticas
     getStats() {
         const tickets = this.getAllTickets();
-        const users = mockData.users;
+        const users = Storage.get(STORAGE_KEYS.users);
         
         return {
             totalTickets: tickets.length,
@@ -491,5 +600,13 @@ const DataManager = {
             totalTechnicians: users.filter(u => u.role === 'tecnico').length,
             availableTechnicians: users.filter(u => u.role === 'tecnico' && u.status === 'disponible').length
         };
+    },
+
+    // Obtener configuración (prioridades, estados, etc.)
+    getConfig() {
+        return mockData.config;
     }
 };
+
+// Exportar eventos de datos
+window.DataEvents = DataEvents;

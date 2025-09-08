@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Detalle de Ticket - Cliente</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/components.css">
+	<link rel="stylesheet" href="css/layout.css">
+	<link rel="stylesheet" href="css/tickets.css">
+	<link rel="stylesheet" href="css/electrical-theme.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Ajuste local de distribución de pares Etiqueta: Valor (más cercano) */
+        .ticket-info-item { display: grid; grid-template-columns: max-content 1fr; column-gap: 6px; align-items: center; }
+        .ticket-info-item .ticket-info-label { opacity: .85; font-weight: 600; }
+        .ticket-info-item .ticket-info-value { white-space: normal; }
+        @media (max-width: 600px) { .ticket-info-item { column-gap: 4px; } }
+        /* Ensanchar contenedor y dar más espacio a la columna de detalle */
+        .page-content { max-width: 1280px; margin: 0 auto; }
+        .page-content .grid-2 { grid-template-columns: 2fr 1fr; column-gap: 24px; }
+        /* Centrar todo el contenido en pantalla */
+        html, body { height: 100%; }
+        .app-container { min-height: 100vh; display: flex; flex-direction: column; }
+        .main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        #content-area { width: 100%; }
+    </style>
+</head>
+<body>
+	<div class="app-container">
+		<nav class="navbar">
+			<div class="nav-brand">
+				<i class="fas fa-ticket-alt electrical-logo"></i>
+				<span>Detalle de Ticket</span>
+			</div>
+			<div class="nav-user">
+				<button class="btn btn-secondary" onclick="goBackToCliente()">
+					<i class="fas fa-arrow-left"></i> Volver
+				</button>
+			</div>
+		</nav>
+
+		<main class="main-content">
+			<div id="content-area"></div>
+		</main>
+	</div>
+
+	<script src="js/data.js"></script>
+	<script src="js/utils.js"></script>
+	<script>
+		const getQueryParam = (name) => {
+			const params = new URLSearchParams(window.location.search);
+			return params.get(name);
+		};
+
+		const goBackToCliente = () => {
+			window.location.href = 'cliente.html';
+		};
+
+		const renderTicketDetail = (ticket) => {
+			const container = document.getElementById('content-area');
+			if (!ticket) {
+				container.innerHTML = '<div class="error-message"><h3>Ticket no encontrado</h3></div>';
+				return;
+			}
+
+			container.innerHTML = `
+				<div class="page-header">
+					<div class="d-flex justify-between align-center">
+						<div>
+							<h1><i class="fas fa-ticket-alt"></i> ${ticket.id}</h1>
+							<p>${ticket.title || ''}</p>
+						</div>
+						<div class="action-buttons">
+							<span class="priority-badge priority-${ticket.priority}">
+								<i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
+								${Utils.getPriorityLabel(ticket.priority)}
+							</span>
+							<span class="status-badge status-${ticket.status}">
+								<i class="${Utils.getStatusIcon(ticket.status)}"></i>
+								${Utils.getStatusLabel(ticket.status)}
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="page-content">
+					<div class="grid-2">
+						<div class="ticket-detail">
+							<div class="ticket-detail-header">
+								<div class="ticket-detail-title">${ticket.title}</div>
+								<div class="ticket-detail-meta">
+									<span><i class="fas fa-user"></i> ${ticket.clientName}</span>
+									<span><i class="fas fa-calendar"></i> ${Utils.formatDate(ticket.createdAt)}</span>
+									${ticket.estimatedDuration ? `<span><i class=\"fas fa-clock\"></i> ${Utils.formatDuration(ticket.estimatedDuration)}</span>` : ''}
+								</div>
+							</div>
+
+							<div class="ticket-detail-body">
+								<div class="ticket-detail-section">
+									<h4>Descripción</h4>
+									<p>${ticket.description}</p>
+								</div>
+
+								<div class="ticket-detail-section">
+									<h4>Información</h4>
+									<div class="grid-2">
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Tipo de Trabajo:</span>
+											<span class="ticket-info-value">${ticket.workType}</span>
+										</div>
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Estado:</span>
+											<span class="ticket-info-value"><span class="status-badge status-${ticket.status}">${Utils.getStatusLabel(ticket.status)}</span></span>
+										</div>
+									</div>
+								</div>
+
+								<div class="ticket-detail-section">
+									<h4>Datos del Cliente</h4>
+									<div class="grid-2">
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Teléfono:</span>
+											<span class="ticket-info-value">${ticket.clientPhone || '-'}</span>
+										</div>
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Dirección:</span>
+											<span class="ticket-info-value">${ticket.clientAddress || '-'}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="ticket-detail-section">
+									<h4>Asignación</h4>
+									<div class="grid-2">
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Técnico Asignado:</span>
+											<span class="ticket-info-value">${ticket.assignedTechnicianName || 'Sin asignar'}</span>
+										</div>
+										<div class="ticket-info-item">
+											<span class="ticket-info-label">Interprovincial:</span>
+											<span class="ticket-info-value">${ticket.isInterprovincial ? 'Sí' : 'No'}</span>
+										</div>
+									</div>
+								</div>
+
+								${ticket.viaticos ? `
+									<div class="ticket-detail-section">
+										<h4>Viáticos</h4>
+										<div class="viaticos-info">
+											<p><strong>Estado:</strong> ${ticket.viaticos.approved ? 'Aprobado' : 'Pendiente'}</p>
+											<p><strong>Monto:</strong> ${Utils.formatCurrency(ticket.viaticos.amount)}</p>
+											<p><strong>Descripción:</strong> ${ticket.viaticos.description}</p>
+										</div>
+									</div>
+								` : ''}
+							</div>
+						</div>
+
+						<div>
+							<div class="card">
+								<div class="card-header"><h3>Comentarios</h3></div>
+								<div class="card-body">
+									<div id="comments-list"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			`;
+
+			// Render de comentarios
+			const commentsList = document.getElementById('comments-list');
+			commentsList.innerHTML = (ticket.comments || []).map(comment => `
+				<div class="comment-item">
+					<div class="comment-header">
+						<span class="comment-author">${comment.author}</span>
+						<span class="comment-date">${Utils.formatRelativeDate(comment.createdAt)}</span>
+					</div>
+					<div class="comment-content">${comment.content}</div>
+				</div>
+			`).join('');
+		};
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const id = getQueryParam('id');
+			const ticket = DataManager.getTicketById(id);
+			renderTicketDetail(ticket);
+			// Actualizar en tiempo real
+			window.addEventListener('tickets:updated', (e) => {
+				if (!id) return;
+				const updated = DataManager.getTicketById(id);
+				renderTicketDetail(updated);
+			});
+		});
+	</script>
+</body>
+</html>
+

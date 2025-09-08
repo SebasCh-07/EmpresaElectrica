@@ -147,6 +147,24 @@ const loadMesaAyudaTicketsView = (container) => {
     // Inicializar variables globales para Mesa de Ayuda
     window.currentMesaTab = 'pendientes';
     window.allMesaTickets = [...pendingTickets, ...assignedTickets, ...completedTickets];
+    // Listener en tiempo real
+    if (!window._mesaTicketsListener) {
+        window._mesaTicketsListener = () => {
+            const p = DataManager.getTicketsByStatus('pendiente');
+            const a = DataManager.getTicketsByStatus('asignado');
+            const c = DataManager.getTicketsByStatus('finalizado');
+            window.allMesaTickets = [...p, ...a, ...c];
+            const pc = document.getElementById('pendientes-count');
+            const ac = document.getElementById('asignados-count');
+            const cc = document.getElementById('completados-count');
+            if (pc) pc.textContent = p.length;
+            if (ac) ac.textContent = a.length;
+            if (cc) cc.textContent = c.length;
+            const list = document.getElementById('mesa-tickets-list');
+            if (list) list.innerHTML = renderMesaTicketsByStatus(window.allMesaTickets, window.currentMesaTab);
+        };
+        window.addEventListener('tickets:updated', window._mesaTicketsListener);
+    }
 };
 
 const loadTecnicoTicketsView = (container) => {
@@ -889,8 +907,7 @@ const editTicket = (ticketId) => {
 };
 
 const assignTicket = (ticketId) => {
-    Utils.showToast(`Asignando técnico al ticket #${ticketId}`, 'info');
-    // Aquí se podría abrir un modal de asignación
+    showAssignmentModal(ticketId);
 };
 
 // Funciones globales
@@ -902,3 +919,4 @@ window.searchMesaTickets = searchMesaTickets;
 window.filterByTechnician = filterByTechnician;
 window.editTicket = editTicket;
 window.assignTicket = assignTicket;
+

@@ -23,6 +23,17 @@ class ClienteApp {
         }
 
         this.setupEventListeners();
+        // Listener de tiempo real para actualizar vistas cuando cambien los tickets
+        window.addEventListener('tickets:updated', () => {
+            const active = document.querySelector('.nav-link.active');
+            if (!active) return;
+            const view = active.getAttribute('data-view');
+            if (view === 'dashboard') {
+                this.loadClienteDashboard();
+            } else if (view === 'tickets') {
+                this.loadClienteTickets();
+            }
+        });
         this.loadUserInfo();
         this.loadDefaultView();
     }
@@ -143,6 +154,9 @@ class ClienteApp {
                 </div>
             </div>
         `;
+        
+        // Verificar si hay tickets finalizados sin encuesta al cargar el dashboard
+        this.checkForCompletedTickets();
     }
 
     loadClienteTickets() {
@@ -237,16 +251,6 @@ class ClienteApp {
                                 </select>
                             </div>
                             
-                            <div class="cliente-form-group">
-                                <label class="cliente-form-label" for="ticket-prioridad">Prioridad</label>
-                                <select class="cliente-form-select" id="ticket-prioridad" name="prioridad" required>
-                                    <option value="">Selecciona la prioridad</option>
-                                    <option value="baja">Baja</option>
-                                    <option value="media">Media</option>
-                                    <option value="alta">Alta</option>
-                                </select>
-                            </div>
-                            
                             <div class="cliente-form-group full-width">
                                 <label class="cliente-form-label" for="ticket-titulo">Título del Ticket</label>
                                 <input type="text" class="cliente-form-input" id="ticket-titulo" name="titulo" 
@@ -283,8 +287,7 @@ class ClienteApp {
     }
 
     getUserTickets() {
-        const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        return allTickets.filter(ticket => ticket.clientId === this.currentUser.id || ticket.clientName === this.currentUser.name);
+        return DataManager.getTicketsByClient(this.currentUser.id);
     }
 
     calculateClienteStats(tickets) {
@@ -328,23 +331,32 @@ class ClienteApp {
                     </div>
                     
                     <div class="cliente-ticket-actions">
-                        <button class="cliente-action-btn" onclick="app.viewTicket('${ticket.id}')">
-                            <i class="fas fa-eye"></i>
-                            Ver
-                        </button>
                         ${ticket.status === 'finalizado' || ticket.status === 'pre_cerrado' ? `
                             ${ticket.encuestaCompletada ? `
-                                <button class="cliente-action-btn primary" onclick="app.downloadReport('${ticket.id}')">
+                                <button class="cliente-action-btn primary" onclick="app.viewTicket('${ticket.id}')">
+                                    <i class="fas fa-file-alt"></i>
+                                    Ver Informe
+                                </button>
+                                <button class="cliente-action-btn" onclick="app.downloadReport('${ticket.id}')">
                                     <i class="fas fa-download"></i>
-                                    Reporte
+                                    Descargar
                                 </button>
                             ` : `
+                                <button class="cliente-action-btn disabled" disabled>
+                                    <i class="fas fa-file-alt"></i>
+                                    Ver Informe
+                                </button>
                                 <button class="cliente-action-btn primary" onclick="app.showSurvey('${ticket.id}')">
                                     <i class="fas fa-star"></i>
                                     Encuesta
                                 </button>
                             `}
-                        ` : ''}
+                        ` : `
+                            <button class="cliente-action-btn" onclick="app.viewTicket('${ticket.id}')">
+                                <i class="fas fa-eye"></i>
+                                Ver
+                            </button>
+                        `}
                     </div>
                 </div>
             </div>
@@ -411,37 +423,19 @@ class ClienteApp {
         try {
             const formData = new FormData(event.target);
             const ticketData = {
-                id: 'TK-' + String(Date.now()).slice(-6),
                 title: formData.get('titulo'),
                 description: formData.get('descripcion'),
                 workType: formData.get('tipo'),
-                priority: formData.get('prioridad'),
-                status: 'pendiente',
+                priority: 'media',
                 clientId: this.currentUser.id,
                 clientName: this.currentUser.name,
                 clientEmail: this.currentUser.email,
                 clientPhone: formData.get('telefono'),
                 clientAddress: formData.get('direccion'),
-                assignedTechnicianId: null,
-                assignedTechnicianName: null,
-                createdAt: new Date().toISOString(),
-                assignedAt: null,
-                visitDate: null,
-                estimatedDuration: null,
-                isInterprovincial: false,
-                viaticos: null,
-                visitForm: null,
-                preClosedAt: null,
-                completedAt: null,
-                closedAt: null,
-                encuestaCompletada: false,
-                fechaEncuesta: null
+                isInterprovincial: false
             };
             
-            // Guardar ticket en localStorage
-            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-            tickets.push(ticketData);
-            localStorage.setItem('tickets', JSON.stringify(tickets));
+            const created = DataManager.createTicket(ticketData);
             
             // Mostrar mensaje de éxito
             Utils.showToast('Ticket creado exitosamente', 'success');
@@ -461,8 +455,7 @@ class ClienteApp {
     }
 
     viewTicket(ticketId) {
-        // Implementar vista de ticket individual
-        Utils.showToast('Función de vista de ticket en desarrollo', 'info');
+        window.location.href = `cliente-ticket.html?id=${encodeURIComponent(ticketId)}`;
     }
 
     downloadReport(ticketId) {
@@ -477,7 +470,13 @@ class ClienteApp {
         );
         
         if (completedTickets.length > 0) {
-            this.showCompletionNotification(completedTickets[0]);
+            // Verificar si ya se mostró la notificación en esta sesión
+            const notificationShown = sessionStorage.getItem('completionNotificationShown');
+            if (!notificationShown) {
+                this.showCompletionNotification(completedTickets[0]);
+                // Marcar que ya se mostró la notificación en esta sesión
+                sessionStorage.setItem('completionNotificationShown', 'true');
+            }
         }
     }
 
@@ -485,7 +484,7 @@ class ClienteApp {
         const notification = document.createElement('div');
         notification.className = 'cliente-notification';
         notification.innerHTML = `
-            <button class="cliente-notification-close" onclick="this.parentElement.remove()">
+            <button class="cliente-notification-close" onclick="this.parentElement.remove(); sessionStorage.removeItem('completionNotificationShown');">
                 <i class="fas fa-times"></i>
             </button>
             <div class="cliente-notification-header">
@@ -496,11 +495,11 @@ class ClienteApp {
                 Tu ticket ${ticket.id} ha sido finalizado. Completa la encuesta de satisfacción para descargar el reporte.
             </div>
             <div class="cliente-notification-actions">
-                <button class="cliente-notification-btn" onclick="app.showSurvey('${ticket.id}'); this.parentElement.parentElement.remove();">
+                <button class="cliente-notification-btn" onclick="app.showSurvey('${ticket.id}'); this.parentElement.parentElement.remove(); sessionStorage.removeItem('completionNotificationShown');">
                     <i class="fas fa-star"></i>
                     Completar Encuesta
                 </button>
-                <button class="cliente-notification-btn" onclick="this.parentElement.parentElement.remove();">
+                <button class="cliente-notification-btn" onclick="this.parentElement.parentElement.remove(); sessionStorage.removeItem('completionNotificationShown');">
                     <i class="fas fa-times"></i>
                     Cerrar
                 </button>
@@ -513,6 +512,8 @@ class ClienteApp {
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
+                // Limpiar el flag cuando se auto-elimina
+                sessionStorage.removeItem('completionNotificationShown');
             }
         }, 10000);
     }
@@ -693,19 +694,12 @@ class ClienteApp {
             return;
         }
         
-        // Guardar encuesta
-        const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
-        surveys.push(surveyData);
-        localStorage.setItem('surveys', JSON.stringify(surveys));
-        
-        // Marcar ticket como encuesta completada
-        const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        const ticketIndex = tickets.findIndex(t => t.id === ticketId);
-        if (ticketIndex !== -1) {
-            tickets[ticketIndex].encuestaCompletada = true;
-            tickets[ticketIndex].fechaEncuesta = new Date().toISOString();
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-        }
+        // Guardar encuesta en el ticket y marcar finalizado (simulación)
+        DataManager.updateTicket(ticketId, {
+            survey: surveyData,
+            status: 'finalizado',
+            completedAt: new Date().toISOString()
+        });
         
         // Cerrar modal
         event.target.closest('.cliente-survey-modal').remove();

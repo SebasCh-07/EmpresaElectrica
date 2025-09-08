@@ -23,6 +23,14 @@ class TecnicoApp {
         }
 
         this.setupEventListeners();
+        // Refrescar en tiempo real cuando se actualicen tickets
+        window.addEventListener('tickets:updated', () => {
+            const active = document.querySelector('.nav-link.active');
+            if (!active) return;
+            const view = active.getAttribute('data-view');
+            if (view === 'dashboard') this.loadTecnicoDashboard();
+            if (view === 'tickets') this.loadTecnicoTickets();
+        });
         this.loadUserInfo();
         this.loadDefaultView();
     }
@@ -138,7 +146,7 @@ class TecnicoApp {
                         </div>
                     </div>
                     <div id="tecnico-tickets-list">
-                        ${this.renderTecnicoTickets(userTickets.filter(t => t.estado === 'asignado' || t.estado === 'en_curso').slice(0, 5))}
+                        ${this.renderTecnicoTickets(userTickets.filter(t => t.status === 'asignado').slice(0, 5))}
                     </div>
                 </div>
             </div>
@@ -294,8 +302,9 @@ class TecnicoApp {
     }
 
     getUserTickets() {
-        const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        return allTickets.filter(ticket => ticket.tecnico === this.currentUser.name);
+        // Como solo hay un usuario técnico en el login, mostrar todas las asignaciones del sistema
+        const all = DataManager.getAllTickets();
+        return all.filter(t => ['asignado', 'en_curso', 'pre_cerrado', 'finalizado'].includes(t.status));
     }
 
     getUserViaticos() {
@@ -305,9 +314,9 @@ class TecnicoApp {
 
     calculateTecnicoStats(tickets) {
         return {
-            asignados: tickets.filter(t => t.estado === 'asignado').length,
-            enCurso: tickets.filter(t => t.estado === 'en_curso').length,
-            completados: tickets.filter(t => t.estado === 'finalizado').length,
+            asignados: tickets.filter(t => t.status === 'asignado').length,
+            enCurso: tickets.filter(t => t.status === 'en_curso').length,
+            completados: tickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado').length,
             viaticos: this.getUserViaticos().length
         };
     }
@@ -327,26 +336,26 @@ class TecnicoApp {
             <div class="tecnico-ticket-card">
                 <div class="tecnico-ticket-header">
                     <div class="tecnico-ticket-id">${ticket.id}</div>
-                    <div class="tecnico-ticket-fecha">${Utils.formatDate(ticket.fecha)}</div>
+                    <div class="tecnico-ticket-fecha">${Utils.formatDate(ticket.createdAt)}</div>
                 </div>
                 
                 <div class="tecnico-client-info">
                     <h4><i class="fas fa-user"></i> Información del Cliente</h4>
                     <div class="tecnico-client-details">
-                        <span><i class="fas fa-user"></i> ${ticket.cliente}</span>
-                        <span><i class="fas fa-map-marker-alt"></i> ${ticket.direccion || 'No especificada'}</span>
-                        <span><i class="fas fa-phone"></i> ${ticket.telefono || 'No especificado'}</span>
-                        <span><i class="fas fa-tag"></i> ${Utils.getPriorityLabel(ticket.prioridad)}</span>
+                        <span><i class="fas fa-user"></i> ${ticket.clientName}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> ${ticket.clientAddress || 'No especificada'}</span>
+                        <span><i class="fas fa-phone"></i> ${ticket.clientPhone || 'No especificado'}</span>
+                        <span><i class="fas fa-tag"></i> ${Utils.getPriorityLabel(ticket.priority)}</span>
                     </div>
                 </div>
                 
-                <div class="tecnico-ticket-titulo">${ticket.titulo}</div>
-                <div class="tecnico-ticket-descripcion">${ticket.descripcion}</div>
+                <div class="tecnico-ticket-titulo">${ticket.title}</div>
+                <div class="tecnico-ticket-descripcion">${ticket.description}</div>
                 
                 <div class="tecnico-ticket-meta">
                     <div class="tecnico-ticket-info">
-                        <span class="status-badge status-${ticket.estado}">${Utils.getStatusLabel(ticket.estado)}</span>
-                        <span class="priority-badge priority-${ticket.prioridad}">${Utils.getPriorityLabel(ticket.prioridad)}</span>
+                        <span class="status-badge status-${ticket.status}">${Utils.getStatusLabel(ticket.status)}</span>
+                        <span class="priority-badge priority-${ticket.priority}">${Utils.getPriorityLabel(ticket.priority)}</span>
                     </div>
                     
                     <div class="tecnico-ticket-actions">
@@ -354,13 +363,13 @@ class TecnicoApp {
                             <i class="fas fa-eye"></i>
                             Ver
                         </button>
-                        ${ticket.estado === 'asignado' ? `
+                        ${ticket.status === 'asignado' ? `
                             <button class="tecnico-action-btn primary" onclick="app.startWork('${ticket.id}')">
                                 <i class="fas fa-play"></i>
                                 Iniciar
                             </button>
                         ` : ''}
-                        ${ticket.estado === 'en_curso' ? `
+                        ${ticket.status === 'en_curso' ? `
                             <button class="tecnico-action-btn success" onclick="app.completeWork('${ticket.id}')">
                                 <i class="fas fa-check"></i>
                                 Completar
@@ -456,29 +465,20 @@ class TecnicoApp {
     }
 
     startWork(ticketId) {
-        // Cambiar estado a en_curso
-        const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        const ticketIndex = tickets.findIndex(t => t.id === ticketId);
-        if (ticketIndex !== -1) {
-            tickets[ticketIndex].estado = 'en_curso';
-            tickets[ticketIndex].fechaInicio = new Date().toISOString();
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-            Utils.showToast('Trabajo iniciado', 'success');
-            this.loadTecnicoTickets();
-        }
+        DataManager.updateTicket(ticketId, { status: 'en_curso', startedAt: new Date().toISOString() });
+        Utils.showToast('Trabajo iniciado', 'success');
+        this.loadTecnicoTickets();
     }
 
     completeWork(ticketId) {
-        // Cambiar estado a finalizado
-        const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        const ticketIndex = tickets.findIndex(t => t.id === ticketId);
-        if (ticketIndex !== -1) {
-            tickets[ticketIndex].estado = 'finalizado';
-            tickets[ticketIndex].fechaFinalizacion = new Date().toISOString();
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-            Utils.showToast('Trabajo completado', 'success');
-            this.loadTecnicoTickets();
+        const ticket = DataManager.getTicketById(ticketId);
+        DataManager.updateTicket(ticketId, { status: 'pre_cerrado', completedAt: new Date().toISOString() });
+        // Al pre-cerrar, liberar técnico
+        if (ticket && ticket.assignedTechnicianId) {
+            DataManager.updateTechnicianStatus(ticket.assignedTechnicianId, 'disponible');
         }
+        Utils.showToast('Trabajo marcado como pre-cerrado', 'success');
+        this.loadTecnicoTickets();
     }
 
     requestViatico(ticketId) {
@@ -487,8 +487,180 @@ class TecnicoApp {
     }
 
     viewTicket(ticketId) {
-        // Implementar vista de ticket individual
-        Utils.showToast('Función de vista de ticket en desarrollo', 'info');
+        const ticket = DataManager.getTicketById(ticketId);
+        if (!ticket) {
+            Utils.showToast('Ticket no encontrado', 'error');
+            return;
+        }
+
+        // Obtener visitas relacionadas si existen
+        const visitas = JSON.parse(localStorage.getItem('visitas') || '[]');
+        const visitasTicket = visitas.filter(v => v.ticketId === ticketId);
+
+        const modal = document.createElement('div');
+        modal.className = 'tecnico-details-modal';
+        modal.innerHTML = `
+            <div class="tecnico-details-container">
+                <button class="tecnico-details-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="tecnico-details-header">
+                    <h2>Detalles de la Asignación</h2>
+                    <div class="tecnico-details-ticket-id">Ticket: ${ticket.id}</div>
+                </div>
+                
+                <div class="tecnico-details-content">
+                    <!-- Información General -->
+                    <div class="tecnico-details-section">
+                        <h3><i class="fas fa-info-circle"></i> Información General</h3>
+                        <div class="tecnico-details-grid">
+                            <div class="tecnico-details-item">
+                                <label>Título:</label>
+                                <span>${ticket.title}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Estado:</label>
+                                <span class="status-badge status-${ticket.status}">${Utils.getStatusLabel(ticket.status)}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Prioridad:</label>
+                                <span class="priority-badge priority-${ticket.priority}">${Utils.getPriorityLabel(ticket.priority)}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Tipo de Trabajo:</label>
+                                <span>${Utils.getWorkTypeLabel(ticket.workType)}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Fecha de Creación:</label>
+                                <span>${Utils.formatDate(ticket.createdAt)}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Última Actualización:</label>
+                                <span>${Utils.formatDate(ticket.updatedAt || ticket.createdAt)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="tecnico-details-section">
+                        <h3><i class="fas fa-align-left"></i> Descripción del Trabajo</h3>
+                        <div class="tecnico-details-description">
+                            ${ticket.description}
+                        </div>
+                    </div>
+
+                    <!-- Información del Cliente -->
+                    <div class="tecnico-details-section">
+                        <h3><i class="fas fa-user"></i> Información del Cliente</h3>
+                        <div class="tecnico-details-grid">
+                            <div class="tecnico-details-item">
+                                <label>Nombre:</label>
+                                <span>${ticket.clientName}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Email:</label>
+                                <span>${ticket.clientEmail || 'No especificado'}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Teléfono:</label>
+                                <span>${ticket.clientPhone || 'No especificado'}</span>
+                            </div>
+                            <div class="tecnico-details-item full-width">
+                                <label>Dirección:</label>
+                                <span>${ticket.clientAddress || 'No especificada'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información Técnica -->
+                    <div class="tecnico-details-section">
+                        <h3><i class="fas fa-tools"></i> Información Técnica</h3>
+                        <div class="tecnico-details-grid">
+                            <div class="tecnico-details-item">
+                                <label>Interprovincial:</label>
+                                <span>${ticket.isInterprovincial ? 'Sí' : 'No'}</span>
+                            </div>
+                            <div class="tecnico-details-item">
+                                <label>Técnico Asignado:</label>
+                                <span>${ticket.assignedTechnicianName || 'Pendiente de asignación'}</span>
+                            </div>
+                            ${ticket.startedAt ? `
+                                <div class="tecnico-details-item">
+                                    <label>Iniciado:</label>
+                                    <span>${Utils.formatDate(ticket.startedAt)}</span>
+                                </div>
+                            ` : ''}
+                            ${ticket.completedAt ? `
+                                <div class="tecnico-details-item">
+                                    <label>Completado:</label>
+                                    <span>${Utils.formatDate(ticket.completedAt)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Historial de Visitas -->
+                    ${visitasTicket.length > 0 ? `
+                        <div class="tecnico-details-section">
+                            <h3><i class="fas fa-history"></i> Historial de Visitas</h3>
+                            <div class="tecnico-visitas-list">
+                                ${visitasTicket.map(visita => `
+                                    <div class="tecnico-visita-item">
+                                        <div class="tecnico-visita-header">
+                                            <span class="tecnico-visita-fecha">${Utils.formatDate(visita.fechaVisita)}</span>
+                                            <span class="tecnico-visita-estado status-badge status-${visita.estado}">${Utils.getStatusLabel(visita.estado)}</span>
+                                        </div>
+                                        <div class="tecnico-visita-content">
+                                            <div class="tecnico-visita-trabajo">
+                                                <strong>Trabajo Realizado:</strong>
+                                                <p>${visita.trabajoRealizado}</p>
+                                            </div>
+                                            ${visita.observaciones ? `
+                                                <div class="tecnico-visita-observaciones">
+                                                    <strong>Observaciones:</strong>
+                                                    <p>${visita.observaciones}</p>
+                                                </div>
+                                            ` : ''}
+                                            <div class="tecnico-visita-meta">
+                                                <span><i class="fas fa-clock"></i> ${visita.tiempoTrabajado} horas</span>
+                                                <span><i class="fas fa-user"></i> ${visita.tecnico}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Acciones -->
+                    <div class="tecnico-details-actions">
+                        ${ticket.status === 'asignado' ? `
+                            <button class="tecnico-action-btn primary" onclick="app.startWork('${ticket.id}'); this.closest('.tecnico-details-modal').remove();">
+                                <i class="fas fa-play"></i>
+                                Iniciar Trabajo
+                            </button>
+                        ` : ''}
+                        ${ticket.status === 'en_curso' ? `
+                            <button class="tecnico-action-btn success" onclick="app.completeWork('${ticket.id}'); this.closest('.tecnico-details-modal').remove();">
+                                <i class="fas fa-check"></i>
+                                Completar Trabajo
+                            </button>
+                        ` : ''}
+                        <button class="tecnico-action-btn warning" onclick="app.requestViatico('${ticket.id}'); this.closest('.tecnico-details-modal').remove();">
+                            <i class="fas fa-car"></i>
+                            Solicitar Viático
+                        </button>
+                        <button class="tecnico-action-btn" onclick="this.closest('.tecnico-details-modal').remove();">
+                            <i class="fas fa-times"></i>
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
     }
 
     // Funciones para pestañas y búsqueda
@@ -507,11 +679,11 @@ class TecnicoApp {
         let filteredTickets = tickets;
         
         if (status === 'asignado') {
-            filteredTickets = tickets.filter(t => t.estado === 'asignado');
+            filteredTickets = tickets.filter(t => t.status === 'asignado');
         } else if (status === 'en_curso') {
-            filteredTickets = tickets.filter(t => t.estado === 'en_curso');
+            filteredTickets = tickets.filter(t => t.status === 'en_curso');
         } else if (status === 'completado') {
-            filteredTickets = tickets.filter(t => t.estado === 'finalizado' || t.estado === 'pre_cerrado');
+            filteredTickets = tickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado');
         }
         
         const ticketsList = document.getElementById('tecnico-tickets-list');
@@ -523,9 +695,9 @@ class TecnicoApp {
     }
 
     updateTecnicoTabCounts(tickets) {
-        const asignadoCount = tickets.filter(t => t.estado === 'asignado').length;
-        const enCursoCount = tickets.filter(t => t.estado === 'en_curso').length;
-        const completadoCount = tickets.filter(t => t.estado === 'finalizado' || t.estado === 'pre_cerrado').length;
+        const asignadoCount = tickets.filter(t => t.status === 'asignado').length;
+        const enCursoCount = tickets.filter(t => t.status === 'en_curso').length;
+        const completadoCount = tickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado').length;
         
         const asignadoBadge = document.getElementById('asignado-count');
         const enCursoBadge = document.getElementById('en-curso-count');
@@ -542,9 +714,9 @@ class TecnicoApp {
         
         if (searchTerm.trim() !== '') {
             filteredTickets = allTickets.filter(ticket => 
-                ticket.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                ticket.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                ticket.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (ticket.title||'').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (ticket.description||'').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (ticket.clientName||'').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 ticket.id.toString().includes(searchTerm)
             );
         }
