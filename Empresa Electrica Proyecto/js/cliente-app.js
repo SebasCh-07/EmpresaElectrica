@@ -284,14 +284,14 @@ class ClienteApp {
 
     getUserTickets() {
         const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        return allTickets.filter(ticket => ticket.cliente === this.currentUser.name);
+        return allTickets.filter(ticket => ticket.clientId === this.currentUser.id || ticket.clientName === this.currentUser.name);
     }
 
     calculateClienteStats(tickets) {
         return {
-            pendientes: tickets.filter(t => t.estado === 'pendiente').length,
-            enCurso: tickets.filter(t => t.estado === 'en_curso').length,
-            finalizados: tickets.filter(t => t.estado === 'finalizado').length,
+            pendientes: tickets.filter(t => t.status === 'pendiente').length,
+            enCurso: tickets.filter(t => t.status === 'en_curso' || t.status === 'asignado').length,
+            finalizados: tickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado').length,
             total: tickets.length
         };
     }
@@ -315,16 +315,16 @@ class ClienteApp {
             <div class="cliente-ticket-card">
                 <div class="cliente-ticket-header">
                     <div class="cliente-ticket-id">${ticket.id}</div>
-                    <div class="cliente-ticket-fecha">${Utils.formatDate(ticket.fecha)}</div>
+                    <div class="cliente-ticket-fecha">${Utils.formatDate(ticket.createdAt)}</div>
                 </div>
                 
-                <div class="cliente-ticket-titulo">${ticket.titulo}</div>
-                <div class="cliente-ticket-descripcion">${ticket.descripcion}</div>
+                <div class="cliente-ticket-titulo">${ticket.title}</div>
+                <div class="cliente-ticket-descripcion">${ticket.description}</div>
                 
                 <div class="cliente-ticket-meta">
                     <div class="cliente-ticket-info">
-                        <span class="status-badge status-${ticket.estado}">${Utils.getStatusLabel(ticket.estado)}</span>
-                        <span class="priority-badge priority-${ticket.prioridad}">${Utils.getPriorityLabel(ticket.prioridad)}</span>
+                        <span class="status-badge status-${ticket.status}">${Utils.getStatusLabel(ticket.status)}</span>
+                        <span class="priority-badge priority-${ticket.priority}">${Utils.getPriorityLabel(ticket.priority)}</span>
                     </div>
                     
                     <div class="cliente-ticket-actions">
@@ -332,7 +332,7 @@ class ClienteApp {
                             <i class="fas fa-eye"></i>
                             Ver
                         </button>
-                        ${ticket.estado === 'finalizado' ? `
+                        ${ticket.status === 'finalizado' || ticket.status === 'pre_cerrado' ? `
                             ${ticket.encuestaCompletada ? `
                                 <button class="cliente-action-btn primary" onclick="app.downloadReport('${ticket.id}')">
                                     <i class="fas fa-download"></i>
@@ -352,7 +352,16 @@ class ClienteApp {
     }
 
     renderClienteTicketsByStatus(tickets, status) {
-        const filteredTickets = tickets.filter(ticket => ticket.estado === status);
+        let filteredTickets;
+        if (status === 'pendiente') {
+            filteredTickets = tickets.filter(ticket => ticket.status === 'pendiente');
+        } else if (status === 'en_curso') {
+            filteredTickets = tickets.filter(ticket => ticket.status === 'en_curso' || ticket.status === 'asignado');
+        } else if (status === 'finalizado') {
+            filteredTickets = tickets.filter(ticket => ticket.status === 'finalizado' || ticket.status === 'pre_cerrado');
+        } else {
+            filteredTickets = tickets.filter(ticket => ticket.status === status);
+        }
         return this.renderClienteTickets(filteredTickets);
     }
 
@@ -382,7 +391,13 @@ class ClienteApp {
         let filteredTickets = userTickets;
         
         if (filter !== 'all') {
-            filteredTickets = userTickets.filter(ticket => ticket.estado === filter);
+            if (filter === 'en_curso') {
+                filteredTickets = userTickets.filter(ticket => ticket.status === 'en_curso' || ticket.status === 'asignado');
+            } else if (filter === 'finalizado') {
+                filteredTickets = userTickets.filter(ticket => ticket.status === 'finalizado' || ticket.status === 'pre_cerrado');
+            } else {
+                filteredTickets = userTickets.filter(ticket => ticket.status === filter);
+            }
         }
         
         // Actualizar lista
@@ -393,36 +408,56 @@ class ClienteApp {
     submitTicket(event) {
         event.preventDefault();
         
-        const formData = new FormData(event.target);
-        const ticketData = {
-            id: 'TK-' + String(Date.now()).slice(-6),
-            titulo: formData.get('titulo'),
-            descripcion: formData.get('descripcion'),
-            tipo: formData.get('tipo'),
-            prioridad: formData.get('prioridad'),
-            estado: 'pendiente',
-            cliente: this.currentUser.name,
-            tecnico: 'Sin asignar',
-            fecha: new Date().toISOString(),
-            direccion: formData.get('direccion'),
-            telefono: formData.get('telefono')
-        };
-        
-        // Guardar ticket
-        const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-        tickets.push(ticketData);
-        localStorage.setItem('tickets', JSON.stringify(tickets));
-        
-        // Mostrar mensaje de éxito
-        Utils.showToast('Ticket creado exitosamente', 'success');
-        
-        // Limpiar formulario
-        event.target.reset();
-        
-        // Redirigir a tickets
-        setTimeout(() => {
-            this.navigateTo('tickets');
-        }, 1500);
+        try {
+            const formData = new FormData(event.target);
+            const ticketData = {
+                id: 'TK-' + String(Date.now()).slice(-6),
+                title: formData.get('titulo'),
+                description: formData.get('descripcion'),
+                workType: formData.get('tipo'),
+                priority: formData.get('prioridad'),
+                status: 'pendiente',
+                clientId: this.currentUser.id,
+                clientName: this.currentUser.name,
+                clientEmail: this.currentUser.email,
+                clientPhone: formData.get('telefono'),
+                clientAddress: formData.get('direccion'),
+                assignedTechnicianId: null,
+                assignedTechnicianName: null,
+                createdAt: new Date().toISOString(),
+                assignedAt: null,
+                visitDate: null,
+                estimatedDuration: null,
+                isInterprovincial: false,
+                viaticos: null,
+                visitForm: null,
+                preClosedAt: null,
+                completedAt: null,
+                closedAt: null,
+                encuestaCompletada: false,
+                fechaEncuesta: null
+            };
+            
+            // Guardar ticket en localStorage
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            tickets.push(ticketData);
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            
+            // Mostrar mensaje de éxito
+            Utils.showToast('Ticket creado exitosamente', 'success');
+            
+            // Limpiar formulario
+            event.target.reset();
+            
+            // Redirigir a tickets después de un breve delay
+            setTimeout(() => {
+                this.navigateTo('tickets');
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error al crear ticket:', error);
+            Utils.showToast('Error al crear el ticket. Inténtalo de nuevo.', 'error');
+        }
     }
 
     viewTicket(ticketId) {
@@ -438,7 +473,7 @@ class ClienteApp {
     checkForCompletedTickets() {
         const userTickets = this.getUserTickets();
         const completedTickets = userTickets.filter(ticket => 
-            ticket.estado === 'finalizado' && !ticket.encuestaCompletada
+            (ticket.status === 'finalizado' || ticket.status === 'pre_cerrado') && !ticket.encuestaCompletada
         );
         
         if (completedTickets.length > 0) {

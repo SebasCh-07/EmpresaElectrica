@@ -328,6 +328,30 @@ const clearFormErrors = (formElement) => {
     });
 };
 
+// Obtener etiqueta de estado
+const getStatusLabel = (status) => {
+    const statusLabels = {
+        'pendiente': 'Pendiente',
+        'asignado': 'Asignado',
+        'en_curso': 'En Curso',
+        'pre_cerrado': 'Pre-cerrado',
+        'finalizado': 'Finalizado',
+        'cerrado': 'Cerrado'
+    };
+    return statusLabels[status] || status;
+};
+
+// Obtener etiqueta de prioridad
+const getPriorityLabel = (priority) => {
+    const priorityLabels = {
+        'baja': 'Baja',
+        'media': 'Media',
+        'alta': 'Alta',
+        'critica': 'Crítica'
+    };
+    return priorityLabels[priority] || priority;
+};
+
 // Exportar funciones para uso global
 window.Utils = {
     formatDate,
@@ -349,6 +373,8 @@ window.Utils = {
     getStatusColor,
     getStatusIcon,
     getPriorityIcon,
+    getStatusLabel,
+    getPriorityLabel,
     validateForm,
     showFormErrors,
     clearFormErrors
