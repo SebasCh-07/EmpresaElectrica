@@ -140,15 +140,15 @@ const loadClientsView = (container) => {
             </div>
             
             <div class="table-container">
-                <table class="table">
+                <table class="modern-table admin-clients-table">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Empresa</th>
-                            <th>Tickets</th>
-                            <th>Acciones</th>
+                            <th class="table-cell-name">Cliente</th>
+                            <th class="table-cell-email">Email</th>
+                            <th class="table-cell-phone">Teléfono</th>
+                            <th class="table-cell-company">Empresa</th>
+                            <th class="table-cell-tickets">Tickets</th>
+                            <th class="table-cell-actions">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,25 +156,48 @@ const loadClientsView = (container) => {
                             const clientTickets = DataManager.getTicketsByClient(client.id);
                             return `
                                 <tr>
-                                    <td>
-                                        <div class="d-flex align-center">
-                                            <div class="technician-avatar">${client.avatar}</div>
-                                            <span>${client.name}</span>
+                                    <td class="table-cell-name">
+                                        <div class="client-info">
+                                            <div class="client-details">
+                                                <div class="client-name">${client.name}</div>
+                                                <div class="client-id">ID: ${client.id}</div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td>${client.email}</td>
-                                    <td>${client.phone}</td>
-                                    <td>${client.company || 'N/A'}</td>
-                                    <td>
-                                        <span class="badge">${clientTickets.length} tickets</span>
+                                    <td class="table-cell-email">
+                                        <div class="email-info">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>${client.email}</span>
+                                        </div>
                                     </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn btn-sm btn-primary" onclick="viewClientTickets(${client.id})">
+                                    <td class="table-cell-phone">
+                                        <div class="phone-info">
+                                            <i class="fas fa-phone"></i>
+                                            <span>${client.phone}</span>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-company">
+                                        <div class="company-info">
+                                            <i class="fas fa-building"></i>
+                                            <span>${client.company || 'Sin empresa'}</span>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-tickets">
+                                        <div class="tickets-count">
+                                            <span class="tickets-badge">${clientTickets.length}</span>
+                                            <span class="tickets-label">tickets</span>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-actions">
+                                        <div class="table-actions">
+                                            <button class="table-action-btn view-btn" onclick="viewClientTickets(${client.id})" title="Ver tickets">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-secondary" onclick="editClient(${client.id})">
+                                            <button class="table-action-btn edit-btn" onclick="editClient(${client.id})" title="Editar cliente">
                                                 <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="table-action-btn contact-btn" onclick="contactClient(${client.id})" title="Contactar">
+                                                <i class="fas fa-comment"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -215,61 +238,107 @@ const loadTechniciansView = (container) => {
                 </div>
             </div>
             
-            <div class="grid-3">
-                ${technicians.map(tech => {
-                    const techTickets = DataManager.getTicketsByTechnician(tech.id);
-                    const activeTickets = techTickets.filter(t => ['asignado', 'en_curso'].includes(t.status));
-                    
-                    return `
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex align-center mb-3">
-                                    <div class="technician-avatar">${tech.avatar}</div>
-                                    <div>
-                                        <h4>${tech.name}</h4>
-                                        <p class="text-muted">${tech.email}</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="technician-details">
-                                    <p><strong>Teléfono:</strong> ${tech.phone}</p>
-                                    <p><strong>Especializaciones:</strong></p>
-                                    <ul>
-                                        ${tech.specializations ? tech.specializations.map(spec => `<li>${spec}</li>`).join('') : '<li>Sin especializaciones</li>'}
-                                    </ul>
-                                    
-                                    <div class="technician-stats">
-                                        <div class="stat-item">
-                                            <span class="stat-label">Tickets Activos:</span>
-                                            <span class="stat-value">${activeTickets.length}</span>
+            <div class="table-container">
+                <table class="modern-table admin-technicians-table">
+                    <thead>
+                        <tr>
+                            <th class="table-cell-technician">Técnico</th>
+                            <th class="table-cell-contact">Contacto</th>
+                            <th class="table-cell-specializations">Especializaciones</th>
+                            <th class="table-cell-status">Estado</th>
+                            <th class="table-cell-tickets">Tickets</th>
+                            <th class="table-cell-actions">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${technicians.map(tech => {
+                            const techTickets = DataManager.getTicketsByTechnician(tech.id);
+                            const activeTickets = techTickets.filter(t => ['asignado', 'en_curso'].includes(t.status));
+                            const completedTickets = techTickets.filter(t => ['finalizado', 'pre_cerrado'].includes(t.status));
+                            
+                            return `
+                                <tr>
+                                    <td class="table-cell-technician">
+                                        <div class="technician-info">
+                                            <div class="technician-avatar">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <div class="technician-details">
+                                                <div class="technician-name">${tech.name}</div>
+                                                <div class="technician-id">ID: ${tech.id}</div>
+                                            </div>
                                         </div>
-                                        <div class="stat-item">
-                                            <span class="stat-label">Total Tickets:</span>
-                                            <span class="stat-value">${techTickets.length}</span>
+                                    </td>
+                                    <td class="table-cell-contact">
+                                        <div class="contact-info">
+                                            <div class="email-info">
+                                                <i class="fas fa-envelope"></i>
+                                                <span class="contact-text">${tech.email}</span>
+                                            </div>
+                                            <div class="phone-info">
+                                                <i class="fas fa-phone"></i>
+                                                <span class="contact-text">${tech.phone}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="technician-status mt-3">
-                                        <div class="status-indicator ${tech.status}"></div>
-                                        <span class="status-badge status-${tech.status}">
-                                            ${tech.status === 'disponible' ? 'Disponible' : 
-                                              tech.status === 'ocupado' ? 'Ocupado' : 'Desconectado'}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <div class="action-buttons mt-3">
-                                    <button class="btn btn-sm btn-primary" onclick="viewTechnicianTickets(${tech.id})">
-                                        <i class="fas fa-eye"></i> Ver Tickets
-                                    </button>
-                                    <button class="btn btn-sm btn-secondary" onclick="editTechnician(${tech.id})">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+                                    </td>
+                                    <td class="table-cell-specializations">
+                                        <div class="specializations-info">
+                                            ${tech.specializations && tech.specializations.length > 0 ? 
+                                                tech.specializations.map(spec => `
+                                                    <span class="specialization-badge">${spec}</span>
+                                                `).join('') : 
+                                                '<span class="no-specializations">Sin especializaciones</span>'
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-status">
+                                        <div class="status-info">
+                                            <span class="status-badge status-${tech.status}">
+                                                <i class="fas fa-circle"></i>
+                                                <span class="status-text">${tech.status === 'disponible' ? 'Disponible' : 
+                                                  tech.status === 'ocupado' ? 'Ocupado' : 'Desconectado'}</span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-tickets">
+                                        <div class="tickets-stats">
+                                            <div class="ticket-stat-row">
+                                                <div class="ticket-stat">
+                                                    <span class="ticket-count active">${activeTickets.length}</span>
+                                                    <span class="ticket-label">Activos</span>
+                                                </div>
+                                                <div class="ticket-stat">
+                                                    <span class="ticket-count completed">${completedTickets.length}</span>
+                                                    <span class="ticket-label">Completados</span>
+                                                </div>
+                                            </div>
+                                            <div class="ticket-stat total-stat">
+                                                <span class="ticket-count total">${techTickets.length}</span>
+                                                <span class="ticket-label">Total</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell-actions">
+                                        <div class="action-buttons">
+                                            <button class="btn view-btn" onclick="viewTechnicianTickets(${tech.id})" title="Ver tickets">
+                                                <i class="fas fa-eye"></i>
+                                                <span>Ver</span>
+                                            </button>
+                                            <button class="btn edit-btn" onclick="editTechnician(${tech.id})" title="Editar técnico">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Editar</span>
+                                            </button>
+                                            <button class="btn contact-btn" onclick="contactTechnician(${tech.id})" title="Contactar">
+                                                <i class="fas fa-comment"></i>
+                                                <span>Contactar</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
             </div>
         </div>
     `;
@@ -375,26 +444,6 @@ const loadSurveyView = (container) => {
     `;
 };
 
-const loadTeamsView = (container) => {
-    container.innerHTML = `
-        <div class="page-header">
-            <h1><i class="fas fa-users-cog"></i> Equipos</h1>
-            <p>Gestión de equipos de trabajo</p>
-        </div>
-        
-        <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Equipos de Trabajo</h3>
-                    <p>Organización de técnicos en equipos especializados</p>
-                </div>
-                <div class="card-body">
-                    <p class="text-center text-muted">Funcionalidad de equipos en desarrollo</p>
-                </div>
-            </div>
-        </div>
-    `;
-};
 
 // Funciones auxiliares
 const setupFileUpload = () => {
@@ -566,12 +615,40 @@ const submitSurvey = (event) => {
     app.navigateTo('dashboard');
 };
 
+// Funciones para gestión de clientes
+const viewClientTickets = (clientId) => {
+    const client = DataManager.getUserById(clientId);
+    const clientTickets = DataManager.getTicketsByClient(clientId);
+    
+    if (clientTickets.length === 0) {
+        Utils.showToast(`${client.name} no tiene tickets registrados`, 'info');
+        return;
+    }
+    
+    // Aquí se podría abrir un modal o navegar a una vista específica
+    Utils.showToast(`Mostrando ${clientTickets.length} tickets de ${client.name}`, 'info');
+};
+
+const editClient = (clientId) => {
+    const client = DataManager.getUserById(clientId);
+    Utils.showToast(`Editando información de ${client.name}`, 'info');
+    // Aquí se podría abrir un modal de edición
+};
+
+const contactClient = (clientId) => {
+    const client = DataManager.getUserById(clientId);
+    Utils.showToast(`Iniciando contacto con ${client.name}`, 'info');
+    // Aquí se podría abrir un modal de contacto o redirigir a email/teléfono
+};
+
 // Exportar funciones
 window.loadTicketForm = loadTicketForm;
 window.loadClientsView = loadClientsView;
 window.loadTechniciansView = loadTechniciansView;
 window.loadGeolocationView = loadGeolocationView;
 window.loadSurveyView = loadSurveyView;
-window.loadTeamsView = loadTeamsView;
 window.submitTicket = submitTicket;
 window.submitSurvey = submitSurvey;
+window.viewClientTickets = viewClientTickets;
+window.editClient = editClient;
+window.contactClient = contactClient;

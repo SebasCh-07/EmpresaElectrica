@@ -1,0 +1,918 @@
+/* Estilos Específicos para Pantalla de Técnico */
+
+/* Dashboard de Técnico */
+.tecnico-dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tecnico-welcome {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.tecnico-welcome::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.tecnico-welcome h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.tecnico-welcome p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+/* Cards de Estadísticas del Técnico */
+.tecnico-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tecnico-stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.tecnico-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.tecnico-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+
+.tecnico-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.tecnico-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.tecnico-stat-icon.asignados {
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+}
+
+.tecnico-stat-icon.en-curso {
+    background: linear-gradient(135deg, var(--accent-color), #10b981);
+}
+
+.tecnico-stat-icon.completados {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+}
+
+.tecnico-stat-icon.viaticos {
+    background: linear-gradient(135deg, var(--warning-color), #f97316);
+}
+
+.tecnico-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.25rem;
+}
+
+.tecnico-stat-label {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Lista de Tickets del Técnico */
+.tecnico-tickets-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.tecnico-tickets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.tecnico-tickets-title {
+    color: var(--gray-800);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.tecnico-tickets-subtitle {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* Cards de Tickets del Técnico */
+.tecnico-ticket-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.tecnico-ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.tecnico-ticket-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-color);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.tecnico-ticket-card:hover::before {
+    opacity: 1;
+}
+
+.tecnico-ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.tecnico-ticket-id {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: var(--primary-light);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.tecnico-ticket-fecha {
+    color: var(--gray-500);
+    font-size: 0.85rem;
+}
+
+.tecnico-ticket-titulo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.tecnico-ticket-descripcion {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.tecnico-ticket-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tecnico-ticket-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.tecnico-ticket-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tecnico-action-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-300);
+    background: white;
+    color: var(--gray-600);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tecnico-action-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.tecnico-action-btn.primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.tecnico-action-btn.primary:hover {
+    background: var(--primary-dark);
+}
+
+.tecnico-action-btn.success {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.tecnico-action-btn.success:hover {
+    background: #059669;
+}
+
+.tecnico-action-btn.warning {
+    background: var(--warning-color);
+    color: white;
+    border-color: var(--warning-color);
+}
+
+.tecnico-action-btn.warning:hover {
+    background: #d97706;
+}
+
+/* Formulario de Visita Técnica */
+.tecnico-form-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    margin-bottom: 2rem;
+}
+
+.tecnico-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.tecnico-form-header h2 {
+    color: var(--gray-800);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.tecnico-form-header p {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+}
+
+.tecnico-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tecnico-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.tecnico-form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.tecnico-form-label {
+    color: var(--gray-700);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.tecnico-form-input,
+.tecnico-form-select,
+.tecnico-form-textarea {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+    background: white;
+}
+
+.tecnico-form-input:focus,
+.tecnico-form-select:focus,
+.tecnico-form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.tecnico-form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.tecnico-form-submit {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    width: 100%;
+}
+
+.tecnico-form-submit:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Sección de Viáticos */
+.tecnico-viaticos-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    margin-bottom: 2rem;
+}
+
+.tecnico-viaticos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.tecnico-viaticos-title {
+    color: var(--gray-800);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.tecnico-viaticos-btn {
+    background: var(--warning-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tecnico-viaticos-btn:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+}
+
+/* Lista de Viáticos */
+.tecnico-viaticos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tecnico-viatico-item {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all var(--transition-normal);
+}
+
+.tecnico-viatico-item:hover {
+    border-color: var(--warning-color);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+.tecnico-viatico-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tecnico-viatico-tipo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.tecnico-viatico-monto {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--warning-color);
+}
+
+.tecnico-viatico-descripcion {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.tecnico-viatico-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+/* Estado Vacío */
+.tecnico-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--gray-500);
+}
+
+.tecnico-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--gray-300);
+}
+
+.tecnico-empty-state h3 {
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.tecnico-empty-state p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design para Técnico */
+@media (max-width: 768px) {
+    .tecnico-dashboard {
+        padding: 1rem;
+    }
+    
+    .tecnico-welcome {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+    
+    .tecnico-welcome h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tecnico-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tecnico-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tecnico-tickets-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .tecnico-ticket-meta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .tecnico-ticket-info {
+        justify-content: center;
+    }
+    
+    .tecnico-ticket-actions {
+        justify-content: center;
+    }
+    
+    .tecnico-viaticos-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .tecnico-welcome {
+        padding: 1.5rem 1rem;
+    }
+    
+    .tecnico-form-container,
+    .tecnico-tickets-container,
+    .tecnico-viaticos-section {
+        padding: 1.5rem;
+    }
+    
+    .tecnico-ticket-card {
+        padding: 1rem;
+    }
+    
+    .tecnico-ticket-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .tecnico-ticket-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .tecnico-ticket-info {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .tecnico-viatico-item {
+        padding: 1rem;
+    }
+    
+    .tecnico-viatico-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+}
+
+/* Animaciones */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tecnico-ticket-card {
+    animation: slideInUp 0.3s ease-out;
+}
+
+.tecnico-stat-card {
+    animation: slideInUp 0.3s ease-out;
+}
+
+.tecnico-viatico-item {
+    animation: slideInUp 0.3s ease-out;
+}
+
+/* Estados de Loading */
+.tecnico-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: var(--gray-500);
+}
+
+.tecnico-loading .loading {
+    margin-right: 1rem;
+}
+
+/* Mejoras de Accesibilidad */
+.tecnico-form-input:focus,
+.tecnico-form-select:focus,
+.tecnico-form-textarea:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.tecnico-action-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Mejoras de Contraste */
+.tecnico-ticket-card {
+    border-color: var(--gray-300);
+}
+
+.tecnico-ticket-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+}
+
+/* Indicadores de Estado */
+.tecnico-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.tecnico-status-indicator.asignado {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.tecnico-status-indicator.en-curso {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--accent-color);
+}
+
+.tecnico-status-indicator.completado {
+    background: var(--success-light);
+    color: var(--success-color);
+}
+
+.tecnico-status-indicator::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Información del Cliente */
+.tecnico-client-info {
+    background: rgba(30, 58, 138, 0.05);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tecnico-client-info h4 {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.tecnico-client-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.tecnico-client-details span {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tecnico-client-details i {
+    color: var(--primary-color);
+    width: 14px;
+}
+
+/* Pestañas del Técnico */
+.tecnico-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.tecnico-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: var(--secondary-color);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tecnico-tab:hover {
+    background: rgba(30, 58, 138, 0.05);
+    color: var(--primary-color);
+}
+
+.tecnico-tab.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+}
+
+.tecnico-tab-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: inherit;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+.tecnico-tab.active .tecnico-tab-badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tecnico-tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Búsqueda del Técnico */
+.tecnico-search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.tecnico-tickets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-lg);
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(30, 58, 138, 0.1);
+    min-width: 300px;
+}
+
+.search-bar i {
+    color: var(--secondary-color);
+    margin-right: 0.75rem;
+    font-size: 1rem;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    width: 100%;
+}
+
+.search-bar input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-bar:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive para pestañas y búsqueda */
+@media (max-width: 768px) {
+    .tecnico-tickets-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .tecnico-search-container {
+        width: 100%;
+    }
+    
+    .search-bar {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .tecnico-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tecnico-tab {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tecnico-tabs {
+        padding: 0.25rem;
+    }
+    
+    .tecnico-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .tecnico-tab-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .search-bar {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .search-bar input {
+        font-size: 0.9rem;
+    }
+}

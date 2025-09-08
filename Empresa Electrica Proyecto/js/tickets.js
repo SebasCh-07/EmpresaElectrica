@@ -62,21 +62,21 @@ const loadAdminTicketsView = (container) => {
             
             <!-- Lista de tickets -->
             <div class="table-container">
-                <table class="table">
+                <table class="modern-table admin-tickets-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Cliente</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th>Técnico</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
+                            <th class="table-cell-id">Ticket</th>
+                            <th class="table-cell-title">Título</th>
+                            <th class="table-cell-client">Cliente</th>
+                            <th class="table-cell-priority">Prioridad</th>
+                            <th class="table-cell-status">Estado</th>
+                            <th class="table-cell-technician">Técnico</th>
+                            <th class="table-cell-date">Fecha</th>
+                            <th class="table-cell-actions">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tickets-table-body">
-                        ${renderTicketsTable(allTickets)}
+                        ${renderAdminTicketsTable(allTickets)}
                     </tbody>
                 </table>
             </div>
@@ -89,6 +89,7 @@ const loadAdminTicketsView = (container) => {
 const loadMesaAyudaTicketsView = (container) => {
     const pendingTickets = DataManager.getTicketsByStatus('pendiente');
     const assignedTickets = DataManager.getTicketsByStatus('asignado');
+    const completedTickets = DataManager.getTicketsByStatus('finalizado');
     
     container.innerHTML = `
         <div class="page-header">
@@ -97,21 +98,55 @@ const loadMesaAyudaTicketsView = (container) => {
         </div>
         
         <div class="page-content">
-            <!-- Filtros de estado -->
-            <div class="ticket-filters">
-                <div class="ticket-filter active" data-status="">Todos</div>
-                <div class="ticket-filter" data-status="pendiente">Pendientes (${pendingTickets.length})</div>
-                <div class="ticket-filter" data-status="asignado">Asignados (${assignedTickets.length})</div>
-            </div>
-            
-            <!-- Lista de tickets -->
-            <div class="ticket-list" id="tickets-list">
-                ${renderTicketsCards([...pendingTickets, ...assignedTickets])}
+            <div class="mesa-tickets-container">
+                <div class="mesa-tickets-header">
+                    <div>
+                        <h2 class="mesa-tickets-title">Todos los Tickets</h2>
+                        <p class="mesa-tickets-subtitle">Gestiona y asigna tickets a técnicos</p>
+                    </div>
+                    <div class="mesa-search-container">
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="mesa-search-input" placeholder="Buscar tickets..." onkeyup="searchMesaTickets(this.value)">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mesa-tabs">
+                    <button class="mesa-tab active" onclick="switchMesaTab('pendientes')">
+                        <span>Pendientes</span>
+                        <span class="mesa-tab-badge" id="pendientes-count">${pendingTickets.length}</span>
+                    </button>
+                    <button class="mesa-tab" onclick="switchMesaTab('asignados')">
+                        <span>Asignados</span>
+                        <span class="mesa-tab-badge" id="asignados-count">${assignedTickets.length}</span>
+                    </button>
+                    <button class="mesa-tab" onclick="switchMesaTab('completados')">
+                        <span>Completados</span>
+                        <span class="mesa-tab-badge" id="completados-count">${completedTickets.length}</span>
+                    </button>
+                </div>
+                
+                <div class="mesa-tab-content">
+                    <div id="mesa-technician-filter" class="mesa-technician-filter" style="display: none;">
+                        <div class="filter-group">
+                            <label for="technician-select">Filtrar por técnico:</label>
+                            <select id="technician-select" onchange="filterByTechnician(this.value)">
+                                <option value="">Todos los técnicos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="mesa-tickets-list" class="ticket-list">
+                        ${renderMesaTicketsByStatus([...pendingTickets, ...assignedTickets, ...completedTickets], 'pendientes')}
+                    </div>
+                </div>
             </div>
         </div>
     `;
     
-    setupMesaAyudaFilters();
+    // Inicializar variables globales para Mesa de Ayuda
+    window.currentMesaTab = 'pendientes';
+    window.allMesaTickets = [...pendingTickets, ...assignedTickets, ...completedTickets];
 };
 
 const loadTecnicoTicketsView = (container) => {
@@ -207,6 +242,91 @@ const renderTicketsTable = (tickets) => {
     `).join('');
 };
 
+const renderAdminTicketsTable = (tickets) => {
+    return tickets.map(ticket => `
+        <tr>
+            <td class="table-cell-id">
+                <div class="ticket-id-info">
+                    <div class="ticket-id-badge">#${ticket.id}</div>
+                    <div class="ticket-type">${ticket.type || 'Soporte'}</div>
+                </div>
+            </td>
+            <td class="table-cell-title">
+                <div class="ticket-title-info">
+                    <div class="ticket-title">${ticket.title}</div>
+                    <div class="ticket-description">${ticket.description.substring(0, 60)}...</div>
+                </div>
+            </td>
+            <td class="table-cell-client">
+                <div class="client-info">
+                    <div class="client-details">
+                        <div class="client-name">${ticket.clientName}</div>
+                        <div class="client-email">${ticket.clientEmail || 'Sin email'}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="table-cell-priority">
+                <div class="priority-info">
+                    <span class="priority-badge priority-${ticket.priority}">
+                        <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
+                        ${ticket.priority.toUpperCase()}
+                    </span>
+                </div>
+            </td>
+            <td class="table-cell-status">
+                <div class="status-info">
+                    <span class="status-badge status-${ticket.status}">
+                        <i class="${Utils.getStatusIcon(ticket.status)}"></i>
+                        ${ticket.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                </div>
+            </td>
+            <td class="table-cell-technician">
+                <div class="technician-info">
+                    ${ticket.assignedTechnicianName ? `
+                        <div class="technician-details">
+                            <div class="technician-name">${ticket.assignedTechnicianName}</div>
+                            <div class="technician-status">Asignado</div>
+                        </div>
+                    ` : `
+                        <div class="no-technician">
+                            <i class="fas fa-user-times"></i>
+                            <span>Sin asignar</span>
+                        </div>
+                    `}
+                </div>
+            </td>
+            <td class="table-cell-date">
+                <div class="date-info">
+                    <div class="date-created">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>${Utils.formatDate(ticket.createdAt)}</span>
+                    </div>
+                    ${ticket.updatedAt && ticket.updatedAt !== ticket.createdAt ? `
+                        <div class="date-updated">
+                            <i class="fas fa-calendar-edit"></i>
+                            <span>${Utils.formatDate(ticket.updatedAt)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            </td>
+            <td class="table-cell-actions">
+                <div class="table-actions">
+                    <button class="table-action-btn view-btn" onclick="loadTicketDetailById('${ticket.id}')" title="Ver detalles">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="table-action-btn edit-btn" onclick="editTicket('${ticket.id}')" title="Editar ticket">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="table-action-btn assign-btn" onclick="assignTicket('${ticket.id}')" title="Asignar técnico">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+};
+
 const renderTicketsCards = (tickets) => {
     if (tickets.length === 0) {
         return '<p class="text-center text-muted">No hay tickets para mostrar</p>';
@@ -243,7 +363,13 @@ const renderTicketsCards = (tickets) => {
                 ${ticket.assignedTechnicianName ? `
                     <div class="ticket-technician">
                         <i class="fas fa-tools"></i>
-                        Asignado a: ${ticket.assignedTechnicianName}
+                        ${(ticket.status === 'finalizado' || ticket.status === 'pre_cerrado') ? 'Completado por:' : 'Asignado a:'} ${ticket.assignedTechnicianName}
+                    </div>
+                ` : ''}
+                ${(ticket.status === 'finalizado' || ticket.status === 'pre_cerrado') && ticket.completedAt ? `
+                    <div class="ticket-completion-date">
+                        <i class="fas fa-check-circle"></i>
+                        Completado: ${Utils.formatRelativeDate(ticket.completedAt)}
                     </div>
                 ` : ''}
             </div>
@@ -658,7 +784,121 @@ const startTicket = (ticketId) => {
     Utils.showToast('Trabajo iniciado', 'success');
 };
 
+// Funciones para Mesa de Ayuda - Pestañas y búsqueda
+const renderMesaTicketsByStatus = (tickets, status) => {
+    let filteredTickets = tickets;
+    
+    if (status === 'pendientes') {
+        filteredTickets = tickets.filter(t => t.status === 'pendiente');
+    } else if (status === 'asignados') {
+        filteredTickets = tickets.filter(t => t.status === 'asignado');
+    } else if (status === 'completados') {
+        filteredTickets = tickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado');
+    }
+    
+    return renderTicketsCards(filteredTickets);
+};
+
+const switchMesaTab = (tabName) => {
+    // Actualizar pestañas activas
+    document.querySelectorAll('.mesa-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[onclick="switchMesaTab('${tabName}')"]`).classList.add('active');
+    
+    // Mostrar/ocultar filtro de técnico
+    const technicianFilter = document.getElementById('mesa-technician-filter');
+    if (technicianFilter) {
+        if (tabName === 'completados') {
+            technicianFilter.style.display = 'block';
+            populateTechnicianFilter();
+        } else {
+            technicianFilter.style.display = 'none';
+        }
+    }
+    
+    window.currentMesaTab = tabName;
+    const ticketsList = document.getElementById('mesa-tickets-list');
+    if (ticketsList) {
+        ticketsList.innerHTML = renderMesaTicketsByStatus(window.allMesaTickets, tabName);
+    }
+};
+
+const searchMesaTickets = (searchTerm) => {
+    const allTickets = window.allMesaTickets || [];
+    let filteredTickets = allTickets;
+    
+    if (searchTerm.trim() !== '') {
+        filteredTickets = allTickets.filter(ticket => 
+            ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ticket.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            ticket.id.toString().includes(searchTerm)
+        );
+    }
+    
+    const ticketsList = document.getElementById('mesa-tickets-list');
+    if (ticketsList) {
+        ticketsList.innerHTML = renderMesaTicketsByStatus(filteredTickets, window.currentMesaTab);
+    }
+};
+
+const populateTechnicianFilter = () => {
+    const completedTickets = window.allMesaTickets.filter(t => t.status === 'finalizado' || t.status === 'pre_cerrado');
+    const technicians = [...new Set(completedTickets.map(ticket => ticket.assignedTo).filter(Boolean))];
+    
+    const technicianSelect = document.getElementById('technician-select');
+    if (technicianSelect) {
+        // Limpiar opciones existentes excepto "Todos los técnicos"
+        technicianSelect.innerHTML = '<option value="">Todos los técnicos</option>';
+        
+        // Agregar técnicos únicos
+        technicians.forEach(technicianId => {
+            const technician = DataManager.getUserById(technicianId);
+            if (technician) {
+                const option = document.createElement('option');
+                option.value = technicianId;
+                option.textContent = technician.name;
+                technicianSelect.appendChild(option);
+            }
+        });
+    }
+};
+
+const filterByTechnician = (technicianId) => {
+    const allTickets = window.allMesaTickets || [];
+    let filteredTickets = allTickets;
+    
+    if (technicianId && window.currentMesaTab === 'completados') {
+        filteredTickets = allTickets.filter(ticket => 
+            (ticket.status === 'finalizado' || ticket.status === 'pre_cerrado') &&
+            ticket.assignedTo === technicianId
+        );
+    }
+    
+    const ticketsList = document.getElementById('mesa-tickets-list');
+    if (ticketsList) {
+        ticketsList.innerHTML = renderMesaTicketsByStatus(filteredTickets, window.currentMesaTab);
+    }
+};
+
+// Funciones para gestión de tickets del admin
+const editTicket = (ticketId) => {
+    Utils.showToast(`Editando ticket #${ticketId}`, 'info');
+    // Aquí se podría abrir un modal de edición
+};
+
+const assignTicket = (ticketId) => {
+    Utils.showToast(`Asignando técnico al ticket #${ticketId}`, 'info');
+    // Aquí se podría abrir un modal de asignación
+};
+
 // Funciones globales
 window.loadTicketDetailById = loadTicketDetailById;
 window.addComment = addComment;
 window.startTicket = startTicket;
+window.switchMesaTab = switchMesaTab;
+window.searchMesaTickets = searchMesaTickets;
+window.filterByTechnician = filterByTechnician;
+window.editTicket = editTicket;
+window.assignTicket = assignTicket;

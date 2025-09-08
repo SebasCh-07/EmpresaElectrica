@@ -95,7 +95,6 @@ class AuthManager {
                     { view: 'clientes', label: 'Clientes', icon: 'fas fa-users' },
                     { view: 'tecnicos', label: 'Técnicos', icon: 'fas fa-tools' },
                     { view: 'geolocalizacion', label: 'Geolocalización', icon: 'fas fa-map-marker-alt' },
-                    { view: 'equipos', label: 'Equipos', icon: 'fas fa-users-cog' }
                 ];
             
             case 'mesa_ayuda':

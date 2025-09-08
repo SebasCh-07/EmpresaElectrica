@@ -615,3 +615,944 @@
     color: var(--gray-600);
     background: white;
 }
+
+/* Estilos específicos para tabla de Clientes del Admin */
+.admin-clients-table {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.admin-clients-table thead {
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+}
+
+.admin-clients-table th {
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+
+/* Información del Cliente */
+.client-info {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.client-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 8px rgba(30, 58, 138, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.client-avatar::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.client-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.client-name {
+    font-weight: 700;
+    color: var(--gray-800);
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.client-id {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    background: rgba(30, 58, 138, 0.1);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+}
+
+/* Información de contacto */
+.email-info,
+.phone-info,
+.company-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.email-info i,
+.phone-info i,
+.company-info i {
+    color: var(--primary-color);
+    font-size: 1rem;
+    width: 16px;
+    text-align: center;
+}
+
+.email-info span,
+.phone-info span,
+.company-info span {
+    color: var(--gray-700);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* Contador de tickets */
+.tickets-count {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.tickets-badge {
+    background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    min-width: 32px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+}
+
+.tickets-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Botones de acción específicos */
+.view-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.view-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.contact-btn {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.contact-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Responsive para tabla de clientes */
+@media (max-width: 768px) {
+    .client-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .client-name {
+        font-size: 0.9rem;
+    }
+    
+    .email-info,
+    .phone-info,
+    .company-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .email-info i,
+    .phone-info i,
+    .company-info i {
+        font-size: 0.9rem;
+    }
+    
+    .tickets-count {
+        gap: 0.125rem;
+    }
+    
+    .tickets-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .client-info {
+        gap: 0.25rem;
+    }
+    
+    .client-name {
+        font-size: 0.85rem;
+    }
+    
+    .client-id {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.375rem;
+    }
+    
+    .email-info span,
+    .phone-info span,
+    .company-info span {
+        font-size: 0.85rem;
+    }
+}
+
+/* Estilos específicos para tabla de Tickets del Admin */
+.admin-tickets-table {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.admin-tickets-table thead {
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+}
+
+.admin-tickets-table th {
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+
+/* Información del Ticket ID */
+.ticket-id-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.ticket-id-badge {
+    background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+    width: fit-content;
+}
+
+.ticket-type {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+/* Información del Título */
+.ticket-title-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.ticket-title {
+    font-weight: 700;
+    color: var(--gray-800);
+    font-size: 0.95rem;
+    line-height: 1.3;
+}
+
+.ticket-description {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    line-height: 1.4;
+}
+
+/* Información del Cliente */
+.client-email {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 400;
+}
+
+/* Información de Prioridad y Estado */
+.priority-info,
+.status-info {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+/* Información del Técnico */
+.technician-info {
+    padding: 0.5rem 0;
+}
+
+.technician-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.technician-name {
+    font-weight: 600;
+    color: var(--gray-800);
+    font-size: 0.9rem;
+}
+
+.technician-status {
+    font-size: 0.75rem;
+    color: var(--success-color);
+    font-weight: 500;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+}
+
+.no-technician {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-500);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.no-technician i {
+    color: var(--gray-400);
+}
+
+/* Información de Fecha */
+.date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.date-created,
+.date-updated {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.date-created {
+    color: var(--gray-700);
+    font-weight: 500;
+}
+
+.date-updated {
+    color: var(--gray-500);
+    font-size: 0.8rem;
+}
+
+.date-created i,
+.date-updated i {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+}
+
+/* Botones de acción específicos para tickets */
+.assign-btn {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: white;
+}
+
+.assign-btn:hover {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+/* Responsive para tabla de tickets */
+@media (max-width: 768px) {
+    .ticket-id-info {
+        gap: 0.125rem;
+    }
+    
+    .ticket-id-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .ticket-type {
+        font-size: 0.7rem;
+    }
+    
+    .ticket-title {
+        font-size: 0.85rem;
+    }
+    
+    .ticket-description {
+        font-size: 0.75rem;
+    }
+    
+    .client-name {
+        font-size: 0.85rem;
+    }
+    
+    .client-email {
+        font-size: 0.7rem;
+    }
+    
+    .technician-name {
+        font-size: 0.8rem;
+    }
+    
+    .technician-status {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.375rem;
+    }
+    
+    .date-created,
+    .date-updated {
+        font-size: 0.8rem;
+    }
+    
+    .date-updated {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ticket-id-badge {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .ticket-type {
+        font-size: 0.65rem;
+    }
+    
+    .ticket-title {
+        font-size: 0.8rem;
+    }
+    
+    .ticket-description {
+        font-size: 0.7rem;
+    }
+    
+    .client-name {
+        font-size: 0.8rem;
+    }
+    
+    .client-email {
+        font-size: 0.65rem;
+    }
+    
+    .technician-name {
+        font-size: 0.75rem;
+    }
+    
+    .technician-status {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.3rem;
+    }
+    
+    .date-created {
+        font-size: 0.75rem;
+    }
+    
+    .date-updated {
+        font-size: 0.7rem;
+    }
+}
+
+/* Estilos específicos para tabla de Técnicos del Admin */
+.admin-technicians-table {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.admin-technicians-table thead {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-technicians-table thead::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+    z-index: -1;
+}
+
+.admin-technicians-table th {
+    padding: 1.5rem 1rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    color: white;
+    border: none;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-technicians-table th.table-cell-technician {
+    color: white !important;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.admin-technicians-table th.table-cell-contact,
+.admin-technicians-table th.table-cell-specializations,
+.admin-technicians-table th.table-cell-status,
+.admin-technicians-table th.table-cell-tickets,
+.admin-technicians-table th.table-cell-actions {
+    color: white !important;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Información del Técnico */
+.technician-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+}
+
+.technician-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    flex-shrink: 0;
+}
+
+.technician-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.technician-name {
+    font-weight: 700;
+    color: var(--gray-800);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
+.technician-id {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    background: var(--gray-100);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+/* Información de Contacto */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.email-info,
+.phone-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    padding: 0.5rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+.email-info:hover,
+.phone-info:hover {
+    background: var(--primary-light);
+    transform: translateX(2px);
+}
+
+.email-info i,
+.phone-info i {
+    color: var(--primary-color);
+    width: 16px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.contact-text {
+    font-weight: 500;
+    word-break: break-all;
+}
+
+/* Especializaciones */
+.specializations-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    justify-content: center;
+}
+
+.specialization-badge {
+    background: linear-gradient(135deg, var(--primary-light), rgba(99, 102, 241, 0.1));
+    color: var(--primary-color);
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+    transition: all 0.2s ease;
+    text-align: center;
+    min-width: fit-content;
+}
+
+.specialization-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
+}
+
+.no-specializations {
+    color: var(--gray-400);
+    font-style: italic;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border: 1px dashed var(--gray-300);
+}
+
+/* Estado */
+.status-info {
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge i {
+    font-size: 0.6rem;
+}
+
+.status-badge.status-disponible {
+    background: var(--success-light);
+    color: var(--success-color);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.status-badge.status-ocupado {
+    background: var(--warning-light);
+    color: var(--warning-color);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.status-badge.status-desconectado {
+    background: var(--danger-light);
+    color: var(--danger-color);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.status-text {
+    font-weight: 600;
+}
+
+/* Estadísticas de Tickets */
+.tickets-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.ticket-stat-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.ticket-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    min-width: 60px;
+    transition: all 0.2s ease;
+}
+
+.ticket-stat:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.total-stat {
+    background: linear-gradient(135deg, var(--primary-light), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.ticket-count {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.ticket-count.active {
+    color: var(--info-color);
+}
+
+.ticket-count.completed {
+    color: var(--success-color);
+}
+
+.ticket-count.total {
+    color: var(--primary-color);
+}
+
+.ticket-label {
+    color: var(--gray-600);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Botones de Acción */
+.admin-technicians-table .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.admin-technicians-table .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-width: 100px;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-technicians-table .view-btn {
+    background: linear-gradient(135deg, var(--info-light), rgba(59, 130, 246, 0.1));
+    color: var(--info-color);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.admin-technicians-table .view-btn:hover {
+    background: var(--info-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.admin-technicians-table .edit-btn {
+    background: linear-gradient(135deg, var(--warning-light), rgba(245, 158, 11, 0.1));
+    color: var(--warning-color);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.admin-technicians-table .edit-btn:hover {
+    background: var(--warning-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.admin-technicians-table .contact-btn {
+    background: linear-gradient(135deg, var(--success-light), rgba(16, 185, 129, 0.1));
+    color: var(--success-color);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.admin-technicians-table .contact-btn:hover {
+    background: var(--success-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Responsive para tabla de técnicos */
+@media (max-width: 768px) {
+    .admin-technicians-table th {
+        padding: 1rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .technician-info {
+        gap: 0.75rem;
+    }
+    
+    .technician-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .technician-name {
+        font-size: 0.9rem;
+    }
+    
+    .technician-id {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+    }
+    
+    .email-info,
+    .phone-info {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+        gap: 0.5rem;
+    }
+    
+    .specialization-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .ticket-stat-row {
+        gap: 0.5rem;
+    }
+    
+    .ticket-stat {
+        padding: 0.4rem;
+        min-width: 50px;
+    }
+    
+    .ticket-count {
+        font-size: 1rem;
+    }
+    
+    .ticket-label {
+        font-size: 0.65rem;
+    }
+    
+    .admin-technicians-table .btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.75rem;
+        min-width: 80px;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-technicians-table .action-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .admin-technicians-table .btn {
+        min-width: 70px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .ticket-stat-row {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .contact-info {
+        gap: 0.5rem;
+    }
+    
+    .email-info,
+    .phone-info {
+        font-size: 0.75rem;
+        padding: 0.3rem;
+    }
+}

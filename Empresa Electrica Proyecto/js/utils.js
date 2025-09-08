@@ -133,7 +133,6 @@ const loadViewContent = (viewName, containerId) => {
         'tecnicos': loadTechniciansView,
         'geolocalizacion': loadGeolocationView,
         'encuesta': loadSurveyView,
-        'equipos': loadTeamsView
     };
     
     const loader = viewLoaders[viewName];
