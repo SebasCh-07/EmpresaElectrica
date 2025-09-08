@@ -333,7 +333,7 @@ class ClienteApp {
                     <div class="cliente-ticket-actions">
                         ${ticket.status === 'finalizado' || ticket.status === 'pre_cerrado' ? `
                             ${ticket.encuestaCompletada ? `
-                                <button class="cliente-action-btn primary" onclick="app.viewTicket('${ticket.id}')">
+                                <button class="cliente-action-btn primary" onclick="app.downloadReport('${ticket.id}')">
                                     <i class="fas fa-file-alt"></i>
                                     Ver Informe
                                 </button>
@@ -459,8 +459,262 @@ class ClienteApp {
     }
 
     downloadReport(ticketId) {
-        // Implementar descarga de reporte
-        Utils.showToast('Función de descarga de reporte en desarrollo', 'info');
+        const ticket = this.getUserTickets().find(t => t.id === ticketId);
+        if (!ticket) {
+            Utils.showToast('Ticket no encontrado', 'error');
+            return;
+        }
+
+        // Obtener la rúbrica del ticket
+        const rubricas = JSON.parse(localStorage.getItem('rubricas') || '[]');
+        const rubric = rubricas.find(r => r.ticketId === ticketId);
+        
+        if (!rubric) {
+            Utils.showToast('No se encontró la rúbrica para este ticket', 'error');
+            return;
+        }
+
+        // Generar PDF
+        this.generateReportPDF(ticket, rubric);
+    }
+
+    async generateReportPDF(ticket, rubric) {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Configuración del documento
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 20;
+            let yPosition = margin;
+            
+            // Función para agregar texto con salto de línea automático
+            const addText = (text, x, y, maxWidth = pageWidth - 2 * margin, fontSize = 10) => {
+                doc.setFontSize(fontSize);
+                const lines = doc.splitTextToSize(text, maxWidth);
+                doc.text(lines, x, y);
+                return y + (lines.length * fontSize * 0.4);
+            };
+
+            // Función para agregar línea separadora
+            const addSeparator = (y) => {
+                doc.setLineWidth(0.5);
+                doc.line(margin, y, pageWidth - margin, y);
+                return y + 10;
+            };
+
+            // Encabezado del reporte
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('INFORME TÉCNICO DE SERVICIO', pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 15;
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Ticket: ${ticket.id}`, pageWidth / 2, yPosition, { align: 'center' });
+            yPosition += 20;
+
+            // Información del ticket
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('INFORMACIÓN GENERAL', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            const ticketInfo = [
+                `Cliente: ${ticket.clientName}`,
+                `Fecha de Creación: ${Utils.formatDate(ticket.createdAt)}`,
+                `Fecha de Visita: ${Utils.formatDate(rubric.fechaVisita)}`,
+                `Prioridad: ${Utils.getPriorityLabel(ticket.priority)}`,
+                `Tipo de Trabajo: ${Utils.getWorkTypeLabel(rubric.tipoTrabajo)}`,
+                `Interprovincial: ${rubric.interprovincial === 'si' ? 'Sí' : 'No'}`
+            ];
+
+            ticketInfo.forEach(info => {
+                yPosition = addText(info, margin, yPosition);
+            });
+
+            yPosition = addSeparator(yPosition);
+
+            // Información del equipo
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('INFORMACIÓN DEL EQUIPO', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            const equipmentInfo = [
+                `Modelo: ${rubric.modeloEquipo}`,
+                `Número de Serie: ${rubric.numeroSerie}`,
+                `Técnicos: ${rubric.tecnicos}`
+            ];
+
+            equipmentInfo.forEach(info => {
+                yPosition = addText(info, margin, yPosition);
+            });
+
+            yPosition = addSeparator(yPosition);
+
+            // Descripción del trabajo
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('DESCRIPCIÓN DEL TRABAJO', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            yPosition = addText(ticket.description, margin, yPosition);
+
+            yPosition = addSeparator(yPosition);
+
+            // Fases del trabajo
+            if (rubric.fases && rubric.fases.length > 0) {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('FASES DEL TRABAJO', margin, yPosition);
+                yPosition += 10;
+
+                rubric.fases.forEach((fase, index) => {
+                    // Verificar si necesitamos una nueva página
+                    if (yPosition > 250) {
+                        doc.addPage();
+                        yPosition = margin;
+                    }
+
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`Fase ${index + 1}: ${fase.descripcion ? 'Descripción disponible' : 'Sin descripción'}`, margin, yPosition);
+                    yPosition += 8;
+
+                    if (fase.descripcion) {
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'normal');
+                        yPosition = addText(fase.descripcion, margin, yPosition);
+                    }
+
+                    if (fase.fotos && fase.fotos.length > 0) {
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'italic');
+                        doc.text(`Fotos adjuntas: ${fase.fotos.length} imagen(es)`, margin, yPosition);
+                        yPosition += 8;
+                    }
+
+                    yPosition += 5;
+                });
+
+                yPosition = addSeparator(yPosition);
+            }
+
+            // Tabla de mediciones
+            if (rubric.mediciones) {
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.text('MEDICIONES ELÉCTRICAS', margin, yPosition);
+                yPosition += 10;
+
+                // Verificar si necesitamos una nueva página para la tabla
+                if (yPosition > 200) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+
+                // Crear tabla de mediciones
+                const tableData = [
+                    ['Fase', 'V.ENTR', 'V.SALI', 'TENSIÓN', 'I ENTR', 'I SALI', 'CORRIENT', 'VDC']
+                ];
+
+                const fases = ['ab', 'cb', 'ac'];
+                const faseLabels = ['A-B', 'C-B', 'A-C'];
+
+                fases.forEach((fase, index) => {
+                    const medicion = rubric.mediciones[fase];
+                    tableData.push([
+                        `FASE ${faseLabels[index]}`,
+                        medicion.v_entr || '0',
+                        medicion.v_sali || '0',
+                        medicion.tension || '0',
+                        medicion.i_entr || '0',
+                        medicion.i_sali || '0',
+                        medicion.corriente || '0',
+                        medicion.vdc || '0'
+                    ]);
+                });
+
+                // Dibujar tabla
+                const tableWidth = pageWidth - 2 * margin;
+                const colWidth = tableWidth / 8;
+                const rowHeight = 8;
+
+                // Encabezados
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'bold');
+                tableData[0].forEach((header, colIndex) => {
+                    const x = margin + (colIndex * colWidth);
+                    doc.rect(x, yPosition - 5, colWidth, rowHeight);
+                    doc.text(header, x + 2, yPosition);
+                });
+                yPosition += rowHeight;
+
+                // Datos
+                doc.setFont(undefined, 'normal');
+                for (let row = 1; row < tableData.length; row++) {
+                    tableData[row].forEach((cell, colIndex) => {
+                        const x = margin + (colIndex * colWidth);
+                        doc.rect(x, yPosition - 5, colWidth, rowHeight);
+                        doc.text(cell.toString(), x + 2, yPosition);
+                    });
+                    yPosition += rowHeight;
+                }
+
+                yPosition += 10;
+                yPosition = addSeparator(yPosition);
+            }
+
+            // Conclusión y recomendaciones
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('CONCLUSIÓN', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            yPosition = addText(rubric.conclusion, margin, yPosition);
+
+            yPosition += 10;
+
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('RECOMENDACIONES', margin, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            yPosition = addText(rubric.recomendaciones, margin, yPosition);
+
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'italic');
+                doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+                doc.text(`Generado el: ${Utils.formatDate(new Date())}`, margin, doc.internal.pageSize.getHeight() - 10);
+            }
+
+            // Descargar el PDF
+            const fileName = `Informe_Tecnico_${ticket.id}_${Utils.formatDate(new Date()).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+            doc.save(fileName);
+
+            Utils.showToast('Informe descargado exitosamente', 'success');
+
+        } catch (error) {
+            console.error('Error al generar PDF:', error);
+            Utils.showToast('Error al generar el informe PDF', 'error');
+        }
     }
 
     checkForCompletedTickets() {
@@ -473,7 +727,7 @@ class ClienteApp {
             // Verificar si ya se mostró la notificación en esta sesión
             const notificationShown = sessionStorage.getItem('completionNotificationShown');
             if (!notificationShown) {
-                this.showCompletionNotification(completedTickets[0]);
+            this.showCompletionNotification(completedTickets[0]);
                 // Marcar que ya se mostró la notificación en esta sesión
                 sessionStorage.setItem('completionNotificationShown', 'true');
             }
@@ -698,7 +952,8 @@ class ClienteApp {
         DataManager.updateTicket(ticketId, {
             survey: surveyData,
             status: 'finalizado',
-            completedAt: new Date().toISOString()
+            completedAt: new Date().toISOString(),
+            encuestaCompletada: true
         });
         
         // Cerrar modal
@@ -707,10 +962,70 @@ class ClienteApp {
         // Mostrar mensaje de éxito
         Utils.showToast('¡Encuesta completada! Ahora puedes descargar el reporte.', 'success');
         
-        // Actualizar la vista de tickets
+        // Actualizar la vista de tickets inmediatamente para habilitar el botón "Ver Informe"
         setTimeout(() => {
             this.loadClienteTickets();
-        }, 1000);
+        }, 500);
+
+        // Mostrar opción de descargar reporte automáticamente
+        setTimeout(() => {
+            this.showDownloadPrompt(ticketId);
+        }, 1500);
+    }
+
+    showDownloadPrompt(ticketId) {
+        const ticket = this.getUserTickets().find(t => t.id === ticketId);
+        if (!ticket) return;
+
+        const modal = document.createElement('div');
+        modal.className = 'download-prompt-modal';
+        modal.innerHTML = `
+            <div class="download-prompt-container">
+                <button class="download-prompt-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="download-prompt-header">
+                    <i class="fas fa-file-pdf download-prompt-icon"></i>
+                    <h3>¡Encuesta Completada!</h3>
+                    <p>Tu informe técnico está listo para descargar</p>
+                </div>
+                
+                <div class="download-prompt-content">
+                    <div class="download-prompt-info">
+                        <h4>Informe Técnico - Ticket ${ticket.id}</h4>
+                        <p>El informe incluye:</p>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Información completa del trabajo realizado</li>
+                            <li><i class="fas fa-check"></i> Todas las fases del proceso</li>
+                            <li><i class="fas fa-check"></i> Mediciones eléctricas detalladas</li>
+                            <li><i class="fas fa-check"></i> Conclusiones y recomendaciones</li>
+                            <li><i class="fas fa-check"></i> Fotos del trabajo (si fueron subidas)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="download-prompt-actions">
+                    <button class="download-prompt-btn secondary" onclick="this.closest('.download-prompt-modal').remove()">
+                        <i class="fas fa-times"></i>
+                        Descargar Después
+                    </button>
+                    <button class="download-prompt-btn primary" onclick="app.downloadReport('${ticketId}'); this.closest('.download-prompt-modal').remove();">
+                        <i class="fas fa-download"></i>
+                        Descargar Ahora
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Auto-cerrar después de 30 segundos
+        setTimeout(() => {
+            if (modal.parentElement) {
+                modal.remove();
+            }
+        }, 30000);
     }
 
     logout() {

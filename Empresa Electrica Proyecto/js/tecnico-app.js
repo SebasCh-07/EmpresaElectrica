@@ -471,19 +471,367 @@ class TecnicoApp {
     }
 
     completeWork(ticketId) {
-        const ticket = DataManager.getTicketById(ticketId);
-        DataManager.updateTicket(ticketId, { status: 'pre_cerrado', completedAt: new Date().toISOString() });
-        // Al pre-cerrar, liberar técnico
-        if (ticket && ticket.assignedTechnicianId) {
-            DataManager.updateTechnicianStatus(ticket.assignedTechnicianId, 'disponible');
-        }
-        Utils.showToast('Trabajo marcado como pre-cerrado', 'success');
-        this.loadTecnicoTickets();
+        // Abrir la rúbrica de finalización en lugar de completar directamente
+        this.showRubricModal(ticketId);
     }
 
     requestViatico(ticketId) {
         // Implementar solicitud de viático
         Utils.showToast('Función de viático en desarrollo', 'info');
+    }
+
+    showRubricModal(ticketId) {
+        const ticket = DataManager.getTicketById(ticketId);
+        if (!ticket) {
+            Utils.showToast('Ticket no encontrado', 'error');
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.className = 'rubric-modal';
+        modal.innerHTML = `
+            <div class="rubric-container">
+                <button class="rubric-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="rubric-header">
+                    <h2>RÚBRICA DE FINALIZACIÓN</h2>
+                    <div class="rubric-ticket-info">Ticket: ${ticket.id}</div>
+                </div>
+                
+                <form id="rubric-form" onsubmit="app.submitRubric(event, '${ticketId}')">
+                    <!-- CABECERA -->
+                    <div class="rubric-section">
+                        <h3>CABECERA</h3>
+                        <div class="rubric-header-grid">
+                            <div class="rubric-field">
+                                <label>Nro Ticket:</label>
+                                <input type="text" value="${ticket.id}" readonly>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Fecha Creación:</label>
+                                <input type="text" value="${Utils.formatDate(ticket.createdAt)}" readonly>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Fecha Visita:</label>
+                                <input type="date" name="fechaVisita" required>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Cliente:</label>
+                                <input type="text" value="${ticket.clientName}" readonly>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Modelo Equipo:</label>
+                                <input type="text" name="modeloEquipo" placeholder="Debe llenar el técnico" required>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Nro Serie:</label>
+                                <input type="text" name="numeroSerie" placeholder="Debe llenar el técnico" required>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Prioridad:</label>
+                                <input type="text" value="${Utils.getPriorityLabel(ticket.priority)}" readonly>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Técnicos:</label>
+                                <input type="text" name="tecnicos" placeholder="Lista de técnicos (más de 2)" required>
+                            </div>
+                            <div class="rubric-field">
+                                <label>Tipo:</label>
+                                <select name="tipoTrabajo" required>
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="inspeccion" ${ticket.workType === 'inspeccion' ? 'selected' : ''}>Inspección</option>
+                                    <option value="soporte" ${ticket.workType === 'soporte' ? 'selected' : ''}>Soporte Técnico</option>
+                                    <option value="responsabilidad" ${ticket.workType === 'responsabilidad' ? 'selected' : ''}>Responsabilidad</option>
+                                    <option value="mantenimiento">Mantenimiento</option>
+                                    <option value="instalacion">Instalación</option>
+                                </select>
+                            </div>
+                            <div class="rubric-field">
+                                <label>InterProvincial:</label>
+                                <select name="interprovincial" required>
+                                    <option value="no" ${!ticket.isInterprovincial ? 'selected' : ''}>NO</option>
+                                    <option value="si" ${ticket.isInterprovincial ? 'selected' : ''}>SÍ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DETALLE / CUERPO DE LA RÚBRICA -->
+                    <div class="rubric-section">
+                        <h3>DETALLE / CUERPO DE LA RÚBRICA</h3>
+                        <div class="phases-container">
+                            <div class="add-phase-controls">
+                                <label>Agregar Fase:</label>
+                                <select id="phase-type-select">
+                                    <option value="revision_inicial">Revisión Inicial</option>
+                                    <option value="despiece">Despiece</option>
+                                    <option value="accidente">Accidente</option>
+                                </select>
+                                <button type="button" class="btn-add-phase" onclick="app.addPhase()">
+                                    <i class="fas fa-plus"></i> Agregar Fase
+                                </button>
+                            </div>
+                            <div id="phases-list" class="phases-list">
+                                <!-- Las fases se agregarán dinámicamente aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA DE VALORES -->
+                    <div class="rubric-section">
+                        <h3>TABLA DE VALORES (La tabla debe ser llenada por el técnico)</h3>
+                        <div class="measurements-table-container">
+                            <table class="measurements-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">FASE</th>
+                                        <th colspan="3">TENSIÓN</th>
+                                        <th colspan="3">CORRIENTE</th>
+                                        <th rowspan="2">VDC</th>
+                                    </tr>
+                                    <tr>
+                                        <th>V.ENTR</th>
+                                        <th>V.SALI</th>
+                                        <th>TENSIÓN</th>
+                                        <th>I ENTR</th>
+                                        <th>I SALI</th>
+                                        <th>CORRIENT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="phase-label">FASE A-B</td>
+                                        <td><input type="number" name="mediciones[ab][v_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][v_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][tension]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][i_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][i_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][corriente]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ab][vdc]" step="0.1" placeholder="0.0"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="phase-label">FASE C-B</td>
+                                        <td><input type="number" name="mediciones[cb][v_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][v_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][tension]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][i_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][i_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][corriente]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[cb][vdc]" step="0.1" placeholder="0.0"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="phase-label">FASE A-C</td>
+                                        <td><input type="number" name="mediciones[ac][v_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][v_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][tension]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][i_entr]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][i_sali]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][corriente]" step="0.1" placeholder="0.0"></td>
+                                        <td><input type="number" name="mediciones[ac][vdc]" step="0.1" placeholder="0.0"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PIE RÚBRICA -->
+                    <div class="rubric-section">
+                        <h3>PIE RÚBRICA</h3>
+                        <div class="rubric-footer-grid">
+                            <div class="rubric-field full-width">
+                                <label>Conclusión:</label>
+                                <textarea name="conclusion" placeholder="Escriba la conclusión del trabajo realizado..." required></textarea>
+                            </div>
+                            <div class="rubric-field full-width">
+                                <label>Recomendaciones:</label>
+                                <textarea name="recomendaciones" placeholder="Escriba las recomendaciones..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE ACCIÓN -->
+                    <div class="rubric-actions">
+                        <button type="button" class="rubric-btn secondary" onclick="this.closest('.rubric-modal').remove()">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="rubric-btn primary">
+                            <i class="fas fa-check"></i>
+                            Finalizar Trabajo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Establecer fecha de hoy por defecto
+        const today = new Date().toISOString().split('T')[0];
+        modal.querySelector('input[name="fechaVisita"]').value = today;
+    }
+
+    addPhase() {
+        const phaseTypeSelect = document.getElementById('phase-type-select');
+        const phasesList = document.getElementById('phases-list');
+        const phaseType = phaseTypeSelect.value;
+        
+        if (!phaseType) {
+            Utils.showToast('Seleccione un tipo de fase', 'warning');
+            return;
+        }
+
+        const phaseId = Date.now().toString();
+        const phaseLabels = {
+            'revision_inicial': 'Revisión Inicial',
+            'despiece': 'Despiece',
+            'accidente': 'Accidente'
+        };
+
+        const phaseElement = document.createElement('div');
+        phaseElement.className = 'phase-item';
+        phaseElement.innerHTML = `
+            <div class="phase-header">
+                <h4>${phaseLabels[phaseType]}</h4>
+                <button type="button" class="btn-remove-phase" onclick="app.removePhase('${phaseId}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="phase-content">
+                <div class="phase-field">
+                    <label>Descripción:</label>
+                    <textarea name="fases[${phaseId}][descripcion]" placeholder="Describe detalladamente esta fase del trabajo..." required></textarea>
+                </div>
+                <div class="phase-field">
+                    <label>Fotos:</label>
+                    <div class="photo-upload-container">
+                        <input type="file" name="fases[${phaseId}][fotos]" multiple accept="image/*" class="photo-input" id="photos-${phaseId}">
+                        <label for="photos-${phaseId}" class="photo-upload-btn">
+                            <i class="fas fa-camera"></i>
+                            Seleccionar Fotos
+                        </label>
+                        <div class="photo-preview" id="preview-${phaseId}"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        phasesList.appendChild(phaseElement);
+        
+        // Configurar preview de fotos
+        const photoInput = phaseElement.querySelector('.photo-input');
+        const photoPreview = phaseElement.querySelector('.photo-preview');
+        
+        photoInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            photoPreview.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'photo-thumbnail';
+                        img.title = file.name;
+                        photoPreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    }
+
+    removePhase(phaseId) {
+        const phaseElement = document.querySelector(`[onclick="app.removePhase('${phaseId}')"]`).closest('.phase-item');
+        if (phaseElement) {
+            phaseElement.remove();
+        }
+    }
+
+    submitRubric(event, ticketId) {
+        event.preventDefault();
+        
+        const formData = new FormData(event.target);
+        const rubricData = {
+            ticketId: ticketId,
+            fechaVisita: formData.get('fechaVisita'),
+            modeloEquipo: formData.get('modeloEquipo'),
+            numeroSerie: formData.get('numeroSerie'),
+            tecnicos: formData.get('tecnicos'),
+            tipoTrabajo: formData.get('tipoTrabajo'),
+            interprovincial: formData.get('interprovincial'),
+            conclusion: formData.get('conclusion'),
+            recomendaciones: formData.get('recomendaciones'),
+            fecha: new Date().toISOString(),
+            tecnico: this.currentUser.name
+        };
+
+        // Recopilar mediciones
+        const mediciones = {};
+        ['ab', 'cb', 'ac'].forEach(phase => {
+            mediciones[phase] = {
+                v_entr: formData.get(`mediciones[${phase}][v_entr]`) || 0,
+                v_sali: formData.get(`mediciones[${phase}][v_sali]`) || 0,
+                tension: formData.get(`mediciones[${phase}][tension]`) || 0,
+                i_entr: formData.get(`mediciones[${phase}][i_entr]`) || 0,
+                i_sali: formData.get(`mediciones[${phase}][i_sali]`) || 0,
+                corriente: formData.get(`mediciones[${phase}][corriente]`) || 0,
+                vdc: formData.get(`mediciones[${phase}][vdc]`) || 0
+            };
+        });
+        rubricData.mediciones = mediciones;
+
+        // Recopilar fases
+        const fases = [];
+        const phaseElements = document.querySelectorAll('.phase-item');
+        phaseElements.forEach((phaseElement, index) => {
+            const descripcion = phaseElement.querySelector('textarea[name*="descripcion"]').value;
+            const fotos = phaseElement.querySelector('input[type="file"]').files;
+            
+            const fase = {
+                id: `fase_${index}`,
+                descripcion: descripcion,
+                fotos: Array.from(fotos).map(file => ({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                }))
+            };
+            fases.push(fase);
+        });
+        rubricData.fases = fases;
+
+        // Guardar rúbrica
+        const rubricas = JSON.parse(localStorage.getItem('rubricas') || '[]');
+        rubricas.push(rubricData);
+        localStorage.setItem('rubricas', JSON.stringify(rubricas));
+
+        // Actualizar ticket
+        const ticket = DataManager.getTicketById(ticketId);
+        DataManager.updateTicket(ticketId, { 
+            status: 'pre_cerrado', 
+            completedAt: new Date().toISOString(),
+            rubric: rubricData
+        });
+
+        // Liberar técnico
+        if (ticket && ticket.assignedTechnicianId) {
+            DataManager.updateTechnicianStatus(ticket.assignedTechnicianId, 'disponible');
+        }
+
+        // Cerrar modal
+        event.target.closest('.rubric-modal').remove();
+
+        // Mostrar mensaje de éxito
+        Utils.showToast('Rúbrica completada y trabajo finalizado exitosamente', 'success');
+
+        // Actualizar vista
+        setTimeout(() => {
+            this.loadTecnicoTickets();
+        }, 1000);
     }
 
     viewTicket(ticketId) {
