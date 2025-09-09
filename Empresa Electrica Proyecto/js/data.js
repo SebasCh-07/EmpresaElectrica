@@ -748,6 +748,23 @@ const DataManager = {
         Storage.set(STORAGE_KEYS.tickets, filteredTickets);
         DataEvents.emit('tickets:updated', { type: 'delete', ticketId: id });
         return true;
+    },
+
+    // Actualizar usuario
+    updateUser(userId, updatedData) {
+        const users = Storage.get(STORAGE_KEYS.users);
+        const userIndex = users.findIndex(user => user.id === userId);
+        
+        if (userIndex === -1) {
+            return false; // Usuario no encontrado
+        }
+
+        // Mantener propiedades existentes y actualizar solo las proporcionadas
+        users[userIndex] = { ...users[userIndex], ...updatedData };
+        
+        Storage.set(STORAGE_KEYS.users, users);
+        DataEvents.emit('users:updated', { type: 'update', userId, updatedData });
+        return true;
     }
 };
 

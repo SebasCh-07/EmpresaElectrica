@@ -193,7 +193,7 @@ const loadClientsView = (container) => {
                                             <button class="table-action-btn view-btn" onclick="viewClientTickets(${client.id})" title="Ver tickets">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="table-action-btn edit-btn" onclick="editClient(${client.id})" title="Editar cliente">
+                                            <button class="table-action-btn edit-btn" onclick="showEditClientModal(${client.id})" title="Editar cliente">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button class="table-action-btn contact-btn" onclick="contactClient(${client.id})" title="Contactar">
@@ -320,17 +320,13 @@ const loadTechniciansView = (container) => {
                                     </td>
                                     <td class="table-cell-actions">
                                         <div class="action-buttons">
-                                            <button class="btn view-btn" onclick="viewTechnicianTickets(${tech.id})" title="Ver tickets">
+                                            <button class="btn view-btn" onclick="showTechnicianModal(${tech.id})" title="Ver detalles del técnico">
                                                 <i class="fas fa-eye"></i>
                                                 <span>Ver</span>
                                             </button>
-                                            <button class="btn edit-btn" onclick="editTechnician(${tech.id})" title="Editar técnico">
+                                            <button class="btn edit-btn" onclick="showEditTechnicianModal(${tech.id})" title="Editar técnico">
                                                 <i class="fas fa-edit"></i>
                                                 <span>Editar</span>
-                                            </button>
-                                            <button class="btn contact-btn" onclick="contactTechnician(${tech.id})" title="Contactar">
-                                                <i class="fas fa-comment"></i>
-                                                <span>Contactar</span>
                                             </button>
                                         </div>
                                     </td>
@@ -344,6 +340,486 @@ const loadTechniciansView = (container) => {
     `;
     
     setupTechnicianSearch();
+};
+
+// Función para mostrar modal de detalles del técnico
+const showTechnicianModal = (technicianId) => {
+    const technician = DataManager.getUserById(technicianId);
+    if (!technician) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Técnico no encontrado', 'error');
+        } else {
+            alert('Técnico no encontrado');
+        }
+        return;
+    }
+
+    // Obtener tickets del técnico
+    const techTickets = DataManager.getTicketsByTechnician(technicianId);
+    const activeTickets = techTickets.filter(t => ['asignado', 'en_curso'].includes(t.status));
+    const completedTickets = techTickets.filter(t => ['finalizado', 'pre_cerrado'].includes(t.status));
+
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.className = 'technician-modal-overlay';
+    modal.innerHTML = `
+        <div class="technician-modal">
+            <div class="technician-modal-header">
+                <h2><i class="fas fa-user-tie"></i> ${technician.name}</h2>
+                <button class="modal-close-btn" onclick="this.closest('.technician-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="technician-modal-content">
+                <div class="technician-modal-section">
+                    <h3>Información Personal</h3>
+                    <div class="technician-info-grid">
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">Nombre:</span>
+                            <span class="technician-info-value">${technician.name}</span>
+                        </div>
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">ID:</span>
+                            <span class="technician-info-value">${technician.id}</span>
+                        </div>
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">Email:</span>
+                            <span class="technician-info-value">${technician.email}</span>
+                        </div>
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">Teléfono:</span>
+                            <span class="technician-info-value">${technician.phone}</span>
+                        </div>
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">Usuario:</span>
+                            <span class="technician-info-value">${technician.username}</span>
+                        </div>
+                        <div class="technician-info-item">
+                            <span class="technician-info-label">Estado:</span>
+                            <span class="status-badge status-${technician.status}">
+                                <i class="fas ${technician.status === 'disponible' ? 'fa-check-circle' : 
+                                              technician.status === 'ocupado' ? 'fa-cog' : 'fa-times-circle'}"></i>
+                                ${technician.status === 'disponible' ? 'Disponible' : 
+                                  technician.status === 'ocupado' ? 'Ocupado' : 'Desconectado'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="technician-modal-section">
+                    <h3>Especializaciones</h3>
+                    <div class="specializations-display">
+                        ${technician.specializations && technician.specializations.length > 0 ? 
+                            technician.specializations.map(spec => `
+                                <span class="specialization-badge">${spec}</span>
+                            `).join('') : 
+                            '<span class="no-specializations">Sin especializaciones registradas</span>'
+                        }
+                    </div>
+                </div>
+
+                ${technician.location ? `
+                    <div class="technician-modal-section">
+                        <h3>Ubicación</h3>
+                        <div class="location-info">
+                            <div class="location-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Lat: ${technician.location.lat}, Lng: ${technician.location.lng}</span>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="technician-modal-section">
+                    <h3>Estadísticas de Tickets</h3>
+                    <div class="tickets-stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon total">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">${techTickets.length}</div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon active">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">${activeTickets.length}</div>
+                                <div class="stat-label">Activos</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon completed">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">${completedTickets.length}</div>
+                                <div class="stat-label">Completados</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="technician-modal-footer">
+                <button class="btn btn-secondary" onclick="this.closest('.technician-modal-overlay').remove()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const closeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    });
+};
+
+// Función para mostrar modal de edición del técnico
+const showEditTechnicianModal = (technicianId) => {
+    const technician = DataManager.getUserById(technicianId);
+    if (!technician) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Técnico no encontrado', 'error');
+        } else {
+            alert('Técnico no encontrado');
+        }
+        return;
+    }
+
+    // Crear modal de edición
+    const modal = document.createElement('div');
+    modal.className = 'technician-modal-overlay';
+    modal.innerHTML = `
+        <div class="technician-modal edit-modal">
+            <div class="technician-modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Técnico</h2>
+                <button class="modal-close-btn" onclick="this.closest('.technician-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="technician-modal-content">
+                <form id="edit-technician-form" onsubmit="submitTechnicianEdit(event, ${technicianId})">
+                    <div class="form-section">
+                        <h3>Información Personal</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="tech-name">Nombre:</label>
+                                <input type="text" id="tech-name" name="name" value="${technician.name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tech-email">Email:</label>
+                                <input type="email" id="tech-email" name="email" value="${technician.email}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tech-phone">Teléfono:</label>
+                                <input type="tel" id="tech-phone" name="phone" value="${technician.phone}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tech-username">Usuario:</label>
+                                <input type="text" id="tech-username" name="username" value="${technician.username}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Estado</h3>
+                        <div class="form-group">
+                            <label for="tech-status">Estado:</label>
+                            <select id="tech-status" name="status" required>
+                                <option value="disponible" ${technician.status === 'disponible' ? 'selected' : ''}>Disponible</option>
+                                <option value="ocupado" ${technician.status === 'ocupado' ? 'selected' : ''}>Ocupado</option>
+                                <option value="offline" ${technician.status === 'offline' ? 'selected' : ''}>Desconectado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Especializaciones</h3>
+                        <div class="form-group">
+                            <label for="tech-specializations">Especializaciones (separadas por coma):</label>
+                            <textarea id="tech-specializations" name="specializations" rows="3" placeholder="Ej: Instalaciones Eléctricas, Mantenimiento, Reparaciones">${technician.specializations ? technician.specializations.join(', ') : ''}</textarea>
+                        </div>
+                    </div>
+
+                    ${technician.location ? `
+                        <div class="form-section">
+                            <h3>Ubicación</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="tech-lat">Latitud:</label>
+                                    <input type="number" id="tech-lat" name="lat" step="any" value="${technician.location.lat}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tech-lng">Longitud:</label>
+                                    <input type="number" id="tech-lng" name="lng" step="any" value="${technician.location.lng}">
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </form>
+            </div>
+            
+            <div class="technician-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.technician-modal-overlay').remove()">
+                    Cancelar
+                </button>
+                <button type="submit" form="edit-technician-form" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const closeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    });
+};
+
+// Función para procesar la edición del técnico
+const submitTechnicianEdit = (event, technicianId) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const updatedData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        username: formData.get('username'),
+        status: formData.get('status'),
+        specializations: formData.get('specializations') ? 
+            formData.get('specializations').split(',').map(s => s.trim()).filter(s => s) : []
+    };
+
+    // Agregar ubicación si existe
+    const lat = formData.get('lat');
+    const lng = formData.get('lng');
+    if (lat && lng) {
+        updatedData.location = {
+            lat: parseFloat(lat),
+            lng: parseFloat(lng)
+        };
+    }
+
+    // Actualizar técnico en el storage
+    const success = DataManager.updateUser(technicianId, updatedData);
+    
+    if (success) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Técnico actualizado exitosamente', 'success');
+        } else {
+            alert('Técnico actualizado exitosamente');
+        }
+        
+        // Cerrar modal
+        event.target.closest('.technician-modal-overlay').remove();
+        
+        // Recargar la vista de técnicos
+        const container = document.getElementById('content-area');
+        if (container) {
+            loadTechniciansView(container);
+        }
+    } else {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Error al actualizar el técnico', 'error');
+        } else {
+            alert('Error al actualizar el técnico');
+        }
+    }
+};
+
+// Función para mostrar modal de edición del cliente
+const showEditClientModal = (clientId) => {
+    const client = DataManager.getUserById(clientId);
+    if (!client) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Cliente no encontrado', 'error');
+        } else {
+            alert('Cliente no encontrado');
+        }
+        return;
+    }
+
+    // Crear modal de edición
+    const modal = document.createElement('div');
+    modal.className = 'client-modal-overlay';
+    modal.innerHTML = `
+        <div class="client-modal edit-modal">
+            <div class="client-modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Cliente</h2>
+                <button class="modal-close-btn" onclick="this.closest('.client-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="client-modal-content">
+                <form id="edit-client-form" onsubmit="submitClientEdit(event, ${clientId})">
+                    <div class="form-section">
+                        <h3>Información Personal</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="client-name">Nombre:</label>
+                                <input type="text" id="client-name" name="name" value="${client.name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="client-email">Email:</label>
+                                <input type="email" id="client-email" name="email" value="${client.email}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="client-phone">Teléfono:</label>
+                                <input type="tel" id="client-phone" name="phone" value="${client.phone}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="client-username">Usuario:</label>
+                                <input type="text" id="client-username" name="username" value="${client.username}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Información Adicional</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="client-company">Empresa:</label>
+                                <input type="text" id="client-company" name="company" value="${client.company || ''}" placeholder="Nombre de la empresa">
+                            </div>
+                            <div class="form-group">
+                                <label for="client-address">Dirección:</label>
+                                <input type="text" id="client-address" name="address" value="${client.address || ''}" placeholder="Dirección completa">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Configuración de Cuenta</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="client-password">Nueva Contraseña (opcional):</label>
+                                <input type="password" id="client-password" name="password" placeholder="Dejar vacío para mantener la actual">
+                            </div>
+                            <div class="form-group">
+                                <label for="client-avatar">Avatar (inicial):</label>
+                                <input type="text" id="client-avatar" name="avatar" value="${client.avatar || ''}" maxlength="1" placeholder="Ej: J">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="client-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.client-modal-overlay').remove()">
+                    Cancelar
+                </button>
+                <button type="submit" form="edit-client-form" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const closeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    });
+};
+
+// Función para procesar la edición del cliente
+const submitClientEdit = (event, clientId) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const updatedData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        username: formData.get('username'),
+        company: formData.get('company') || null,
+        address: formData.get('address') || null,
+        avatar: formData.get('avatar') || null
+    };
+
+    // Solo actualizar la contraseña si se proporciona una nueva
+    const newPassword = formData.get('password');
+    if (newPassword && newPassword.trim() !== '') {
+        updatedData.password = newPassword.trim();
+    }
+
+    // Actualizar cliente en el storage
+    const success = DataManager.updateUser(clientId, updatedData);
+    
+    if (success) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Cliente actualizado exitosamente', 'success');
+        } else {
+            alert('Cliente actualizado exitosamente');
+        }
+        
+        // Cerrar modal
+        event.target.closest('.client-modal-overlay').remove();
+        
+        // Recargar la vista de clientes
+        const container = document.getElementById('content-area');
+        if (container) {
+            loadClientsView(container);
+        }
+    } else {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Error al actualizar el cliente', 'error');
+        } else {
+            alert('Error al actualizar el cliente');
+        }
+    }
 };
 
 const loadGeolocationView = (container) => {
@@ -651,3 +1127,8 @@ window.submitSurvey = submitSurvey;
 window.viewClientTickets = viewClientTickets;
 window.editClient = editClient;
 window.contactClient = contactClient;
+window.showTechnicianModal = showTechnicianModal;
+window.showEditTechnicianModal = showEditTechnicianModal;
+window.submitTechnicianEdit = submitTechnicianEdit;
+window.showEditClientModal = showEditClientModal;
+window.submitClientEdit = submitClientEdit;
