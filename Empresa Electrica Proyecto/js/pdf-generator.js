@@ -349,3 +349,4 @@ window.generateTicketPDF = (ticketId) => {
 window.generateGeneralReport = (filters) => {
     window.PDFGenerator.generateGeneralReport(filters);
 };
+
