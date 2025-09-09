@@ -1518,3 +1518,150 @@
         font-size: 0.85rem;
     }
 }
+
+/* Estilos para filtros de fecha */
+.cliente-tickets-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cliente-date-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cliente-date-filter-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.cliente-date-filter label {
+    font-weight: 500;
+    color: var(--gray-700);
+    white-space: nowrap;
+}
+
+.cliente-date-filter select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--gray-700);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 180px;
+}
+
+.cliente-date-filter select:hover {
+    border-color: var(--primary-color);
+}
+
+.cliente-date-filter select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.custom-date-range {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+}
+
+.custom-date-range input[type="date"] {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--gray-700);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-date-range input[type="date"]:hover {
+    border-color: var(--primary-color);
+}
+
+.custom-date-range input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.custom-date-range::before {
+    content: "Desde:";
+    font-weight: 500;
+    color: var(--gray-600);
+    font-size: 0.85rem;
+}
+
+.custom-date-range .date-separator {
+    color: var(--gray-600);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.cliente-global-filters {
+    background: var(--gray-50);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--gray-200);
+}
+
+/* Responsive para filtros */
+@media (min-width: 768px) {
+    .cliente-tickets-filters {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+    
+    .cliente-date-filter-main {
+        flex-wrap: nowrap;
+    }
+    
+    .custom-date-range {
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 767px) {
+    .cliente-date-filter-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .cliente-date-filter select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .custom-date-range {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 1rem;
+    }
+    
+    .custom-date-range input[type="date"] {
+        width: 100%;
+    }
+    
+    .custom-date-range::before {
+        align-self: flex-start;
+    }
+}

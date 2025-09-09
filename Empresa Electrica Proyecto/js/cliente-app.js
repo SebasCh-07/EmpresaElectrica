@@ -141,11 +141,31 @@ class ClienteApp {
                 <div class="cliente-tickets-container">
                     <div class="cliente-tickets-header">
                         <h2 class="cliente-tickets-title">Tickets Recientes</h2>
-                        <div class="cliente-tickets-filter">
-                            <button class="cliente-filter-btn active" onclick="app.filterTickets('all')">Todos</button>
-                            <button class="cliente-filter-btn" onclick="app.filterTickets('pendiente')">Pendientes</button>
-                            <button class="cliente-filter-btn" onclick="app.filterTickets('en_curso')">En Curso</button>
-                            <button class="cliente-filter-btn" onclick="app.filterTickets('finalizado')">Finalizados</button>
+                        <div class="cliente-tickets-filters">
+                            <div class="cliente-tickets-filter">
+                                <button class="cliente-filter-btn active" onclick="app.filterTickets('all')">Todos</button>
+                                <button class="cliente-filter-btn" onclick="app.filterTickets('pendiente')">Pendientes</button>
+                                <button class="cliente-filter-btn" onclick="app.filterTickets('en_curso')">En Curso</button>
+                                <button class="cliente-filter-btn" onclick="app.filterTickets('finalizado')">Finalizados</button>
+                            </div>
+                            <div class="cliente-date-filter">
+                                <div class="cliente-date-filter-main">
+                                    <label for="dashboard-date-filter">Filtrar por fecha:</label>
+                                    <select id="dashboard-date-filter" onchange="app.filterTicketsByDate(this.value, 'dashboard')">
+                                        <option value="all">Todas las fechas</option>
+                                        <option value="today">Hoy</option>
+                                        <option value="week">Última semana</option>
+                                        <option value="month">Último mes</option>
+                                        <option value="quarter">Últimos 3 meses</option>
+                                        <option value="custom">Rango personalizado</option>
+                                    </select>
+                                </div>
+                                <div id="dashboard-custom-date-range" class="custom-date-range" style="display: none;">
+                                    <input type="date" id="dashboard-date-from" onchange="app.applyCustomDateFilter('dashboard')">
+                                    <span class="date-separator">hasta</span>
+                                    <input type="date" id="dashboard-date-to" onchange="app.applyCustomDateFilter('dashboard')">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="cliente-tickets-list">
@@ -173,6 +193,26 @@ class ClienteApp {
                 </div>
                 
                 <div class="cliente-tickets-container">
+                    <div class="cliente-global-filters">
+                        <div class="cliente-date-filter">
+                            <div class="cliente-date-filter-main">
+                                <label for="tickets-date-filter">Filtrar por fecha:</label>
+                                <select id="tickets-date-filter" onchange="app.filterTicketsByDate(this.value, 'tickets')">
+                                    <option value="all">Todas las fechas</option>
+                                    <option value="today">Hoy</option>
+                                    <option value="week">Última semana</option>
+                                    <option value="month">Último mes</option>
+                                    <option value="quarter">Últimos 3 meses</option>
+                                    <option value="custom">Rango personalizado</option>
+                                </select>
+                            </div>
+                            <div id="tickets-custom-date-range" class="custom-date-range" style="display: none;">
+                                <input type="date" id="tickets-date-from" onchange="app.applyCustomDateFilter('tickets')">
+                                <span class="date-separator">hasta</span>
+                                <input type="date" id="tickets-date-to" onchange="app.applyCustomDateFilter('tickets')">
+                            </div>
+                        </div>
+                    </div>
                     <div class="cliente-tabs">
                         <button class="cliente-tab active" onclick="app.switchTab('solicitado')" data-tab="solicitado">
                             <i class="fas fa-clock"></i>
@@ -1026,6 +1066,132 @@ class ClienteApp {
                 modal.remove();
             }
         }, 30000);
+    }
+
+    // Función para filtrar tickets por fecha
+    filterTicketsByDate(period, context) {
+        const userTickets = this.getUserTickets();
+        let filteredTickets = userTickets;
+        
+        if (period !== 'all') {
+            const now = new Date();
+            let startDate;
+            
+            switch (period) {
+                case 'today':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    break;
+                case 'week':
+                    startDate = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                    break;
+                case 'quarter':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                    break;
+                case 'custom':
+                    // Mostrar controles de fecha personalizada
+                    const customRange = document.getElementById(`${context}-custom-date-range`);
+                    if (customRange) {
+                        customRange.style.display = 'flex';
+                    }
+                    return; // No filtrar hasta que se seleccionen las fechas
+                default:
+                    startDate = null;
+            }
+            
+            if (startDate) {
+                filteredTickets = userTickets.filter(ticket => {
+                    const ticketDate = new Date(ticket.createdAt);
+                    return ticketDate >= startDate;
+                });
+            }
+        }
+        
+        // Ocultar controles de fecha personalizada si no es custom
+        if (period !== 'custom') {
+            const customRange = document.getElementById(`${context}-custom-date-range`);
+            if (customRange) {
+                customRange.style.display = 'none';
+            }
+        }
+        
+        // Aplicar filtro según el contexto
+        this.applyDateFilter(filteredTickets, context);
+    }
+    
+    // Función para aplicar filtro de fecha personalizada
+    applyCustomDateFilter(context) {
+        const fromInput = document.getElementById(`${context}-date-from`);
+        const toInput = document.getElementById(`${context}-date-to`);
+        
+        if (!fromInput.value || !toInput.value) return;
+        
+        const fromDate = new Date(fromInput.value);
+        const toDate = new Date(toInput.value);
+        toDate.setHours(23, 59, 59, 999); // Incluir todo el día final
+        
+        const userTickets = this.getUserTickets();
+        const filteredTickets = userTickets.filter(ticket => {
+            const ticketDate = new Date(ticket.createdAt);
+            return ticketDate >= fromDate && ticketDate <= toDate;
+        });
+        
+        this.applyDateFilter(filteredTickets, context);
+    }
+    
+    // Función helper para aplicar el filtro según el contexto
+    applyDateFilter(filteredTickets, context) {
+        if (context === 'dashboard') {
+            // Aplicar filtro en el dashboard
+            const ticketsList = document.getElementById('cliente-tickets-list');
+            if (ticketsList) {
+                // También aplicar filtro de estado actual si existe
+                const activeFilter = document.querySelector('.cliente-filter-btn.active');
+                let finalTickets = filteredTickets;
+                
+                if (activeFilter && activeFilter.onclick) {
+                    const statusMatch = activeFilter.onclick.toString().match(/'([^']+)'/);
+                    if (statusMatch && statusMatch[1] !== 'all') {
+                        const status = statusMatch[1];
+                        finalTickets = filteredTickets.filter(ticket => {
+                            if (status === 'en_curso') return ['asignado', 'en_curso'].includes(ticket.status);
+                            return ticket.status === status;
+                        });
+                    }
+                }
+                
+                ticketsList.innerHTML = this.renderClienteTickets(finalTickets.slice(0, 5));
+            }
+        } else if (context === 'tickets') {
+            // Aplicar filtro en la sección Mis Tickets
+            // Actualizar todas las pestañas
+            const stats = this.calculateClienteStats(filteredTickets);
+            
+            // Actualizar contadores en las pestañas
+            const badges = document.querySelectorAll('.cliente-tab-badge');
+            if (badges.length >= 3) {
+                badges[0].textContent = stats.pendientes;
+                badges[1].textContent = stats.enCurso;
+                badges[2].textContent = stats.finalizados;
+            }
+            
+            // Actualizar contenido de las pestañas
+            const solicitadoDiv = document.getElementById('cliente-tickets-solicitado');
+            const enCursoDiv = document.getElementById('cliente-tickets-en-curso');
+            const finalizadoDiv = document.getElementById('cliente-tickets-finalizado');
+            
+            if (solicitadoDiv) {
+                solicitadoDiv.innerHTML = this.renderClienteTicketsByStatus(filteredTickets, 'pendiente');
+            }
+            if (enCursoDiv) {
+                enCursoDiv.innerHTML = this.renderClienteTicketsByStatus(filteredTickets, 'en_curso');
+            }
+            if (finalizadoDiv) {
+                finalizadoDiv.innerHTML = this.renderClienteTicketsByStatus(filteredTickets, 'finalizado');
+            }
+        }
     }
 
     logout() {

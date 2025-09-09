@@ -96,14 +96,7 @@ const loadTicketForm = (container) => {
                     </div>
                     
                     <div class="form-section">
-                        <h4>Archivos Adjuntos</h4>
-                        <div class="file-upload" onclick="document.getElementById('file-input').click()">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Arrastra archivos aquí o haz clic para seleccionar</p>
-                            <p class="text-muted">Formatos permitidos: PDF, JPG, PNG, DOC (máx. 10MB)</p>
-                            <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;">
-                        </div>
-                        <div id="uploaded-files" class="uploaded-files"></div>
+                        ${photoManager.createPhotoUploader('new')}
                     </div>
                     
                     <div class="form-actions">
@@ -118,8 +111,6 @@ const loadTicketForm = (container) => {
             </div>
         </div>
     `;
-    
-    setupFileUpload();
 };
 
 const loadClientsView = (container) => {
@@ -1150,6 +1141,10 @@ const submitClientEdit = (event, clientId) => {
     }
 };
 
+const loadToolsView = (container) => {
+    container.innerHTML = toolsManager.createToolsManagementView();
+};
+
 const loadGeolocationView = (container) => {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
@@ -1250,29 +1245,6 @@ const loadSurveyView = (container) => {
 
 
 // Funciones auxiliares
-const setupFileUpload = () => {
-    const fileInput = document.getElementById('file-input');
-    const uploadedFiles = document.getElementById('uploaded-files');
-    
-    fileInput.addEventListener('change', (e) => {
-        const files = Array.from(e.target.files);
-        files.forEach(file => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'uploaded-file';
-            fileItem.innerHTML = `
-                <div class="uploaded-file-info">
-                    <i class="fas fa-file"></i>
-                    <span class="uploaded-file-name">${file.name}</span>
-                    <span class="uploaded-file-size">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
-                </div>
-                <button class="uploaded-file-remove" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            uploadedFiles.appendChild(fileItem);
-        });
-    });
-};
 
 const setupClientSearch = () => {
     const searchInput = document.getElementById('client-search');
@@ -1393,12 +1365,32 @@ const submitTicket = (event) => {
     
     const newTicket = DataManager.createTicket(ticketData);
     
+    // Transferir fotos del ticket temporal al ticket real
+    const tempPhotos = photoManager.getTicketPhotos('new');
+    if (tempPhotos.length > 0) {
+        const photos = JSON.parse(localStorage.getItem('ticketPhotos') || '{}');
+        // Actualizar el ticketId de cada foto
+        const updatedPhotos = tempPhotos.map(photo => ({
+            ...photo,
+            ticketId: newTicket.id
+        }));
+        photos[newTicket.id] = updatedPhotos;
+        // Limpiar fotos temporales
+        delete photos['new'];
+        localStorage.setItem('ticketPhotos', JSON.stringify(photos));
+    }
+    
     // Agregar comentario inicial
     DataManager.addCommentToTicket(newTicket.id, {
         author: ticketData.clientName,
         authorRole: 'cliente',
         content: 'Ticket creado por el cliente'
     });
+    
+    // Enviar notificación de ticket creado
+    if (typeof notificationSystem !== 'undefined') {
+        notificationSystem.notifyTicketCreated(newTicket);
+    }
     
     Utils.showToast('Ticket creado exitosamente', 'success');
     app.navigateTo('tickets');
@@ -1448,6 +1440,7 @@ const contactClient = (clientId) => {
 window.loadTicketForm = loadTicketForm;
 window.loadClientsView = loadClientsView;
 window.loadTechniciansView = loadTechniciansView;
+window.loadToolsView = loadToolsView;
 window.loadGeolocationView = loadGeolocationView;
 window.loadSurveyView = loadSurveyView;
 window.submitTicket = submitTicket;

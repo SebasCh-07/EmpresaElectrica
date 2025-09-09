@@ -132,13 +132,24 @@ const loadViewContent = (viewName, containerId) => {
         'clientes': loadClientsView,
         'tecnicos': loadTechniciansView,
         'geolocalizacion': loadGeolocationView,
+        'herramientas': loadToolsView,
         'encuesta': loadSurveyView,
     };
     
-    const loader = viewLoaders[viewName];
+    let loader = viewLoaders[viewName];
+    
+    // Verificación adicional para loadTicketsView
+    if (viewName === 'tickets' && !loader && window.loadTicketsView) {
+        loader = window.loadTicketsView;
+    }
+    
     if (loader) {
         loader(container);
     } else {
+        console.error(`Vista no encontrada: ${viewName}`, {
+            available: Object.keys(viewLoaders),
+            windowLoadTicketsView: !!window.loadTicketsView
+        });
         container.innerHTML = '<div class="error-message"><h3>Vista no encontrada</h3><p>La vista solicitada no existe.</p></div>';
     }
 };

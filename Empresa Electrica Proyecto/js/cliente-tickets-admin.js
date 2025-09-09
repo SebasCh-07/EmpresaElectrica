@@ -359,6 +359,20 @@ class ClienteTicketsAdmin {
         }
     }
 
+    renderTicketPhotos(ticketId) {
+        // Verificar si photoManager está disponible
+        if (typeof photoManager !== 'undefined' && photoManager.getTicketPhotos) {
+            const photos = photoManager.getTicketPhotos(ticketId);
+            if (photos && photos.length > 0) {
+                return photoManager.renderPhotoGallery(photos);
+            } else {
+                return '<div class="no-photos"><i class="fas fa-image"></i><p>No hay fotografías disponibles</p></div>';
+            }
+        } else {
+            return '<div class="no-photos"><i class="fas fa-image"></i><p>Fotografías no disponibles</p></div>';
+        }
+    }
+
     goBackToClients() {
         // Navegar directamente a la sección de clientes en admin usando el hash
         window.location.href = 'admin.html#clientes';
@@ -455,6 +469,13 @@ class ClienteTicketsAdmin {
                             </div>
                         </div>
                     ` : ''}
+                    
+                    <div class="ticket-modal-section">
+                        <h3><i class="fas fa-camera"></i> Fotografías del Trabajo</h3>
+                        <div class="ticket-photos-gallery">
+                            ${this.renderTicketPhotos(ticket.id)}
+                        </div>
+                    </div>
 
                     ${ticket.comments && ticket.comments.length > 0 ? `
                         <div class="ticket-modal-section">
@@ -475,6 +496,9 @@ class ClienteTicketsAdmin {
                 </div>
                 
                 <div class="ticket-modal-footer">
+                    <button class="btn btn-primary" onclick="generateTicketPDF('${ticket.id}')" title="Generar PDF del ticket">
+                        <i class="fas fa-file-pdf"></i> Generar PDF
+                    </button>
                     <button class="btn btn-secondary" onclick="this.closest('.ticket-modal-overlay').remove()">
                         Cerrar
                     </button>

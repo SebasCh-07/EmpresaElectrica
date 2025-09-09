@@ -24,11 +24,11 @@ const loadDashboard = (container) => {
 
 const loadAdminDashboard = (container) => {
     const stats = DataManager.getStats();
-    // Ordenar tickets por fecha de creación (más recientes primero) y tomar los primeros 5
+    // Ordenar tickets por fecha de creación (más recientes primero) y tomar los primeros 3
     const allTickets = DataManager.getAllTickets();
     const recentTickets = allTickets
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5);
+        .slice(0, 3);
     const technicians = DataManager.getUsersByRole('tecnico');
     
     container.innerHTML = `

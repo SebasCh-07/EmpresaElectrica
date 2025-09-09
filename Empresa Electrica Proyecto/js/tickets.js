@@ -32,8 +32,17 @@ const loadAdminTicketsView = (container) => {
     
     container.innerHTML = `
         <div class="page-header">
+            <div class="d-flex justify-between align-center">
+                <div>
             <h1><i class="fas fa-ticket-alt"></i> Todos los Tickets</h1>
             <p>Gestión completa de todos los tickets del sistema</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="generateGeneralReport()" title="Generar reporte PDF de todos los tickets">
+                        <i class="fas fa-file-pdf"></i> Reporte PDF
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="page-content">
@@ -423,8 +432,15 @@ const renderTicketsCards = (tickets) => {
         return '<p class="text-center text-muted">No hay tickets para mostrar</p>';
     }
     
-    return tickets.map(ticket => `
-        <div class="ticket-card" onclick="loadTicketDetailById('${ticket.id}')">
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    return tickets.map(ticket => {
+        const clickAction = currentUser.role === 'mesa_ayuda' ? 
+            `handleMesaAyudaTicketClick('${ticket.id}')` : 
+            `loadTicketDetailById('${ticket.id}')`;
+        
+        return `
+        <div class="ticket-card" onclick="${clickAction}">
             <div class="ticket-header">
                 <span class="ticket-id">${ticket.id}</span>
                 <div class="ticket-priority">
@@ -465,7 +481,8 @@ const renderTicketsCards = (tickets) => {
                 ` : ''}
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 };
 
 const loadTicketDetail = (container) => {
@@ -518,9 +535,9 @@ const loadTicketDetailById = (ticketId, container = null) => {
         </div>
         
         <div class="page-content">
-            <div class="grid-2">
+            <div class="ticket-detail-container">
                 <!-- Información del ticket -->
-                <div class="ticket-detail">
+                <div class="ticket-detail-main">
                     <div class="ticket-detail-header">
                         <div class="ticket-detail-title">${ticket.title}</div>
                         <div class="ticket-detail-meta">
@@ -577,85 +594,51 @@ const loadTicketDetailById = (ticketId, container = null) => {
                             </div>
                         </div>
                         
-                        ${ticket.viaticos ? `
+                        ${ticket.viaticos && ticket.viaticos.requested ? `
                             <div class="ticket-detail-section">
-                                <h4>Viáticos</h4>
+                                <h4><i class="fas fa-money-bill-wave"></i> Viáticos</h4>
                                 <div class="viaticos-info">
-                                    <p><strong>Estado:</strong> ${ticket.viaticos.approved ? 'Aprobado' : 'Pendiente'}</p>
-                                    <p><strong>Monto:</strong> ${Utils.formatCurrency(ticket.viaticos.amount)}</p>
-                                    <p><strong>Descripción:</strong> ${ticket.viaticos.description}</p>
-                                    <p><strong>Aprobado por:</strong> ${ticket.viaticos.approvedBy}</p>
+                                    <div class="viaticos-status">
+                                        <span class="status-badge status-${ticket.viaticos.approved ? 'aprobado' : 'pendiente'}">
+                                            <i class="${ticket.viaticos.approved ? 'fas fa-check' : 'fas fa-clock'}"></i>
+                                            ${ticket.viaticos.approved ? 'Aprobado' : 'Pendiente'}
+                                        </span>
+                                        <span class="viaticos-amount">$${ticket.viaticos.amount ? Utils.formatCurrency(ticket.viaticos.amount) : '0'}</span>
+                                    </div>
+                                    ${ticket.viaticos.description ? `<p><strong>Descripción:</strong> ${ticket.viaticos.description}</p>` : ''}
+                                    ${ticket.viaticos.approvedBy ? `<p><strong>Aprobado por:</strong> ${ticket.viaticos.approvedBy}</p>` : ''}
+                                    ${ticket.viaticos.rejectionReason ? `<p><strong>Motivo de rechazo:</strong> ${ticket.viaticos.rejectionReason}</p>` : ''}
+                                    <div class="viaticos-actions">
+                                        <button class="btn btn-sm btn-info" onclick="viaticosSystem.showViaticosDetailModal('${ticket.viaticos.requestId}')">
+                                            <i class="fas fa-eye"></i> Ver Detalle
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ` : ''}
                         
-                        
-                        ${(ticket.status === 'finalizado' && ticket.survey && currentUser.role === 'admin') ? `
+                        <!-- Sección de fotografías -->
                             <div class="ticket-detail-section">
-                                <h4>Encuesta de Satisfacción del Cliente</h4>
-                                <div class="survey-results-admin">
-                                    <div class="survey-ratings">
-                                        <div class="survey-rating-item">
-                                            <span class="survey-label">Satisfacción General:</span>
-                                            <div class="rating-display">
-                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.satisfaction || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.satisfaction || 0))}</span>
-                                                <span class="rating-number">${ticket.survey.satisfaction || 0}/5</span>
-                                            </div>
-                                        </div>
-                                        <div class="survey-rating-item">
-                                            <span class="survey-label">Calidad del Trabajo:</span>
-                                            <div class="rating-display">
-                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.quality || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.quality || 0))}</span>
-                                                <span class="rating-number">${ticket.survey.quality || 0}/5</span>
-                                            </div>
-                                        </div>
-                                        <div class="survey-rating-item">
-                                            <span class="survey-label">Puntualidad:</span>
-                                            <div class="rating-display">
-                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.punctuality || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.punctuality || 0))}</span>
-                                                <span class="rating-number">${ticket.survey.punctuality || 0}/5</span>
-                                            </div>
-                                        </div>
-                                        <div class="survey-rating-item">
-                                            <span class="survey-label">Comunicación del Técnico:</span>
-                                            <div class="rating-display">
-                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.communication || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.communication || 0))}</span>
-                                                <span class="rating-number">${ticket.survey.communication || 0}/5</span>
-                                            </div>
-                                        </div>
-                                        <div class="survey-rating-item">
-                                            <span class="survey-label">¿Recomendaría nuestros servicios?</span>
-                                            <div class="recommendation-display">
-                                                <span class="recommendation-badge recommendation-${ticket.survey.recommendation}">${Utils.formatRecommendation(ticket.survey.recommendation)}</span>
-                                            </div>
-                                        </div>
-                                        ${ticket.survey.comments ? `
-                                            <div class="survey-rating-item">
-                                                <span class="survey-label">Comentarios Adicionales:</span>
-                                                <div class="survey-comments">
-                                                    <p>"${ticket.survey.comments}"</p>
-                                                </div>
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                    <div class="survey-summary">
-                                        <div class="survey-summary-item">
-                                            <span class="summary-label">Promedio General:</span>
-                                            <span class="summary-value">${Utils.calculateSurveyAverage(ticket.survey)}/5</span>
-                                        </div>
-                                        <div class="survey-summary-item">
-                                            <span class="summary-label">Fecha de Encuesta:</span>
-                                            <span class="summary-value">${Utils.formatDate(ticket.finalCompletedAt || ticket.completedAt)}</span>
-                                        </div>
-                                    </div>
+                            <h4><i class="fas fa-camera"></i> Fotografías del Trabajo</h4>
+                            <div id="ticket-photos-gallery" class="ticket-photos-gallery">
+                                ${photoManager.renderPhotoGallery(photoManager.getTicketPhotos(ticket.id))}
                                 </div>
                             </div>
+                        
+                        
+                        ${(ticket.status === 'finalizado' && currentUser.role === 'admin') ? `
+                            <div class="ticket-detail-section">
+                                <h4><i class="fas fa-clipboard-check"></i> Encuesta de Satisfacción del Cliente</h4>
+                                ${ticket.survey ? 
+                                    surveySystem.renderSurveyResults(ticket.survey) :
+                                    '<div class="no-survey"><i class="fas fa-clipboard"></i><p>Encuesta no completada por el cliente</p></div>'
+                                }
                         ` : ''}
                     </div>
                 </div>
                 
                 <!-- Panel de acciones y comentarios -->
-                <div>
+                <div class="ticket-detail-sidebar">
                     ${renderTicketActions(ticket, currentUser)}
                     ${renderTicketComments(ticket)}
                 </div>
@@ -742,7 +725,7 @@ const renderTicketActions = (ticket, currentUser) => {
                                 <h3>Gestionar Trabajo</h3>
                             </div>
                             <div class="card-body">
-                                <button class="btn btn-warning" onclick="showViaticosModal('${ticket.id}')">
+                                <button class="btn btn-warning" onclick="viaticosSystem.showViaticosRequestModal('${ticket.id}')">
                                     <i class="fas fa-money-bill"></i> Solicitar Viáticos
                                 </button>
                                 <button class="btn btn-success" onclick="showVisitFormModal('${ticket.id}')">
@@ -764,7 +747,7 @@ const renderTicketActions = (ticket, currentUser) => {
                         </div>
                         <div class="card-body">
                             <p class="mb-3">El técnico ha completado el trabajo. Para finalizar el servicio y descargar el informe, debe completar la encuesta de satisfacción.</p>
-                            <button class="btn btn-primary" onclick="showSurveyModal('${ticket.id}')">
+                            <button class="btn btn-primary" onclick="surveySystem.showSurveyModal('${ticket.id}')">
                                 <i class="fas fa-star"></i> Completar Encuesta de Satisfacción
                             </button>
                         </div>
@@ -1114,6 +1097,23 @@ const filterByTechnician = (technicianId) => {
     }
 };
 
+// Función para manejar click en tickets desde Mesa de Ayuda
+const handleMesaAyudaTicketClick = (ticketId) => {
+    const ticket = DataManager.getTicketById(ticketId);
+    if (!ticket) {
+        Utils.showToast('Ticket no encontrado', 'error');
+        return;
+    }
+    
+    // Si el ticket está pendiente, mostrar modal de asignación
+    if (ticket.status === 'pendiente') {
+        showAssignTechnicianModal(ticketId);
+    } else {
+        // Para otros estados, mostrar el detalle del ticket
+        loadTicketDetailById(ticketId);
+    }
+};
+
 // Función para mostrar modal de asignación de técnico
 const showAssignTechnicianModal = (ticketId) => {
     const ticket = DataManager.getTicketById(ticketId);
@@ -1269,6 +1269,9 @@ window.assignTicket = assignTicket;
 window.switchAdminTab = switchAdminTab;
 window.searchAdminTickets = searchAdminTickets;
 window.filterAdminTickets = filterAdminTickets;
+window.handleMesaAyudaTicketClick = handleMesaAyudaTicketClick;
 window.showAssignTechnicianModal = showAssignTechnicianModal;
+window.showAssignmentModal = showAssignTechnicianModal; // Alias para compatibilidad
 window.assignTechnicianToTicket = assignTechnicianToTicket;
+window.loadTicketsView = loadTicketsView;
 

@@ -64,10 +64,9 @@ class MesaAyudaApp {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new MesaAyudaApp();
+    // Hacer app disponible globalmente después de inicializar
+    window.app = app;
 });
-
-// Funciones globales
-window.app = app;
 
 // Función para toggle del menú móvil
 window.toggleMobileMenu = () => {

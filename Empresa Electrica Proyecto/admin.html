@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/electrical-theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- Main Application -->
@@ -29,6 +30,10 @@
                 <span>Empresa Eléctrica - Admin</span>
             </div>
             <div class="nav-user">
+                <button class="notification-bell" onclick="notificationSystem.showNotificationHistory()" title="Ver historial de notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                </button>
                 <span id="user-role"></span>
                 <span id="user-name"></span>
                 <button id="logout-btn" class="btn btn-secondary">
@@ -70,6 +75,12 @@
                         Geolocalización
                     </a>
                 </li>
+                <li>
+                    <a href="#" onclick="app.navigateTo('herramientas')" class="nav-link" data-view="herramientas">
+                        <i class="fas fa-toolbox"></i>
+                        Herramientas
+                    </a>
+                </li>
             </ul>
         </aside>
 
@@ -88,6 +99,12 @@
     <script src="js/tickets.js"></script>
     <script src="js/data-loaders.js"></script>
     <script src="js/shared-functions.js"></script>
+    <script src="js/pdf-generator.js"></script>
+    <script src="js/photo-manager.js"></script>
+    <script src="js/survey-system.js"></script>
+    <script src="js/notification-system.js"></script>
+    <script src="js/tools-management.js"></script>
+    <script src="js/viaticos-system.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/admin-app.js"></script>
 </body>
