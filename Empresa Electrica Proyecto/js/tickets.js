@@ -589,18 +589,6 @@ const loadTicketDetailById = (ticketId, container = null) => {
                             </div>
                         ` : ''}
                         
-                        ${ticket.rubric ? `
-                            <div class="ticket-detail-section">
-                                <h4>Rúbrica de Trabajo</h4>
-                                <div class="rubric-info">
-                                    <p><strong>Verificación de Seguridad:</strong> ${ticket.rubric.safetyCheck}</p>
-                                    <p><strong>Herramientas Utilizadas:</strong> ${(ticket.rubric.toolsUsed || []).join(', ')}</p>
-                                    <p><strong>Trabajo Completado:</strong> ${ticket.rubric.workCompleted}</p>
-                                    <p><strong>Problemas Encontrados:</strong> ${ticket.rubric.issuesFound}</p>
-                                    <p><strong>Próximos Pasos:</strong> ${ticket.rubric.nextSteps}</p>
-                                </div>
-                            </div>
-                        ` : ''}
                         
                         ${(ticket.status === 'finalizado' && ticket.survey && currentUser.role === 'admin') ? `
                             <div class="ticket-detail-section">
