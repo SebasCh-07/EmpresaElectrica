@@ -1105,13 +1105,8 @@ const handleMesaAyudaTicketClick = (ticketId) => {
         return;
     }
     
-    // Si el ticket está pendiente, mostrar modal de asignación
-    if (ticket.status === 'pendiente') {
-        showAssignTechnicianModal(ticketId);
-    } else {
-        // Para otros estados, mostrar el detalle del ticket
-        loadTicketDetailById(ticketId);
-    }
+    // Todos los tickets navegan a la página de detalles
+    loadTicketDetailById(ticketId);
 };
 
 // Función para mostrar modal de asignación de técnico
@@ -1198,6 +1193,315 @@ const showAssignTechnicianModal = (ticketId) => {
     document.getElementById('visit-date').min = now.toISOString().slice(0, 16);
 };
 
+// Función para mostrar detalles del ticket en modal para Mesa de Ayuda
+const showMesaAyudaTicketDetailModal = (ticketId) => {
+    const ticket = DataManager.getTicketById(ticketId);
+    if (!ticket) {
+        Utils.showToast('Ticket no encontrado', 'error');
+        return;
+    }
+
+    const technician = ticket.assignedTo ? DataManager.getUserById(ticket.assignedTo) : null;
+    const photos = (typeof photoManager !== 'undefined' && photoManager) ? photoManager.getTicketPhotos(ticketId) : [];
+    const comments = ticket.comments || [];
+
+    const modal = document.createElement('div');
+    modal.className = 'modal mesa-ticket-detail-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-eye"></i> Detalles del Ticket - ${ticket.id}</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mesa-ticket-detail-container">
+                    <div class="ticket-status-header">
+                        <div class="status-indicators">
+                            <span class="priority-badge priority-${ticket.priority}">
+                                <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
+                                ${ticket.priority.toUpperCase()}
+                            </span>
+                            <span class="status-badge status-${ticket.status}">
+                                <i class="${Utils.getStatusIcon(ticket.status)}"></i>
+                                ${ticket.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="ticket-dates">
+                            <span><i class="fas fa-calendar-plus"></i> Creado: ${Utils.formatDate(ticket.createdAt)}</span>
+                            ${ticket.completedAt ? `<span><i class="fas fa-calendar-check"></i> Completado: ${Utils.formatDate(ticket.completedAt)}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="ticket-info-grid">
+                        <div class="info-card">
+                            <h4><i class="fas fa-clipboard-list"></i> Información del Trabajo</h4>
+                            <div class="info-content">
+                                <p><strong>Título:</strong> ${ticket.title}</p>
+                                <p><strong>Descripción:</strong> ${ticket.description}</p>
+                                <p><strong>Tipo:</strong> ${ticket.workType || 'No especificado'}</p>
+                                <p><strong>Duración estimada:</strong> ${ticket.estimatedDuration || 'No especificada'} horas</p>
+                                ${ticket.isInterprovincial ? '<p><strong><i class="fas fa-map-marked-alt"></i> Trabajo Interprovincial</strong></p>' : ''}
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <h4><i class="fas fa-user"></i> Información del Cliente</h4>
+                            <div class="info-content">
+                                <p><strong>Nombre:</strong> ${ticket.clientName}</p>
+                                <p><strong>Email:</strong> ${ticket.clientEmail}</p>
+                                <p><strong>Teléfono:</strong> ${ticket.clientPhone}</p>
+                                ${ticket.clientCompany ? `<p><strong>Empresa:</strong> ${ticket.clientCompany}</p>` : ''}
+                                <p><strong>Dirección:</strong> ${ticket.clientAddress}</p>
+                            </div>
+                        </div>
+
+                        ${technician ? `
+                        <div class="info-card">
+                            <h4><i class="fas fa-tools"></i> Técnico Asignado</h4>
+                            <div class="info-content">
+                                <p><strong>Nombre:</strong> ${technician.name}</p>
+                                <p><strong>Email:</strong> ${technician.email}</p>
+                                <p><strong>Teléfono:</strong> ${technician.phone}</p>
+                                <p><strong>Especialidad:</strong> ${technician.specialty || 'General'}</p>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${photos.length > 0 ? `
+                    <div class="info-card">
+                        <h4><i class="fas fa-camera"></i> Fotos del Trabajo</h4>
+                        <div class="photos-gallery">
+                            ${photos.map(photo => `
+                                <img src="${photo.data}" alt="${photo.name}" class="work-photo" 
+                                     onclick="showImageModal('${photo.data}', '${photo.name}')">
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${comments.length > 0 ? `
+                    <div class="info-card">
+                        <h4><i class="fas fa-comments"></i> Comentarios</h4>
+                        <div class="comments-list">
+                            ${comments.map(comment => `
+                                <div class="comment-item">
+                                    <div class="comment-header">
+                                        <strong>${comment.authorName}</strong>
+                                        <span class="comment-date">${Utils.formatDate(comment.createdAt)}</span>
+                                    </div>
+                                    <div class="comment-content">${comment.content}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <div class="mesa-ticket-actions">
+                        ${ticket.status === 'pendiente' ? `
+                            <button class="btn btn-primary" onclick="this.closest('.modal').remove(); showAssignTechnicianModal('${ticket.id}')">
+                                <i class="fas fa-user-plus"></i> Asignar Técnico
+                            </button>
+                        ` : ''}
+                        
+                        ${(ticket.status === 'asignado' || ticket.status === 'en_curso') && technician ? `
+                            <div class="action-info">
+                                <i class="fas fa-info-circle"></i>
+                                Ticket asignado a ${technician.name}. El técnico puede gestionar el progreso del trabajo.
+                            </div>
+                        ` : ''}
+                        
+                        ${(ticket.status === 'finalizado' || ticket.status === 'pre_cerrado') ? `
+                            <div class="action-info success">
+                                <i class="fas fa-check-circle"></i>
+                                Trabajo completado ${ticket.completedAt ? 'el ' + Utils.formatDate(ticket.completedAt) : ''}.
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Cerrar modal con ESC
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Cerrar modal al hacer click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    });
+};
+
+// Función para cambiar el estado del ticket (Mesa de Ayuda)
+const changeTicketStatus = (ticketId) => {
+    const ticket = DataManager.getTicketById(ticketId);
+    if (!ticket) {
+        Utils.showToast('Ticket no encontrado', 'error');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal change-status-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exchange-alt"></i> Cambiar Estado del Ticket</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="submitStatusChange(event, '${ticketId}')">
+                    <div class="form-group">
+                        <label for="new-status">Nuevo Estado:</label>
+                        <select id="new-status" name="newStatus" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="pendiente" ${ticket.status === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="asignado" ${ticket.status === 'asignado' ? 'selected' : ''}>Asignado</option>
+                            <option value="en_curso" ${ticket.status === 'en_curso' ? 'selected' : ''}>En Curso</option>
+                            <option value="pre_cerrado" ${ticket.status === 'pre_cerrado' ? 'selected' : ''}>Pre-cerrado</option>
+                            <option value="finalizado" ${ticket.status === 'finalizado' ? 'selected' : ''}>Finalizado</option>
+                            <option value="cancelado" ${ticket.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-reason">Motivo del cambio:</label>
+                        <textarea id="status-reason" name="reason" placeholder="Explique el motivo del cambio de estado..." required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Cambiar Estado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+};
+
+// Función para procesar el cambio de estado
+const submitStatusChange = (event, ticketId) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const newStatus = formData.get('newStatus');
+    const reason = formData.get('reason');
+    
+    if (!newStatus || !reason.trim()) {
+        Utils.showToast('Por favor complete todos los campos', 'warning');
+        return;
+    }
+
+    const ticket = DataManager.getTicketById(ticketId);
+    if (!ticket) {
+        Utils.showToast('Ticket no encontrado', 'error');
+        return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const oldStatus = ticket.status;
+
+    // Actualizar el ticket
+    const updatedTicket = {
+        ...ticket,
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+        updatedBy: currentUser.id
+    };
+
+    // Agregar comentario del cambio de estado
+    if (!updatedTicket.comments) {
+        updatedTicket.comments = [];
+    }
+
+    updatedTicket.comments.push({
+        id: Date.now().toString(),
+        content: `Estado cambiado de "${oldStatus}" a "${newStatus}". Motivo: ${reason}`,
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        createdAt: new Date().toISOString(),
+        type: 'status_change'
+    });
+
+    // Si se marca como finalizado, agregar fecha de completado
+    if (newStatus === 'finalizado') {
+        updatedTicket.completedAt = new Date().toISOString();
+    }
+
+    // Guardar cambios
+    DataManager.updateTicket(ticketId, updatedTicket);
+    
+    Utils.showToast('Estado del ticket actualizado correctamente', 'success');
+    
+    // Cerrar modal
+    event.target.closest('.modal').remove();
+    
+    // Recargar la vista de detalles
+    loadTicketDetailById(ticketId);
+};
+
+// Función simple para mostrar imagen en modal (fallback si no está photoManager)
+const showImageModal = (imageData, imageName) => {
+    if (typeof photoManager !== 'undefined' && photoManager && photoManager.showPhotoModal) {
+        photoManager.showPhotoModal(imageData, imageName);
+        return;
+    }
+
+    // Fallback simple si no está photoManager
+    const modal = document.createElement('div');
+    modal.className = 'modal image-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 80%; text-align: center;">
+            <div class="modal-header">
+                <h3>${imageName}</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="${imageData}" alt="${imageName}" style="max-width: 100%; height: auto; border-radius: 8px;">
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // Cerrar al hacer click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    });
+};
+
 // Función para procesar la asignación del técnico
 const assignTechnicianToTicket = (event, ticketId) => {
     event.preventDefault();
@@ -1270,6 +1574,10 @@ window.switchAdminTab = switchAdminTab;
 window.searchAdminTickets = searchAdminTickets;
 window.filterAdminTickets = filterAdminTickets;
 window.handleMesaAyudaTicketClick = handleMesaAyudaTicketClick;
+window.showMesaAyudaTicketDetailModal = showMesaAyudaTicketDetailModal;
+window.showImageModal = showImageModal;
+window.changeTicketStatus = changeTicketStatus;
+window.submitStatusChange = submitStatusChange;
 window.showAssignTechnicianModal = showAssignTechnicianModal;
 window.showAssignmentModal = showAssignTechnicianModal; // Alias para compatibilidad
 window.assignTechnicianToTicket = assignTechnicianToTicket;

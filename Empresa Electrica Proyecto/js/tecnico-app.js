@@ -719,7 +719,7 @@ class TecnicoApp {
                     <textarea name="fases[${phaseId}][descripcion]" placeholder="Describe detalladamente esta fase del trabajo..." required></textarea>
                 </div>
                 <div class="phase-field">
-                    <label>Fotos:</label>
+                    <label class="photo-label">Fotos:</label>
                     <div class="photo-upload-container">
                         <input type="file" name="fases[${phaseId}][fotos]" multiple accept="image/*" class="photo-input" id="photos-${phaseId}">
                         <label for="photos-${phaseId}" class="photo-upload-btn">
