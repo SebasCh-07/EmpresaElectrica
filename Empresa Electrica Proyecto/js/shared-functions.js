@@ -746,7 +746,15 @@ window.cancelTicket = (ticketId) => {
 };
 
 window.viewClientTickets = (clientId) => {
-    Utils.showToast('Funcionalidad en desarrollo', 'info');
+    const client = DataManager.getUserById(clientId);
+    
+    if (!client) {
+        Utils.showToast('Cliente no encontrado', 'error');
+        return;
+    }
+    
+    // Navegar a la página específica de tickets del cliente
+    window.location.href = `cliente-tickets-admin.html?clientId=${clientId}`;
 };
 
 window.editClient = (clientId) => {

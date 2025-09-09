@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickets del Cliente - Empresa Eléctrica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tickets.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/electrical-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Main Application -->
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <i class="fas fa-bolt electrical-logo"></i>
+                <span>Empresa Eléctrica - Admin</span>
+            </div>
+            <div class="nav-actions">
+                <div class="user-info">
+                    <span id="user-name">Admin</span>
+                    <button class="btn btn-sm btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="nav-menu">
+                <li>
+                    <a href="admin.html#dashboard" class="nav-link" data-view="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#tickets" class="nav-link" data-view="tickets">
+                        <i class="fas fa-ticket-alt"></i>
+                        Todos los Tickets
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#clientes" class="nav-link active" data-view="clientes">
+                        <i class="fas fa-users"></i>
+                        Clientes
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#tecnicos" class="nav-link" data-view="tecnicos">
+                        <i class="fas fa-tools"></i>
+                        Técnicos
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#geolocalizacion" class="nav-link" data-view="geolocalizacion">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Geolocalización
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content client-tickets-view">
+            <div class="page-header">
+                <div class="d-flex justify-between align-center">
+                    <div>
+                        <h1><i class="fas fa-user"></i> <span id="client-name">Cliente</span></h1>
+                        <p id="client-subtitle">Tickets asociados al cliente</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="goBackToClients()">
+                            <i class="fas fa-arrow-left"></i> Volver a Clientes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Info Card -->
+            <div class="page-content">
+                <div class="client-info-card">
+                    <div class="client-info-header">
+                        <h3><i class="fas fa-info-circle"></i> Información del Cliente</h3>
+                    </div>
+                    <div class="client-info-body" id="client-info-details">
+                        <!-- Client details will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Tickets Stats -->
+                <div class="tickets-stats-grid" id="tickets-stats">
+                    <!-- Stats will be loaded here -->
+                </div>
+
+                <!-- Tickets Table -->
+                <div class="tickets-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-ticket-alt"></i> Tickets del Cliente</h3>
+                        <div class="section-actions">
+                            <div class="search-box">
+                                <input type="text" id="tickets-search" placeholder="Buscar en tickets...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <select id="status-filter" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_progreso">En Progreso</option>
+                                <option value="finalizado">Finalizado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="modern-table client-tickets-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-cell-id">ID</th>
+                                    <th class="table-cell-title">Título</th>
+                                    <th class="table-cell-worktype">Tipo</th>
+                                    <th class="table-cell-priority">Prioridad</th>
+                                    <th class="table-cell-status">Estado</th>
+                                    <th class="table-cell-technician">Técnico</th>
+                                    <th class="table-cell-date">Fecha</th>
+                                    <th class="table-cell-actions">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-table-body">
+                                <!-- Tickets will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="no-tickets-message" class="no-results" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No hay tickets</h3>
+                        <p>Este cliente no tiene tickets registrados en el sistema.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Cargando tickets del cliente...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/tickets.js"></script>
+    <script src="js/shared-functions.js"></script>
+    <script src="js/cliente-tickets-admin.js"></script>
+</body>
+</html>

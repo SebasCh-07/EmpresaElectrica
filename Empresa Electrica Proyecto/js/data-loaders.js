@@ -618,15 +618,14 @@ const submitSurvey = (event) => {
 // Funciones para gestión de clientes
 const viewClientTickets = (clientId) => {
     const client = DataManager.getUserById(clientId);
-    const clientTickets = DataManager.getTicketsByClient(clientId);
     
-    if (clientTickets.length === 0) {
-        Utils.showToast(`${client.name} no tiene tickets registrados`, 'info');
+    if (!client) {
+        Utils.showToast('Cliente no encontrado', 'error');
         return;
     }
     
-    // Aquí se podría abrir un modal o navegar a una vista específica
-    Utils.showToast(`Mostrando ${clientTickets.length} tickets de ${client.name}`, 'info');
+    // Navegar a la página específica de tickets del cliente
+    window.location.href = `cliente-tickets-admin.html?clientId=${clientId}`;
 };
 
 const editClient = (clientId) => {
