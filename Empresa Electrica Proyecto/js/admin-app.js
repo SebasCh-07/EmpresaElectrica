@@ -33,6 +33,14 @@ class AdminApp {
         document.getElementById('logout-btn').addEventListener('click', () => {
             this.logout();
         });
+
+        // Manejar cambios de hash en la URL
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash && ['dashboard', 'tickets', 'clientes', 'tecnicos', 'geolocalizacion'].includes(hash)) {
+                this.navigateTo(hash);
+            }
+        });
     }
 
     loadUserInfo() {
@@ -41,7 +49,13 @@ class AdminApp {
     }
 
     loadDefaultView() {
-        this.navigateTo('dashboard');
+        // Verificar si hay un hash en la URL para navegar a una vista específica
+        const hash = window.location.hash.substring(1); // Remover el #
+        if (hash && ['dashboard', 'tickets', 'clientes', 'tecnicos', 'geolocalizacion'].includes(hash)) {
+            this.navigateTo(hash);
+        } else {
+            this.navigateTo('dashboard');
+        }
     }
 
     navigateTo(view) {

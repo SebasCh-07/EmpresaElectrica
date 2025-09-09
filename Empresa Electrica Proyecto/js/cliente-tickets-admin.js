@@ -259,21 +259,9 @@ class ClienteTicketsAdmin {
                 </td>
                 <td class="table-cell-actions">
                     <div class="table-actions">
-                        <button class="table-action-btn view-btn" onclick="loadTicketDetailById('${ticket.id}')" title="Ver detalles">
+                        <button class="table-action-btn view-btn" onclick="app.showTicketModal('${ticket.id}')" title="Ver detalles">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="table-action-btn edit-btn" onclick="editTicket('${ticket.id}')" title="Editar ticket">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        ${ticket.status === 'pendiente' ? `
-                            <button class="table-action-btn assign-btn" onclick="showAssignTechnicianModal('${ticket.id}')" title="Asignar técnico">
-                                <i class="fas fa-user-plus"></i>
-                            </button>
-                        ` : `
-                            <button class="table-action-btn assign-btn disabled" disabled title="Solo disponible para tickets pendientes">
-                                <i class="fas fa-user-plus"></i>
-                            </button>
-                        `}
                     </div>
                 </td>
             </tr>
@@ -372,26 +360,153 @@ class ClienteTicketsAdmin {
     }
 
     goBackToClients() {
+        // Navegar directamente a la sección de clientes en admin usando el hash
         window.location.href = 'admin.html#clientes';
     }
 
-    // Métodos para compatibilidad con las funciones existentes
-    viewTicketDetail(ticketId) {
-        // Abrir la página de detalles del ticket manteniendo el contexto del cliente
-        window.location.href = `admin.html#ticket-detail?id=${ticketId}&returnTo=client-tickets&clientId=${this.clientId}`;
-    }
+    // Mostrar modal con detalles del ticket
+    showTicketModal(ticketId) {
+        const ticket = DataManager.getTicketById(ticketId);
+        if (!ticket) {
+            this.showToast('Ticket no encontrado', 'error');
+            return;
+        }
 
-    editTicket(ticketId) {
-        this.showToast('Funcionalidad de edición en desarrollo', 'info');
-    }
+        // Crear modal
+        const modal = document.createElement('div');
+        modal.className = 'ticket-modal-overlay';
+        modal.innerHTML = `
+            <div class="ticket-modal">
+                <div class="ticket-modal-header">
+                    <h2><i class="fas fa-ticket-alt"></i> Ticket #${ticket.id}</h2>
+                    <button class="modal-close-btn" onclick="this.closest('.ticket-modal-overlay').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="ticket-modal-content">
+                    <div class="ticket-modal-section">
+                        <h3>Información General</h3>
+                        <div class="ticket-info-grid">
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Título:</span>
+                                <span class="ticket-info-value">${ticket.title}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Estado:</span>
+                                <span class="status-badge status-${ticket.status}">
+                                    <i class="${this.getStatusIcon(ticket.status)}"></i>
+                                    ${(ticket.status || 'pendiente').replace('_', ' ').toUpperCase()}
+                                </span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Prioridad:</span>
+                                <span class="priority-badge priority-${ticket.priority}">
+                                    <i class="${this.getPriorityIcon(ticket.priority)}"></i>
+                                    ${(ticket.priority || 'media').toUpperCase()}
+                                </span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Tipo de Trabajo:</span>
+                                <span class="ticket-info-value">${ticket.workType}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Cliente:</span>
+                                <span class="ticket-info-value">${ticket.clientName}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Teléfono:</span>
+                                <span class="ticket-info-value">${ticket.clientPhone || 'No especificado'}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Dirección:</span>
+                                <span class="ticket-info-value">${ticket.clientAddress || 'No especificada'}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Técnico Asignado:</span>
+                                <span class="ticket-info-value">${ticket.assignedTechnicianName || 'Sin asignar'}</span>
+                            </div>
+                            <div class="ticket-info-item">
+                                <span class="ticket-info-label">Fecha de Creación:</span>
+                                <span class="ticket-info-value">${this.formatDate(ticket.createdAt)}</span>
+                            </div>
+                            ${ticket.updatedAt && ticket.updatedAt !== ticket.createdAt ? `
+                                <div class="ticket-info-item">
+                                    <span class="ticket-info-label">Última Actualización:</span>
+                                    <span class="ticket-info-value">${this.formatDate(ticket.updatedAt)}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-modal-section">
+                        <h3>Descripción del Trabajo</h3>
+                        <p class="ticket-description">${ticket.description}</p>
+                    </div>
 
-    showAssignTechnicianModal(ticketId) {
-        this.showToast('Funcionalidad de asignación en desarrollo', 'info');
+                    ${ticket.viaticos ? `
+                        <div class="ticket-modal-section">
+                            <h3>Viáticos</h3>
+                            <div class="viaticos-info">
+                                <p><strong>Estado:</strong> ${ticket.viaticos.approved ? 'Aprobado' : 'Pendiente'}</p>
+                                <p><strong>Monto:</strong> ${ticket.viaticos.amount ? '$' + ticket.viaticos.amount : 'No especificado'}</p>
+                                <p><strong>Descripción:</strong> ${ticket.viaticos.description || 'Sin descripción'}</p>
+                                ${ticket.viaticos.approvedBy ? `<p><strong>Aprobado por:</strong> ${ticket.viaticos.approvedBy}</p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${ticket.comments && ticket.comments.length > 0 ? `
+                        <div class="ticket-modal-section">
+                            <h3>Comentarios</h3>
+                            <div class="comments-list">
+                                ${ticket.comments.map(comment => `
+                                    <div class="comment-item">
+                                        <div class="comment-header">
+                                            <strong>${comment.author}</strong>
+                                            <span class="comment-date">${this.formatDate(comment.createdAt)}</span>
+                                        </div>
+                                        <div class="comment-content">${comment.content}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="ticket-modal-footer">
+                    <button class="btn btn-secondary" onclick="this.closest('.ticket-modal-overlay').remove()">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Agregar modal al DOM
+        document.body.appendChild(modal);
+
+        // Cerrar con ESC
+        const closeHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', closeHandler);
+            }
+        };
+        document.addEventListener('keydown', closeHandler);
+
+        // Cerrar al hacer clic fuera del modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+                document.removeEventListener('keydown', closeHandler);
+            }
+        });
     }
 }
 
 // Funciones globales para compatibilidad
 window.goBackToClients = () => {
+    // Navegar directamente a la sección de clientes en admin usando el hash
     window.location.href = 'admin.html#clientes';
 };
 

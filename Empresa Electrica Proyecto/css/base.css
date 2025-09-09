@@ -792,3 +792,198 @@ body {
         gap: 0.5rem;
     }
 }
+
+/* Estilos para el modal de detalles de ticket */
+.ticket-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+}
+
+.ticket-modal {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-modal-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ticket-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.ticket-modal-section {
+    margin-bottom: 1.5rem;
+}
+
+.ticket-modal-section:last-child {
+    margin-bottom: 0;
+}
+
+.ticket-modal-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 0.5rem;
+}
+
+.ticket-modal .ticket-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.ticket-modal .ticket-info-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.ticket-modal .ticket-info-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+.ticket-modal .ticket-info-value {
+    font-size: 0.875rem;
+    color: var(--gray-900);
+}
+
+.ticket-description {
+    background: var(--gray-50);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary-color);
+    margin: 0;
+    line-height: 1.6;
+    color: var(--gray-700);
+}
+
+.viaticos-info p {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+.viaticos-info p:last-child {
+    margin-bottom: 0;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.comment-item {
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border-left: 3px solid var(--info-color);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.comment-header strong {
+    color: var(--gray-900);
+    font-weight: 600;
+}
+
+.comment-date {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.comment-content {
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
+.ticket-modal-footer {
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+    .ticket-modal-overlay {
+        padding: 0.5rem;
+    }
+    
+    .ticket-modal {
+        max-height: 95vh;
+    }
+    
+    .ticket-modal-header {
+        padding: 1rem;
+    }
+    
+    .ticket-modal-content {
+        padding: 1rem;
+    }
+    
+    .ticket-modal .ticket-info-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+    
+    .ticket-modal-footer {
+        padding: 1rem;
+    }
+}
