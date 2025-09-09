@@ -24,7 +24,11 @@ const loadDashboard = (container) => {
 
 const loadAdminDashboard = (container) => {
     const stats = DataManager.getStats();
-    const recentTickets = DataManager.getAllTickets().slice(0, 5);
+    // Ordenar tickets por fecha de creación (más recientes primero) y tomar los primeros 5
+    const allTickets = DataManager.getAllTickets();
+    const recentTickets = allTickets
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
     const technicians = DataManager.getUsersByRole('tecnico');
     
     container.innerHTML = `
@@ -36,11 +40,6 @@ const loadAdminDashboard = (container) => {
         <div class="page-content">
             <!-- Estadísticas principales -->
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">${stats.totalTickets}</div>
-                    <div class="stat-label">Total Tickets</div>
-                    <i class="fas fa-ticket-alt stat-icon"></i>
-                </div>
                 <div class="stat-card warning">
                     <div class="stat-number">${stats.pendingTickets}</div>
                     <div class="stat-label">Pendientes</div>
@@ -78,9 +77,15 @@ const loadAdminDashboard = (container) => {
                     <div class="card-body">
                         <div class="ticket-list">
                             ${recentTickets.map(ticket => `
-                                <div class="ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
+                                <div class="ticket-card dashboard-ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
                                     <div class="ticket-header">
-                                        <span class="ticket-id">${ticket.id}</span>
+                                        <div class="ticket-id-section">
+                                            <span class="ticket-id">${ticket.id}</span>
+                                            <span class="status-badge status-${ticket.status || 'pendiente'}">
+                                                <i class="${Utils.getStatusIcon(ticket.status || 'pendiente')}"></i>
+                                                ${(ticket.status || 'pendiente').replace('_', ' ').toUpperCase()}
+                                            </span>
+                                        </div>
                                         <span class="priority-badge priority-${ticket.priority || 'media'}">
                                             <i class="${Utils.getPriorityIcon(ticket.priority || 'media')}"></i>
                                             ${(ticket.priority || 'media').toUpperCase()}
@@ -98,6 +103,12 @@ const loadAdminDashboard = (container) => {
                                                 <i class="fas fa-calendar"></i>
                                                 ${Utils.formatRelativeDate(ticket.createdAt)}
                                             </div>
+                                            ${ticket.assignedTechnicianName ? `
+                                                <div class="ticket-technician">
+                                                    <i class="fas fa-tools"></i>
+                                                    ${ticket.assignedTechnicianName}
+                                                </div>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 </div>

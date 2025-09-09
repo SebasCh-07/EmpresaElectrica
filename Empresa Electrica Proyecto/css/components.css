@@ -168,6 +168,70 @@
     background: rgba(249, 250, 251, 0.5);
 }
 
+/* Estilos específicos para tickets del dashboard */
+.dashboard-ticket-card .ticket-header {
+    padding: 1rem 1.5rem;
+}
+
+.ticket-id-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-ticket-card .ticket-id {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.dashboard-ticket-card .status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.dashboard-ticket-card .priority-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.dashboard-ticket-card .ticket-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.dashboard-ticket-card .ticket-meta > div {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+}
+
+.dashboard-ticket-card .ticket-meta i {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.dashboard-ticket-card .ticket-technician {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
 .ticket-id {
     font-weight: 700;
     color: var(--primary-color);

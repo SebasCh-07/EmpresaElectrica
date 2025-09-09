@@ -26,6 +26,9 @@ const loadTicketsView = (container) => {
 
 const loadAdminTicketsView = (container) => {
     const allTickets = DataManager.getAllTickets();
+    const openTickets = allTickets.filter(t => ['pendiente', 'asignado'].includes(t.status));
+    const preClosedTickets = allTickets.filter(t => ['en_curso', 'pre_cerrado'].includes(t.status));
+    const closedTickets = allTickets.filter(t => ['finalizado', 'cancelado'].includes(t.status));
     
     container.innerHTML = `
         <div class="page-header">
@@ -34,23 +37,38 @@ const loadAdminTicketsView = (container) => {
         </div>
         
         <div class="page-content">
+            <!-- Pestañas de estado -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('abiertos')" data-tab="abiertos">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Abiertos</span>
+                    <span class="admin-tab-badge">${openTickets.length}</span>
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('pre_cerrados')" data-tab="pre_cerrados">
+                    <i class="fas fa-clock"></i>
+                    <span>Pre Cerrados</span>
+                    <span class="admin-tab-badge">${preClosedTickets.length}</span>
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('cerrados')" data-tab="cerrados">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Cerrados</span>
+                    <span class="admin-tab-badge">${closedTickets.length}</span>
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('todos')" data-tab="todos">
+                    <i class="fas fa-list"></i>
+                    <span>Todos</span>
+                    <span class="admin-tab-badge">${allTickets.length}</span>
+                </button>
+            </div>
+
             <!-- Filtros y búsqueda -->
             <div class="search-filter-bar">
                 <div class="search-box">
-                    <input type="text" id="ticket-search" placeholder="Buscar tickets...">
+                    <input type="text" id="admin-ticket-search" placeholder="Buscar tickets..." onkeyup="searchAdminTickets(this.value)">
                     <i class="fas fa-search"></i>
                 </div>
                 <div class="filter-group">
-                    <select id="status-filter" class="filter-select">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="asignado">Asignado</option>
-                        <option value="en_curso">En Curso</option>
-                        <option value="semi_finalizado">Semi Finalizado</option>
-                        <option value="finalizado">Finalizado</option>
-                        <option value="cancelado">Cancelado</option>
-                    </select>
-                    <select id="priority-filter" class="filter-select">
+                    <select id="admin-priority-filter" class="filter-select" onchange="filterAdminTickets()">
                         <option value="">Todas las prioridades</option>
                         <option value="baja">Baja</option>
                         <option value="media">Media</option>
@@ -75,15 +93,20 @@ const loadAdminTicketsView = (container) => {
                             <th class="table-cell-actions">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tickets-table-body">
-                        ${renderAdminTicketsTable(allTickets)}
+                    <tbody id="admin-tickets-table-body">
+                        ${renderAdminTicketsTable(openTickets, 'abiertos')}
                     </tbody>
                 </table>
             </div>
         </div>
     `;
     
-    setupTicketsFilters();
+    // Inicializar variables globales para el administrador
+    window.currentAdminTab = 'abiertos';
+    window.allAdminTickets = allTickets;
+    window.filteredAdminTickets = openTickets;
+    
+    setupAdminTicketsFilters();
 };
 
 const loadMesaAyudaTicketsView = (container) => {
@@ -260,13 +283,57 @@ const renderTicketsTable = (tickets) => {
     `).join('');
 };
 
-const renderAdminTicketsTable = (tickets) => {
+const renderAdminTicketsTable = (tickets, currentTab = 'todos') => {
+    // Si no hay tickets, mostrar mensaje personalizado según la pestaña
+    if (tickets.length === 0) {
+        const emptyMessages = {
+            'abiertos': {
+                icon: 'fas fa-folder-open',
+                title: 'No hay tickets abiertos',
+                message: 'Todos los tickets han sido procesados o no hay tickets pendientes por asignar en este momento.'
+            },
+            'pre_cerrados': {
+                icon: 'fas fa-clock',
+                title: 'No hay tickets pre-cerrados',
+                message: 'No hay tickets en proceso de finalización. Los tickets aparecerán aquí cuando estén siendo trabajados o esperando confirmación del cliente.'
+            },
+            'cerrados': {
+                icon: 'fas fa-check-circle',
+                title: 'No hay tickets cerrados',
+                message: 'No se han finalizado tickets aún. Los tickets completados aparecerán aquí cuando el proceso esté terminado.'
+            },
+            'todos': {
+                icon: 'fas fa-list',
+                title: 'No hay tickets en el sistema',
+                message: 'No se han creado tickets aún. Los tickets aparecerán aquí cuando los clientes generen solicitudes de servicio.'
+            }
+        };
+
+        const emptyState = emptyMessages[currentTab] || emptyMessages['todos'];
+        
+        return `
+            <tr>
+                <td colspan="8" class="empty-state-cell">
+                    <div class="empty-state-container">
+                        <div class="empty-state-icon">
+                            <i class="${emptyState.icon}"></i>
+                        </div>
+                        <div class="empty-state-content">
+                            <h3 class="empty-state-title">${emptyState.title}</h3>
+                            <p class="empty-state-message">${emptyState.message}</p>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
     return tickets.map(ticket => `
         <tr>
             <td class="table-cell-id">
                 <div class="ticket-id-info">
                     <div class="ticket-id-badge">#${ticket.id}</div>
-                    <div class="ticket-type">${ticket.type || 'Soporte'}</div>
+                    <div class="ticket-type">${ticket.workType || 'Soporte'}</div>
                 </div>
             </td>
             <td class="table-cell-title">
@@ -336,9 +403,15 @@ const renderAdminTicketsTable = (tickets) => {
                     <button class="table-action-btn edit-btn" onclick="editTicket('${ticket.id}')" title="Editar ticket">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="table-action-btn assign-btn" onclick="assignTicket('${ticket.id}')" title="Asignar técnico">
-                        <i class="fas fa-user-plus"></i>
-                    </button>
+                    ${ticket.status === 'pendiente' ? `
+                        <button class="table-action-btn assign-btn" onclick="showAssignTechnicianModal('${ticket.id}')" title="Asignar técnico">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    ` : `
+                        <button class="table-action-btn assign-btn disabled" disabled title="Solo disponible para tickets pendientes">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    `}
                 </div>
             </td>
         </tr>
@@ -528,6 +601,68 @@ const loadTicketDetailById = (ticketId, container = null) => {
                                 </div>
                             </div>
                         ` : ''}
+                        
+                        ${(ticket.status === 'finalizado' && ticket.survey && currentUser.role === 'admin') ? `
+                            <div class="ticket-detail-section">
+                                <h4>Encuesta de Satisfacción del Cliente</h4>
+                                <div class="survey-results-admin">
+                                    <div class="survey-ratings">
+                                        <div class="survey-rating-item">
+                                            <span class="survey-label">Satisfacción General:</span>
+                                            <div class="rating-display">
+                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.satisfaction || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.satisfaction || 0))}</span>
+                                                <span class="rating-number">${ticket.survey.satisfaction || 0}/5</span>
+                                            </div>
+                                        </div>
+                                        <div class="survey-rating-item">
+                                            <span class="survey-label">Calidad del Trabajo:</span>
+                                            <div class="rating-display">
+                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.quality || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.quality || 0))}</span>
+                                                <span class="rating-number">${ticket.survey.quality || 0}/5</span>
+                                            </div>
+                                        </div>
+                                        <div class="survey-rating-item">
+                                            <span class="survey-label">Puntualidad:</span>
+                                            <div class="rating-display">
+                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.punctuality || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.punctuality || 0))}</span>
+                                                <span class="rating-number">${ticket.survey.punctuality || 0}/5</span>
+                                            </div>
+                                        </div>
+                                        <div class="survey-rating-item">
+                                            <span class="survey-label">Comunicación del Técnico:</span>
+                                            <div class="rating-display">
+                                                <span class="rating-stars">${'★'.repeat(parseInt(ticket.survey.communication || 0))}${'☆'.repeat(5 - parseInt(ticket.survey.communication || 0))}</span>
+                                                <span class="rating-number">${ticket.survey.communication || 0}/5</span>
+                                            </div>
+                                        </div>
+                                        <div class="survey-rating-item">
+                                            <span class="survey-label">¿Recomendaría nuestros servicios?</span>
+                                            <div class="recommendation-display">
+                                                <span class="recommendation-badge recommendation-${ticket.survey.recommendation}">${Utils.formatRecommendation(ticket.survey.recommendation)}</span>
+                                            </div>
+                                        </div>
+                                        ${ticket.survey.comments ? `
+                                            <div class="survey-rating-item">
+                                                <span class="survey-label">Comentarios Adicionales:</span>
+                                                <div class="survey-comments">
+                                                    <p>"${ticket.survey.comments}"</p>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="survey-summary">
+                                        <div class="survey-summary-item">
+                                            <span class="summary-label">Promedio General:</span>
+                                            <span class="summary-value">${Utils.calculateSurveyAverage(ticket.survey)}/5</span>
+                                        </div>
+                                        <div class="survey-summary-item">
+                                            <span class="summary-label">Fecha de Encuesta:</span>
+                                            <span class="summary-value">${Utils.formatDate(ticket.finalCompletedAt || ticket.completedAt)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -697,34 +832,104 @@ const renderTicketComments = (ticket) => {
     `;
 };
 
-// Funciones de filtrado
-const setupTicketsFilters = () => {
-    const searchInput = document.getElementById('ticket-search');
-    const statusFilter = document.getElementById('status-filter');
-    const priorityFilter = document.getElementById('priority-filter');
+// Funciones para el manejo de pestañas del administrador
+const switchAdminTab = (tabName) => {
+    // Actualizar pestañas activas
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     
-    const filterTickets = () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const statusValue = statusFilter.value;
-        const priorityValue = priorityFilter.value;
-        
-        const allTickets = DataManager.getAllTickets();
-        const filteredTickets = allTickets.filter(ticket => {
-            const matchesSearch = (ticket.title || '').toLowerCase().includes(searchTerm) ||
-                                (ticket.clientName || '').toLowerCase().includes(searchTerm) ||
-                                (ticket.id || '').toLowerCase().includes(searchTerm);
-            const matchesStatus = !statusValue || ticket.status === statusValue;
-            const matchesPriority = !priorityValue || ticket.priority === priorityValue;
-            
-            return matchesSearch && matchesStatus && matchesPriority;
-        });
-        
-        document.getElementById('tickets-table-body').innerHTML = renderTicketsTable(filteredTickets);
-    };
+    // Obtener tickets según la pestaña
+    const allTickets = window.allAdminTickets || DataManager.getAllTickets();
+    let filteredTickets = [];
     
-    searchInput.addEventListener('input', Utils.debounce(filterTickets, 300));
-    statusFilter.addEventListener('change', filterTickets);
-    priorityFilter.addEventListener('change', filterTickets);
+    switch(tabName) {
+        case 'abiertos':
+            filteredTickets = allTickets.filter(t => ['pendiente', 'asignado'].includes(t.status));
+            break;
+        case 'pre_cerrados':
+            filteredTickets = allTickets.filter(t => ['en_curso', 'pre_cerrado'].includes(t.status));
+            break;
+        case 'cerrados':
+            filteredTickets = allTickets.filter(t => ['finalizado', 'cancelado'].includes(t.status));
+            break;
+        case 'todos':
+        default:
+            filteredTickets = allTickets;
+            break;
+    }
+    
+    window.currentAdminTab = tabName;
+    window.filteredAdminTickets = filteredTickets;
+    
+    // Aplicar filtros actuales si existen
+    filterAdminTickets();
+};
+
+const searchAdminTickets = (searchTerm) => {
+    const filteredTickets = window.filteredAdminTickets || [];
+    let searchResults = filteredTickets;
+    
+    if (searchTerm.trim() !== '') {
+        searchResults = filteredTickets.filter(ticket => 
+            (ticket.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (ticket.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (ticket.clientName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (ticket.id || '').toString().includes(searchTerm)
+        );
+    }
+    
+    const tableBody = document.getElementById('admin-tickets-table-body');
+    if (tableBody) {
+        tableBody.innerHTML = renderAdminTicketsTable(searchResults, window.currentAdminTab);
+    }
+};
+
+const filterAdminTickets = () => {
+    const priorityFilter = document.getElementById('admin-priority-filter');
+    const searchInput = document.getElementById('admin-ticket-search');
+    
+    if (!priorityFilter || !searchInput) return;
+    
+    const priorityValue = priorityFilter.value;
+    const searchTerm = searchInput.value.toLowerCase();
+    
+    let filteredTickets = window.filteredAdminTickets || [];
+    
+    // Aplicar filtro de prioridad
+    if (priorityValue) {
+        filteredTickets = filteredTickets.filter(ticket => ticket.priority === priorityValue);
+    }
+    
+    // Aplicar filtro de búsqueda
+    if (searchTerm.trim() !== '') {
+        filteredTickets = filteredTickets.filter(ticket => 
+            (ticket.title || '').toLowerCase().includes(searchTerm) ||
+            (ticket.description || '').toLowerCase().includes(searchTerm) ||
+            (ticket.clientName || '').toLowerCase().includes(searchTerm) ||
+            (ticket.id || '').toString().includes(searchTerm)
+        );
+    }
+    
+    const tableBody = document.getElementById('admin-tickets-table-body');
+    if (tableBody) {
+        tableBody.innerHTML = renderAdminTicketsTable(filteredTickets, window.currentAdminTab);
+    }
+};
+
+// Función de configuración para los filtros del administrador
+const setupAdminTicketsFilters = () => {
+    const priorityFilter = document.getElementById('admin-priority-filter');
+    const searchInput = document.getElementById('admin-ticket-search');
+    
+    if (priorityFilter) {
+        priorityFilter.addEventListener('change', filterAdminTickets);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', Utils.debounce(filterAdminTickets, 300));
+    }
 };
 
 const setupMesaAyudaFilters = () => {
@@ -921,6 +1126,139 @@ const filterByTechnician = (technicianId) => {
     }
 };
 
+// Función para mostrar modal de asignación de técnico
+const showAssignTechnicianModal = (ticketId) => {
+    const ticket = DataManager.getTicketById(ticketId);
+    if (!ticket) {
+        Utils.showToast('Ticket no encontrado', 'error');
+        return;
+    }
+    
+    if (ticket.status !== 'pendiente') {
+        Utils.showToast('Solo se pueden asignar técnicos a tickets pendientes', 'warning');
+        return;
+    }
+    
+    const availableTechnicians = DataManager.getUsersByRole('tecnico');
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal assign-technician-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Asignar Técnico</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="ticket-info-summary">
+                    <h4>Ticket: ${ticket.id}</h4>
+                    <p><strong>Título:</strong> ${ticket.title}</p>
+                    <p><strong>Cliente:</strong> ${ticket.clientName}</p>
+                    <p><strong>Prioridad:</strong> <span class="priority-badge priority-${ticket.priority}">${ticket.priority.toUpperCase()}</span></p>
+                    <p><strong>Dirección:</strong> ${ticket.clientAddress}</p>
+                </div>
+                
+                <form id="assign-technician-form" onsubmit="assignTechnicianToTicket(event, '${ticketId}')">
+                    <div class="form-group">
+                        <label for="technician-select">Seleccionar Técnico:</label>
+                        <select id="technician-select" name="technicianId" required class="form-select">
+                            <option value="">-- Selecciona un técnico --</option>
+                            ${availableTechnicians.map(tech => `
+                                <option value="${tech.id}" data-status="${tech.status}">
+                                    ${tech.name} - ${tech.status === 'disponible' ? '✅ Disponible' : '⏰ Ocupado'}
+                                    ${tech.specializations ? ` (${tech.specializations.join(', ')})` : ''}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visit-date">Fecha de Visita:</label>
+                        <input type="datetime-local" id="visit-date" name="visitDate" required class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estimated-duration">Duración Estimada (horas):</label>
+                        <input type="number" id="estimated-duration" name="estimatedDuration" min="1" max="24" value="2" required class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assignment-notes">Notas para el Técnico:</label>
+                        <textarea id="assignment-notes" name="notes" placeholder="Instrucciones especiales, detalles importantes..." class="form-textarea"></textarea>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Asignar Técnico
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Establecer fecha mínima como ahora
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('visit-date').min = now.toISOString().slice(0, 16);
+};
+
+// Función para procesar la asignación del técnico
+const assignTechnicianToTicket = (event, ticketId) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const technicianId = parseInt(formData.get('technicianId'));
+    const visitDate = formData.get('visitDate');
+    const estimatedDuration = parseInt(formData.get('estimatedDuration'));
+    const notes = formData.get('notes');
+    
+    const technician = DataManager.getUserById(technicianId);
+    if (!technician) {
+        Utils.showToast('Técnico no encontrado', 'error');
+        return;
+    }
+    
+    // Actualizar el ticket
+    const updatedTicket = DataManager.updateTicket(ticketId, {
+        status: 'asignado',
+        assignedTechnicianId: technicianId,
+        assignedTechnicianName: technician.name,
+        assignedAt: new Date().toISOString(),
+        visitDate: new Date(visitDate).toISOString(),
+        estimatedDuration: estimatedDuration
+    });
+    
+    // Agregar comentario sobre la asignación
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    DataManager.addCommentToTicket(ticketId, {
+        author: currentUser.name,
+        authorRole: currentUser.role,
+        content: `Ticket asignado a ${technician.name}. Visita programada para ${new Date(visitDate).toLocaleString('es-ES')}. Duración estimada: ${estimatedDuration} horas.${notes ? ` Notas: ${notes}` : ''}`
+    });
+    
+    // Actualizar estado del técnico a ocupado si estaba disponible
+    if (technician.status === 'disponible') {
+        DataManager.updateTechnicianStatus(technicianId, 'ocupado');
+    }
+    
+    // Cerrar modal
+    document.querySelector('.assign-technician-modal').remove();
+    
+    // Mostrar mensaje de éxito
+    Utils.showToast(`Técnico ${technician.name} asignado exitosamente al ticket ${ticketId}`, 'success');
+    
+    // Recargar la vista de tickets para mostrar los cambios
+    loadAdminTicketsView(document.getElementById('content-area'));
+};
+
 // Funciones para gestión de tickets del admin
 const editTicket = (ticketId) => {
     Utils.showToast(`Editando ticket #${ticketId}`, 'info');
@@ -928,7 +1266,7 @@ const editTicket = (ticketId) => {
 };
 
 const assignTicket = (ticketId) => {
-    showAssignmentModal(ticketId);
+    showAssignTechnicianModal(ticketId);
 };
 
 // Funciones globales
@@ -940,4 +1278,9 @@ window.searchMesaTickets = searchMesaTickets;
 window.filterByTechnician = filterByTechnician;
 window.editTicket = editTicket;
 window.assignTicket = assignTicket;
+window.switchAdminTab = switchAdminTab;
+window.searchAdminTickets = searchAdminTickets;
+window.filterAdminTickets = filterAdminTickets;
+window.showAssignTechnicianModal = showAssignTechnicianModal;
+window.assignTechnicianToTicket = assignTechnicianToTicket;
 

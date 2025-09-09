@@ -365,6 +365,35 @@ const getWorkTypeLabel = (workType) => {
 };
 
 // Exportar funciones para uso global
+// Formatear texto de recomendación de encuesta
+const formatRecommendation = (recommendation) => {
+    const recommendations = {
+        'definitivamente': 'Definitivamente',
+        'probablemente': 'Probablemente',
+        'neutral': 'Neutral',
+        'probablemente_no': 'Probablemente no',
+        'definitivamente_no': 'Definitivamente no'
+    };
+    return recommendations[recommendation] || recommendation;
+};
+
+// Calcular promedio de encuesta de satisfacción
+const calculateSurveyAverage = (survey) => {
+    if (!survey) return 0;
+    
+    const ratings = [
+        survey.satisfaction,
+        survey.quality,
+        survey.punctuality,
+        survey.communication
+    ].filter(rating => rating && !isNaN(rating));
+    
+    if (ratings.length === 0) return 0;
+    
+    const average = ratings.reduce((sum, rating) => sum + parseInt(rating), 0) / ratings.length;
+    return Math.round(average * 10) / 10; // Redondear a 1 decimal
+};
+
 window.Utils = {
     formatDate,
     formatRelativeDate,
@@ -390,5 +419,7 @@ window.Utils = {
     getWorkTypeLabel,
     validateForm,
     showFormErrors,
-    clearFormErrors
+    clearFormErrors,
+    formatRecommendation,
+    calculateSurveyAverage
 };

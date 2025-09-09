@@ -153,7 +153,7 @@ const mockData = {
             clientPhone: '+1234567895',
             clientAddress: 'Calle Insurgentes 456, Ciudad de México',
             priority: 'media',
-            status: 'en_curso',
+            status: 'finalizado',
             assignedTechnicianId: 4,
             assignedTechnicianName: 'Ana Martínez',
             createdAt: '2024-01-16T08:15:00Z',
@@ -167,15 +167,23 @@ const mockData = {
             visitForm: {
                 safetyCheck: 'si',
                 toolsUsed: ['multimetro', 'destornilladores', 'cables'],
-                workCompleted: 'parcial',
-                issuesFound: 'Cableado dañado en el cuadro principal',
-                nextSteps: 'Reemplazar cableado y verificar conexiones',
+                workCompleted: 'completo',
+                issuesFound: 'Cableado dañado en el cuadro principal - REPARADO',
+                nextSteps: 'Instalación completada según normativas',
                 photos: ['foto1.jpg', 'foto2.jpg'],
-                observations: 'Se encontraron varias irregularidades en la instalación'
+                observations: 'Irregularidades reparadas. Instalación ahora cumple con todas las normativas.'
             },
-            preClosedAt: null,
-            survey: null,
-            reportGenerated: false,
+            preClosedAt: '2024-01-16T16:00:00Z',
+            finalCompletedAt: '2024-01-17T10:00:00Z',
+            survey: {
+                satisfaction: '4',
+                quality: '4',
+                punctuality: '5',
+                communication: '4',
+                recommendation: 'probablemente',
+                comments: 'Buen trabajo, la inspección fue completa y detallada. El técnico fue muy profesional.'
+            },
+            reportGenerated: true,
             comments: [
                 {
                     id: 3,
@@ -190,6 +198,20 @@ const mockData = {
                     authorRole: 'tecnico',
                     content: 'En camino al sitio. ETA 30 minutos.',
                     createdAt: '2024-01-16T09:00:00Z'
+                },
+                {
+                    id: 5,
+                    author: 'Ana Martínez',
+                    authorRole: 'tecnico',
+                    content: 'Inspección completada. Todas las irregularidades han sido reparadas. Instalación ahora cumple con normativas.',
+                    createdAt: '2024-01-16T16:00:00Z'
+                },
+                {
+                    id: 6,
+                    author: 'Laura Pérez',
+                    authorRole: 'cliente',
+                    content: 'Encuesta completada. Muy satisfecha con el trabajo realizado.',
+                    createdAt: '2024-01-17T10:00:00Z'
                 }
             ]
         },
@@ -237,7 +259,7 @@ const mockData = {
             clientPhone: '+1234567895',
             clientAddress: 'Calle Insurgentes 456, Ciudad de México',
             priority: 'alta',
-            status: 'pre_cerrado',
+            status: 'finalizado',
             assignedTechnicianId: 3,
             assignedTechnicianName: 'Carlos Rodríguez',
             createdAt: '2024-01-10T09:00:00Z',
@@ -245,6 +267,7 @@ const mockData = {
             visitDate: '2024-01-12T08:00:00Z',
             startedAt: '2024-01-12T08:00:00Z',
             preClosedAt: '2024-01-14T17:00:00Z',
+            finalCompletedAt: '2024-01-15T10:30:00Z',
             estimatedDuration: 16,
             workType: 'soporte',
             isInterprovincial: true,
@@ -265,8 +288,15 @@ const mockData = {
                 photos: ['instalacion1.jpg', 'instalacion2.jpg', 'instalacion3.jpg'],
                 observations: 'Instalación completada según especificaciones. Sistema funcionando correctamente.'
             },
-            survey: null,
-            reportGenerated: false,
+            survey: {
+                satisfaction: '5',
+                quality: '5',
+                punctuality: '4',
+                communication: '5',
+                recommendation: 'definitivamente',
+                comments: 'Excelente servicio, el técnico Carlos fue muy profesional y completó el trabajo a tiempo. La instalación quedó perfecta y funcionando sin problemas. Definitivamente recomendaría este servicio.'
+            },
+            reportGenerated: true,
             comments: [
                 {
                     id: 6,
@@ -274,6 +304,81 @@ const mockData = {
                     authorRole: 'tecnico',
                     content: 'Trabajo completado exitosamente. Caso marcado como pre-cerrado. Esperando encuesta del cliente.',
                     createdAt: '2024-01-14T17:30:00Z'
+                },
+                {
+                    id: 7,
+                    author: 'Laura Pérez',
+                    authorRole: 'cliente',
+                    content: 'Encuesta de satisfacción completada. Servicio finalizado. Informe disponible para descarga.',
+                    createdAt: '2024-01-15T10:30:00Z'
+                }
+            ]
+        },
+        {
+            id: 'TK-005',
+            title: 'Instalación de sistema eléctrico nuevo',
+            description: 'Instalación completa de sistema eléctrico para nueva oficina comercial. Se requiere revisión de planos y instalación de tablero principal.',
+            clientId: 5,
+            clientName: 'Roberto Silva',
+            clientEmail: 'roberto@email.com',
+            clientPhone: '+1234567894',
+            clientAddress: 'Av. Reforma 123, Ciudad de México',
+            priority: 'alta',
+            status: 'pendiente',
+            assignedTechnicianId: null,
+            assignedTechnicianName: null,
+            createdAt: '2024-01-18T09:15:00Z',
+            assignedAt: null,
+            visitDate: null,
+            estimatedDuration: 6,
+            workType: 'instalacion',
+            isInterprovincial: false,
+            viaticos: null,
+            visitForm: null,
+            preClosedAt: null,
+            survey: null,
+            reportGenerated: false,
+            comments: [
+                {
+                    id: 8,
+                    author: 'Roberto Silva',
+                    authorRole: 'cliente',
+                    content: 'Es urgente completar esta instalación antes del próximo lunes para la apertura de la oficina.',
+                    createdAt: '2024-01-18T09:20:00Z'
+                }
+            ]
+        },
+        {
+            id: 'TK-006',
+            title: 'Revisión de tablero eléctrico - Problema de sobrecarga',
+            description: 'El tablero eléctrico está presentando problemas de sobrecarga. Se disparan los breakers constantemente y hay olor a quemado.',
+            clientId: 6,
+            clientName: 'Laura Pérez',
+            clientEmail: 'laura@email.com',
+            clientPhone: '+1234567895',
+            clientAddress: 'Calle Insurgentes 456, Ciudad de México',
+            priority: 'critica',
+            status: 'pendiente',
+            assignedTechnicianId: null,
+            assignedTechnicianName: null,
+            createdAt: '2024-01-18T14:30:00Z',
+            assignedAt: null,
+            visitDate: null,
+            estimatedDuration: 3,
+            workType: 'soporte',
+            isInterprovincial: false,
+            viaticos: null,
+            visitForm: null,
+            preClosedAt: null,
+            survey: null,
+            reportGenerated: false,
+            comments: [
+                {
+                    id: 9,
+                    author: 'Laura Pérez',
+                    authorRole: 'cliente',
+                    content: 'Por favor atender con urgencia, tengo miedo de que haya un cortocircuito o incendio.',
+                    createdAt: '2024-01-18T14:35:00Z'
                 }
             ]
         }

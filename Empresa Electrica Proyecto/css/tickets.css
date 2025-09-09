@@ -1500,3 +1500,460 @@
         font-size: 0.9rem;
     }
 }
+
+/* Estilos para la visualización de encuestas de satisfacción para administradores */
+.survey-results-admin {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    margin-top: 1rem;
+}
+
+.survey-ratings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.survey-rating-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.survey-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+}
+
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-stars {
+    color: #fbbf24;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.rating-number {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.recommendation-display {
+    display: flex;
+    align-items: center;
+}
+
+.recommendation-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recommendation-definitivamente {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.recommendation-probablemente {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.recommendation-neutral {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+}
+
+.recommendation-probablemente_no {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.recommendation-definitivamente_no {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.survey-comments {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+    margin-top: 0.5rem;
+    max-width: 100%;
+}
+
+.survey-comments p {
+    margin: 0;
+    color: var(--gray-700);
+    font-style: italic;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.survey-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(226, 232, 240, 0.7);
+}
+
+.survey-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.summary-label {
+    font-weight: 600;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.summary-value {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+/* Responsive para encuestas en móviles */
+@media (max-width: 768px) {
+    .survey-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .survey-rating-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .rating-display {
+        align-self: flex-end;
+    }
+    
+    .survey-results-admin {
+        padding: 1rem;
+    }
+}
+
+/* Estilos para las pestañas del administrador */
+.admin-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.admin-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--gray-600);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.admin-tab:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.admin-tab.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-tab i {
+    font-size: 1.1rem;
+}
+
+.admin-tab-badge {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}
+
+.admin-tab.active .admin-tab-badge {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-color);
+}
+
+/* Estilos para botones deshabilitados en la tabla del admin */
+.table-action-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--gray-300);
+    color: var(--gray-500);
+}
+
+.table-action-btn.disabled:hover {
+    background: var(--gray-300);
+    transform: none;
+    box-shadow: none;
+}
+
+/* Estilos para el modal de asignación de técnico */
+.assign-technician-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.assign-technician-modal .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.assign-technician-modal .modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.assign-technician-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.assign-technician-modal .modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background var(--transition-normal);
+}
+
+.assign-technician-modal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.assign-technician-modal .modal-body {
+    padding: 2rem;
+}
+
+.ticket-info-summary {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.ticket-info-summary h4 {
+    margin: 0 0 1rem 0;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.ticket-info-summary p {
+    margin: 0.5rem 0;
+    color: var(--gray-700);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+    background: white;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Responsive para pestañas de admin */
+@media (max-width: 768px) {
+    .admin-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .admin-tab {
+        justify-content: space-between;
+        padding: 1rem;
+    }
+    
+    .assign-technician-modal .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .assign-technician-modal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* Estilos para estados vacíos en las pestañas del administrador */
+.empty-state-cell {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    margin: 1rem;
+    border: 2px dashed #cbd5e1;
+    text-align: center;
+}
+
+.empty-state-icon {
+    margin-bottom: 1.5rem;
+}
+
+.empty-state-icon i {
+    font-size: 4rem;
+    color: #94a3b8;
+    opacity: 0.7;
+}
+
+.empty-state-content {
+    max-width: 400px;
+}
+
+.empty-state-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.empty-state-message {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--gray-600);
+    line-height: 1.6;
+}
+
+/* Responsive para estados vacíos */
+@media (max-width: 768px) {
+    .empty-state-container {
+        padding: 3rem 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .empty-state-icon i {
+        font-size: 3rem;
+    }
+    
+    .empty-state-title {
+        font-size: 1.25rem;
+    }
+    
+    .empty-state-message {
+        font-size: 0.9rem;
+    }
+}
