@@ -272,7 +272,7 @@ const renderAdminTicketsTable = (tickets) => {
             <td class="table-cell-title">
                 <div class="ticket-title-info">
                     <div class="ticket-title">${ticket.title}</div>
-                    <div class="ticket-description">${ticket.description.substring(0, 60)}...</div>
+                    <div class="ticket-description">${(ticket.description || '').substring(0, 60)}...</div>
                 </div>
             </td>
             <td class="table-cell-client">
@@ -285,17 +285,17 @@ const renderAdminTicketsTable = (tickets) => {
             </td>
             <td class="table-cell-priority">
                 <div class="priority-info">
-                    <span class="priority-badge priority-${ticket.priority}">
-                        <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
-                        ${ticket.priority.toUpperCase()}
+                    <span class="priority-badge priority-${ticket.priority || 'media'}">
+                        <i class="${Utils.getPriorityIcon(ticket.priority || 'media')}"></i>
+                        ${(ticket.priority || 'media').toUpperCase()}
                     </span>
                 </div>
             </td>
             <td class="table-cell-status">
                 <div class="status-info">
-                    <span class="status-badge status-${ticket.status}">
-                        <i class="${Utils.getStatusIcon(ticket.status)}"></i>
-                        ${ticket.status.replace('_', ' ').toUpperCase()}
+                    <span class="status-badge status-${ticket.status || 'pendiente'}">
+                        <i class="${Utils.getStatusIcon(ticket.status || 'pendiente')}"></i>
+                        ${(ticket.status || 'pendiente').replace('_', ' ').toUpperCase()}
                     </span>
                 </div>
             </td>
@@ -359,15 +359,15 @@ const renderTicketsCards = (tickets) => {
                         <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
                         ${ticket.priority.toUpperCase()}
                     </span>
-                    <span class="status-badge status-${ticket.status}">
-                        <i class="${Utils.getStatusIcon(ticket.status)}"></i>
-                        ${ticket.status.replace('_', ' ').toUpperCase()}
+                    <span class="status-badge status-${ticket.status || 'pendiente'}">
+                        <i class="${Utils.getStatusIcon(ticket.status || 'pendiente')}"></i>
+                        ${(ticket.status || 'pendiente').replace('_', ' ').toUpperCase()}
                     </span>
                 </div>
             </div>
             <div class="ticket-body">
                 <div class="ticket-title">${ticket.title}</div>
-                <div class="ticket-description">${ticket.description.substring(0, 150)}...</div>
+                <div class="ticket-description">${(ticket.description || '').substring(0, 150)}...</div>
                 <div class="ticket-meta">
                     <div class="ticket-client">
                         <i class="fas fa-user"></i>
@@ -420,6 +420,15 @@ const loadTicketDetailById = (ticketId, container = null) => {
     
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
+    // Actualizar el menú activo para mostrar que estamos en la vista de tickets
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    const ticketsLink = document.querySelector('[data-view="tickets"]');
+    if (ticketsLink) {
+        ticketsLink.classList.add('active');
+    }
+    
     targetContainer.innerHTML = `
         <div class="page-header">
             <div class="d-flex justify-between align-center">
@@ -428,7 +437,7 @@ const loadTicketDetailById = (ticketId, container = null) => {
                     <p>${ticket.title}</p>
                 </div>
                 <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="app.navigateTo('tickets')">
+                    <button class="btn btn-secondary" onclick="app ? app.navigateTo('tickets') : loadTicketsView(document.getElementById('content-area'))">
                         <i class="fas fa-arrow-left"></i> Volver
                     </button>
                 </div>
@@ -512,7 +521,7 @@ const loadTicketDetailById = (ticketId, container = null) => {
                                 <h4>Rúbrica de Trabajo</h4>
                                 <div class="rubric-info">
                                     <p><strong>Verificación de Seguridad:</strong> ${ticket.rubric.safetyCheck}</p>
-                                    <p><strong>Herramientas Utilizadas:</strong> ${ticket.rubric.toolsUsed.join(', ')}</p>
+                                    <p><strong>Herramientas Utilizadas:</strong> ${(ticket.rubric.toolsUsed || []).join(', ')}</p>
                                     <p><strong>Trabajo Completado:</strong> ${ticket.rubric.workCompleted}</p>
                                     <p><strong>Problemas Encontrados:</strong> ${ticket.rubric.issuesFound}</p>
                                     <p><strong>Próximos Pasos:</strong> ${ticket.rubric.nextSteps}</p>
@@ -560,20 +569,32 @@ const renderTicketActions = (ticket, currentUser) => {
             break;
             
         case 'mesa_ayuda':
-            if (ticket.status === 'pendiente') {
-                actions = `
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Asignar Técnico</h3>
-                        </div>
-                        <div class="card-body">
-                            <button class="btn btn-primary" onclick="showAssignmentModal('${ticket.id}')">
-                                <i class="fas fa-user-plus"></i> Asignar Técnico
+            actions = `
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Gestión de Ticket</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            ${ticket.status === 'pendiente' ? `
+                                <button class="btn btn-primary" onclick="showAssignmentModal('${ticket.id}')">
+                                    <i class="fas fa-user-plus"></i> Asignar Técnico
+                                </button>
+                            ` : `
+                                <button class="btn btn-warning" onclick="showAssignmentModal('${ticket.id}')">
+                                    <i class="fas fa-user-edit"></i> Reasignar Técnico
+                                </button>
+                            `}
+                            <button class="btn btn-info" onclick="changeTicketStatus('${ticket.id}')">
+                                <i class="fas fa-exchange-alt"></i> Cambiar Estado
+                            </button>
+                            <button class="btn btn-secondary" onclick="editTicket('${ticket.id}')">
+                                <i class="fas fa-edit"></i> Editar Ticket
                             </button>
                         </div>
                     </div>
-                `;
-            }
+                </div>
+            `;
             break;
             
         case 'tecnico':
@@ -661,7 +682,7 @@ const renderTicketComments = (ticket) => {
                     </button>
                 </div>
                 <div class="comments-list">
-                    ${ticket.comments.map(comment => `
+                    ${(ticket.comments || []).map(comment => `
                         <div class="comment-item">
                             <div class="comment-header">
                                 <span class="comment-author">${comment.author}</span>
@@ -689,9 +710,9 @@ const setupTicketsFilters = () => {
         
         const allTickets = DataManager.getAllTickets();
         const filteredTickets = allTickets.filter(ticket => {
-            const matchesSearch = ticket.title.toLowerCase().includes(searchTerm) ||
-                                ticket.clientName.toLowerCase().includes(searchTerm) ||
-                                ticket.id.toLowerCase().includes(searchTerm);
+            const matchesSearch = (ticket.title || '').toLowerCase().includes(searchTerm) ||
+                                (ticket.clientName || '').toLowerCase().includes(searchTerm) ||
+                                (ticket.id || '').toLowerCase().includes(searchTerm);
             const matchesStatus = !statusValue || ticket.status === statusValue;
             const matchesPriority = !priorityValue || ticket.priority === priorityValue;
             

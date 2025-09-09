@@ -24,6 +24,7 @@ class AdminApp {
 
         this.setupEventListeners();
         this.loadUserInfo();
+        this.cleanInvalidTickets();
         this.loadDefaultView();
     }
 
@@ -48,7 +49,10 @@ class AdminApp {
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
-        document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        const activeLink = document.querySelector(`[data-view="${view}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
         
         // Cargar contenido
         Utils.loadViewContent(view, 'content-area');
@@ -57,6 +61,15 @@ class AdminApp {
     logout() {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
+    }
+
+    cleanInvalidTickets() {
+        try {
+            const cleanedTickets = DataManager.cleanInvalidTickets();
+            console.log('Limpieza de tickets completada:', cleanedTickets.length, 'tickets válidos');
+        } catch (error) {
+            console.error('Error al limpiar tickets:', error);
+        }
     }
 }
 

@@ -37,22 +37,22 @@ window.showAssignmentModal = (ticketId) => {
                         
                         <h4>Selecciona un técnico disponible:</h4>
                         <div class="technician-select">
-                            ${availableTechnicians.map(tech => `
-                                <div class="technician-option" onclick="selectTechnicianOption(${tech.id})">
-                                    <input type="radio" name="technicianId" value="${tech.id}" id="tech-${tech.id}" required>
-                                    <div class="technician-option-info">
-                                        <div class="technician-avatar">${tech.avatar}</div>
-                                        <div>
-                                            <h5>${tech.name}</h5>
-                                            <p>${tech.specializations ? tech.specializations.join(', ') : 'Sin especializaciones'}</p>
-                                        </div>
-                                    </div>
-                                    <div class="technician-option-status">
-                                        <div class="status-indicator"></div>
-                                        <span>Disponible</span>
-                                    </div>
-                                </div>
-                            `).join('')}
+${availableTechnicians.map(tech => `
+<div class="technician-option" onclick="selectTechnicianOption(${tech.id})">
+<input type="radio" name="technicianId" value="${tech.id}" id="tech-${tech.id}" required>
+<div class="technician-option-info">
+<div class="technician-avatar">${tech.avatar}</div>
+<div>
+<h5>${tech.name}</h5>
+<p>${tech.specializations ? tech.specializations.join(', ') : 'Sin especializaciones'}</p>
+</div>
+</div>
+<div class="technician-option-status">
+<div class="status-indicator"></div>
+<span>Disponible</span>
+</div>
+</div>
+`).join('')}
                         </div>
                         
                         <div class="modal-footer">

@@ -81,14 +81,14 @@ const loadAdminDashboard = (container) => {
                                 <div class="ticket-card" onclick="app.navigateTo('ticket-detail'); loadTicketDetailById('${ticket.id}')">
                                     <div class="ticket-header">
                                         <span class="ticket-id">${ticket.id}</span>
-                                        <span class="priority-badge priority-${ticket.priority}">
-                                            <i class="${Utils.getPriorityIcon(ticket.priority)}"></i>
-                                            ${ticket.priority.toUpperCase()}
+                                        <span class="priority-badge priority-${ticket.priority || 'media'}">
+                                            <i class="${Utils.getPriorityIcon(ticket.priority || 'media')}"></i>
+                                            ${(ticket.priority || 'media').toUpperCase()}
                                         </span>
                                     </div>
                                     <div class="ticket-body">
                                         <div class="ticket-title">${ticket.title}</div>
-                                        <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                        <div class="ticket-description">${(ticket.description || '').substring(0, 100)}...</div>
                                         <div class="ticket-meta">
                                             <div class="ticket-client">
                                                 <i class="fas fa-user"></i>
@@ -202,7 +202,7 @@ const loadMesaAyudaDashboard = (container) => {
                                     </div>
                                     <div class="ticket-body">
                                         <div class="ticket-title">${ticket.title}</div>
-                                        <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                        <div class="ticket-description">${(ticket.description || '').substring(0, 100)}...</div>
                                         <div class="ticket-meta">
                                             <div class="ticket-client">
                                                 <i class="fas fa-user"></i>
@@ -304,7 +304,7 @@ const loadTecnicoDashboard = (container) => {
                                 </div>
                                 <div class="ticket-body">
                                     <div class="ticket-title">${ticket.title}</div>
-                                    <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                    <div class="ticket-description">${(ticket.description || '').substring(0, 100)}...</div>
                                     <div class="ticket-meta">
                                         <div class="ticket-client">
                                             <i class="fas fa-user"></i>
@@ -396,7 +396,7 @@ const loadClienteDashboard = (container) => {
                                 </div>
                                 <div class="ticket-body">
                                     <div class="ticket-title">${ticket.title}</div>
-                                    <div class="ticket-description">${ticket.description.substring(0, 100)}...</div>
+                                    <div class="ticket-description">${(ticket.description || '').substring(0, 100)}...</div>
                                     <div class="ticket-meta">
                                         <div class="ticket-date">
                                             <i class="fas fa-calendar"></i>

@@ -542,6 +542,11 @@ const DataManager = {
         const tickets = Storage.get(STORAGE_KEYS.tickets);
         const ticketIndex = tickets.findIndex(t => t.id === ticketId);
         if (ticketIndex !== -1) {
+            // Asegurar que comments sea un array
+            if (!tickets[ticketIndex].comments) {
+                tickets[ticketIndex].comments = [];
+            }
+            
             const newComment = {
                 id: Date.now(),
                 ...comment,
@@ -605,6 +610,39 @@ const DataManager = {
     // Obtener configuración (prioridades, estados, etc.)
     getConfig() {
         return mockData.config;
+    },
+
+    // Limpiar tickets con datos faltantes o undefined
+    cleanInvalidTickets() {
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        const validTickets = tickets.filter(ticket => {
+            // Verificar que el ticket tenga las propiedades básicas requeridas
+            return ticket && 
+                   ticket.id && 
+                   ticket.title && 
+                   ticket.description && 
+                   ticket.priority && 
+                   ticket.status &&
+                   ticket.clientName &&
+                   ticket.createdAt;
+        });
+        
+        if (validTickets.length !== tickets.length) {
+            console.log(`Se eliminaron ${tickets.length - validTickets.length} tickets con datos inválidos`);
+            Storage.set(STORAGE_KEYS.tickets, validTickets);
+            DataEvents.emit('tickets:updated', { type: 'cleanup' });
+        }
+        
+        return validTickets;
+    },
+
+    // Eliminar ticket específico
+    deleteTicket(id) {
+        const tickets = Storage.get(STORAGE_KEYS.tickets);
+        const filteredTickets = tickets.filter(ticket => ticket.id !== id);
+        Storage.set(STORAGE_KEYS.tickets, filteredTickets);
+        DataEvents.emit('tickets:updated', { type: 'delete', ticketId: id });
+        return true;
     }
 };
 
