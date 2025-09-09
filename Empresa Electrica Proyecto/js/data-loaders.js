@@ -127,8 +127,17 @@ const loadClientsView = (container) => {
     
     container.innerHTML = `
         <div class="page-header">
-            <h1><i class="fas fa-users"></i> Clientes</h1>
-            <p>Gestión de clientes del sistema</p>
+            <div class="d-flex justify-between align-center">
+                <div>
+                    <h1><i class="fas fa-users"></i> Clientes</h1>
+                    <p>Gestión de clientes del sistema</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showAddClientModal()" title="Agregar nuevo cliente">
+                        <i class="fas fa-plus"></i> Agregar Cliente
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="page-content">
@@ -218,8 +227,17 @@ const loadTechniciansView = (container) => {
     
     container.innerHTML = `
         <div class="page-header">
-            <h1><i class="fas fa-tools"></i> Técnicos</h1>
-            <p>Gestión de técnicos del sistema</p>
+            <div class="d-flex justify-between align-center">
+                <div>
+                    <h1><i class="fas fa-tools"></i> Técnicos</h1>
+                    <p>Gestión de técnicos del sistema</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showAddTechnicianModal()" title="Agregar nuevo técnico">
+                        <i class="fas fa-plus"></i> Agregar Técnico
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="page-content">
@@ -340,6 +358,172 @@ const loadTechniciansView = (container) => {
     `;
     
     setupTechnicianSearch();
+};
+
+// Función para mostrar modal de agregar técnico
+const showAddTechnicianModal = () => {
+    // Crear modal de creación
+    const modal = document.createElement('div');
+    modal.className = 'technician-modal-overlay';
+    modal.innerHTML = `
+        <div class="technician-modal add-modal">
+            <div class="technician-modal-header">
+                <h2><i class="fas fa-user-tie"></i> Agregar Nuevo Técnico</h2>
+                <button class="modal-close-btn" onclick="this.closest('.technician-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="technician-modal-content">
+                <form id="add-technician-form" onsubmit="submitTechnicianAdd(event)">
+                    <div class="form-section">
+                        <h3>Información Personal</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-tech-name">Nombre:</label>
+                                <input type="text" id="new-tech-name" name="name" required placeholder="Nombre completo del técnico">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tech-email">Email:</label>
+                                <input type="email" id="new-tech-email" name="email" required placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tech-phone">Teléfono:</label>
+                                <input type="tel" id="new-tech-phone" name="phone" required placeholder="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tech-username">Usuario:</label>
+                                <input type="text" id="new-tech-username" name="username" required placeholder="nombre_usuario">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Configuración Profesional</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-tech-status">Estado:</label>
+                                <select id="new-tech-status" name="status" required>
+                                    <option value="disponible">Disponible</option>
+                                    <option value="ocupado">Ocupado</option>
+                                    <option value="offline">Desconectado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tech-password">Contraseña:</label>
+                                <input type="password" id="new-tech-password" name="password" required placeholder="Contraseña para el técnico" minlength="6">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Especializaciones</h3>
+                        <div class="form-group">
+                            <label for="new-tech-specializations">Especializaciones (separadas por coma):</label>
+                            <textarea id="new-tech-specializations" name="specializations" rows="3" placeholder="Ej: Instalaciones Eléctricas, Mantenimiento, Reparaciones"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Ubicación (Opcional)</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-tech-lat">Latitud:</label>
+                                <input type="number" id="new-tech-lat" name="lat" step="any" placeholder="19.4326">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tech-lng">Longitud:</label>
+                                <input type="number" id="new-tech-lng" name="lng" step="any" placeholder="-99.1332">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="technician-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.technician-modal-overlay').remove()">
+                    Cancelar
+                </button>
+                <button type="submit" form="add-technician-form" class="btn btn-primary">
+                    <i class="fas fa-user-tie"></i> Crear Técnico
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const closeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    });
+};
+
+// Función para procesar la creación del técnico
+const submitTechnicianAdd = (event) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const technicianData = {
+        role: 'tecnico',
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        username: formData.get('username'),
+        password: formData.get('password'),
+        status: formData.get('status'),
+        specializations: formData.get('specializations') ? 
+            formData.get('specializations').split(',').map(s => s.trim()).filter(s => s) : []
+    };
+
+    // Agregar ubicación si se proporcionó
+    const lat = formData.get('lat');
+    const lng = formData.get('lng');
+    if (lat && lng) {
+        technicianData.location = {
+            lat: parseFloat(lat),
+            lng: parseFloat(lng)
+        };
+    }
+
+    // Crear técnico usando DataManager
+    const result = DataManager.createUser(technicianData);
+    
+    if (result.success) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Técnico creado exitosamente', 'success');
+        } else {
+            alert('Técnico creado exitosamente');
+        }
+        
+        // Cerrar modal
+        event.target.closest('.technician-modal-overlay').remove();
+        
+        // Recargar la vista de técnicos
+        const container = document.getElementById('content-area');
+        if (container) {
+            loadTechniciansView(container);
+        }
+    } else {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast(result.error || 'Error al crear el técnico', 'error');
+        } else {
+            alert(result.error || 'Error al crear el técnico');
+        }
+    }
 };
 
 // Función para mostrar modal de detalles del técnico
@@ -660,6 +844,150 @@ const submitTechnicianEdit = (event, technicianId) => {
             Utils.showToast('Error al actualizar el técnico', 'error');
         } else {
             alert('Error al actualizar el técnico');
+        }
+    }
+};
+
+// Función para mostrar modal de agregar cliente
+const showAddClientModal = () => {
+    // Crear modal de creación
+    const modal = document.createElement('div');
+    modal.className = 'client-modal-overlay';
+    modal.innerHTML = `
+        <div class="client-modal add-modal">
+            <div class="client-modal-header">
+                <h2><i class="fas fa-user-plus"></i> Agregar Nuevo Cliente</h2>
+                <button class="modal-close-btn" onclick="this.closest('.client-modal-overlay').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="client-modal-content">
+                <form id="add-client-form" onsubmit="submitClientAdd(event)">
+                    <div class="form-section">
+                        <h3>Información Personal</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-client-name">Nombre:</label>
+                                <input type="text" id="new-client-name" name="name" required placeholder="Nombre completo del cliente">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-client-email">Email:</label>
+                                <input type="email" id="new-client-email" name="email" required placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-client-phone">Teléfono:</label>
+                                <input type="tel" id="new-client-phone" name="phone" required placeholder="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-client-username">Usuario:</label>
+                                <input type="text" id="new-client-username" name="username" required placeholder="nombre_usuario">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Información Adicional</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-client-company">Empresa:</label>
+                                <input type="text" id="new-client-company" name="company" placeholder="Nombre de la empresa (opcional)">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-client-address">Dirección:</label>
+                                <input type="text" id="new-client-address" name="address" placeholder="Dirección completa (opcional)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Configuración de Cuenta</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new-client-password">Contraseña:</label>
+                                <input type="password" id="new-client-password" name="password" required placeholder="Contraseña para el cliente" minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-client-avatar">Avatar (inicial):</label>
+                                <input type="text" id="new-client-avatar" name="avatar" maxlength="1" placeholder="Ej: J (opcional)">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="client-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.client-modal-overlay').remove()">
+                    Cancelar
+                </button>
+                <button type="submit" form="add-client-form" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Crear Cliente
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Agregar modal al DOM
+    document.body.appendChild(modal);
+
+    // Cerrar con ESC
+    const closeHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    };
+    document.addEventListener('keydown', closeHandler);
+
+    // Cerrar al hacer clic fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.removeEventListener('keydown', closeHandler);
+        }
+    });
+};
+
+// Función para procesar la creación del cliente
+const submitClientAdd = (event) => {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const clientData = {
+        role: 'cliente',
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        username: formData.get('username'),
+        password: formData.get('password'),
+        company: formData.get('company') || null,
+        address: formData.get('address') || null,
+        avatar: formData.get('avatar') || null
+    };
+
+    // Crear cliente usando DataManager
+    const result = DataManager.createUser(clientData);
+    
+    if (result.success) {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Cliente creado exitosamente', 'success');
+        } else {
+            alert('Cliente creado exitosamente');
+        }
+        
+        // Cerrar modal
+        event.target.closest('.client-modal-overlay').remove();
+        
+        // Recargar la vista de clientes
+        const container = document.getElementById('content-area');
+        if (container) {
+            loadClientsView(container);
+        }
+    } else {
+        if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast(result.error || 'Error al crear el cliente', 'error');
+        } else {
+            alert(result.error || 'Error al crear el cliente');
         }
     }
 };
@@ -1130,5 +1458,9 @@ window.contactClient = contactClient;
 window.showTechnicianModal = showTechnicianModal;
 window.showEditTechnicianModal = showEditTechnicianModal;
 window.submitTechnicianEdit = submitTechnicianEdit;
+window.showAddClientModal = showAddClientModal;
+window.submitClientAdd = submitClientAdd;
 window.showEditClientModal = showEditClientModal;
 window.submitClientEdit = submitClientEdit;
+window.showAddTechnicianModal = showAddTechnicianModal;
+window.submitTechnicianAdd = submitTechnicianAdd;

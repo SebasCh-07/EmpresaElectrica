@@ -765,6 +765,45 @@ const DataManager = {
         Storage.set(STORAGE_KEYS.users, users);
         DataEvents.emit('users:updated', { type: 'update', userId, updatedData });
         return true;
+    },
+
+    // Crear nuevo usuario
+    createUser(userData) {
+        const users = Storage.get(STORAGE_KEYS.users);
+        
+        // Verificar que no exista un usuario con el mismo username o email
+        const existingUser = users.find(user => 
+            user.username === userData.username || user.email === userData.email
+        );
+        
+        if (existingUser) {
+            return { success: false, error: 'Ya existe un usuario con ese nombre de usuario o email' };
+        }
+
+        // Generar nuevo ID
+        const newId = Math.max(...users.map(u => u.id), 0) + 1;
+        
+        // Crear el nuevo usuario con valores por defecto
+        const newUser = {
+            id: newId,
+            username: userData.username,
+            password: userData.password,
+            role: userData.role,
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            avatar: userData.avatar || userData.name.charAt(0).toUpperCase(),
+            ...userData // Incluir cualquier propiedad adicional específica del rol
+        };
+
+        // Agregar el usuario a la lista
+        users.push(newUser);
+        Storage.set(STORAGE_KEYS.users, users);
+        
+        // Emitir evento de creación
+        DataEvents.emit('users:updated', { type: 'create', userId: newId, userData: newUser });
+        
+        return { success: true, user: newUser };
     }
 };
 
