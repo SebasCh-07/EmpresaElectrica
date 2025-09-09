@@ -144,6 +144,12 @@ class TecnicoApp {
                             <h2 class="tecnico-tickets-title">Asignaciones Recientes</h2>
                             <p class="tecnico-tickets-subtitle">Trabajos pendientes y en progreso</p>
                         </div>
+                        <div class="tecnico-actions">
+                            <button class="btn btn-primary" onclick="app.showToolRequestModal()">
+                                <i class="fas fa-tools"></i>
+                                Solicitar Herramientas
+                            </button>
+                        </div>
                     </div>
                     <div id="tecnico-tickets-list">
                         ${this.renderTecnicoTickets(userTickets.filter(t => t.status === 'asignado').slice(0, 5))}
@@ -170,10 +176,18 @@ class TecnicoApp {
                             <h2 class="tecnico-tickets-title">Todas mis Asignaciones</h2>
                             <p class="tecnico-tickets-subtitle">Trabajos asignados y en progreso</p>
                         </div>
-                        <div class="tecnico-search-container">
-                            <div class="search-bar">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="tecnico-search-input" placeholder="Buscar asignaciones..." onkeyup="app.searchTecnicoTickets(this.value)">
+                        <div class="tecnico-header-actions">
+                            <div class="tecnico-search-container">
+                                <div class="search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="tecnico-search-input" placeholder="Buscar asignaciones..." onkeyup="app.searchTecnicoTickets(this.value)">
+                                </div>
+                            </div>
+                            <div class="tecnico-actions">
+                                <button class="btn btn-primary" onclick="app.showToolRequestModal()">
+                                    <i class="fas fa-tools"></i>
+                                    Solicitar Herramientas
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1072,6 +1086,166 @@ class TecnicoApp {
         this.renderTecnicoTicketsByStatus(filteredTickets, this.currentTecnicoTab);
     }
 
+    // Función para mostrar modal de solicitud de herramientas
+    showToolRequestModal() {
+        console.log('Abriendo modal de solicitud de herramientas...');
+        
+        // Obtener herramientas disponibles
+        const availableTools = DataManager.getAllTools ? DataManager.getAllTools().filter(tool => tool.status === 'disponible') : [];
+        console.log('Herramientas disponibles:', availableTools.length);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal tool-request-modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-tools"></i> Solicitar Herramientas</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="tool-request-form" onsubmit="app.submitToolRequest(event)">
+                        <div class="form-group">
+                            <label for="request-ticket">Ticket asociado:</label>
+                            <select id="request-ticket" required>
+                                <option value="">Seleccionar ticket...</option>
+                                ${this.getUserTickets().filter(t => ['asignado', 'en_curso'].includes(t.status)).map(ticket => `
+                                    <option value="${ticket.id}">#${ticket.id} - ${ticket.title}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tools-selection">Herramientas solicitadas:</label>
+                            <div id="tools-selection" class="tools-selection">
+                                ${availableTools.length > 0 ? availableTools.map(tool => `
+                                    <div class="tool-option">
+                                        <input type="checkbox" id="tool-${tool.id}" name="tools" value="${tool.id}">
+                                        <label for="tool-${tool.id}">
+                                            <span class="tool-name">${tool.name}</span>
+                                            <span class="tool-code">${tool.code}</span>
+                                            <span class="tool-category">${tool.category}</span>
+                                        </label>
+                                    </div>
+                                `).join('') : '<p class="no-tools">No hay herramientas disponibles en este momento</p>'}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="request-reason">Justificación de la solicitud:</label>
+                            <textarea id="request-reason" rows="4" placeholder="Describe por qué necesitas estas herramientas para completar el trabajo..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="request-duration">Duración estimada (días):</label>
+                            <input type="number" id="request-duration" min="1" max="30" value="1" required>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Enviar Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        console.log('Modal agregado al DOM');
+        
+        // Cerrar modal al hacer click fuera de él
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.parentElement) {
+                modal.remove();
+            }
+        });
+        
+        console.log('Modal de solicitud de herramientas configurado completamente');
+    }
+    
+    // Función para enviar solicitud de herramientas
+    submitToolRequest(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const ticketId = form.querySelector('#request-ticket').value;
+        const selectedTools = Array.from(form.querySelectorAll('input[name="tools"]:checked')).map(cb => cb.value);
+        const reason = form.querySelector('#request-reason').value;
+        const duration = parseInt(form.querySelector('#request-duration').value);
+        
+        if (selectedTools.length === 0) {
+            alert('Debes seleccionar al menos una herramienta');
+            return;
+        }
+        
+        // Crear solicitud
+        const request = {
+            id: Date.now().toString(),
+            technicianId: this.currentUser.id,
+            technicianName: this.currentUser.name,
+            ticketId: ticketId,
+            tools: selectedTools,
+            reason: reason,
+            duration: duration,
+            status: 'pendiente',
+            requestedAt: new Date().toISOString(),
+            approvedAt: null,
+            approvedBy: null,
+            rejectedAt: null,
+            rejectedBy: null,
+            comments: []
+        };
+        
+        // Guardar solicitud
+        this.saveToolRequest(request);
+        
+        // Cerrar modal
+        form.closest('.modal').remove();
+        
+        // Mostrar confirmación
+        this.showNotification('Solicitud enviada exitosamente', 'success');
+    }
+    
+    // Función para guardar solicitud en localStorage
+    saveToolRequest(request) {
+        const requests = JSON.parse(localStorage.getItem('toolRequests') || '[]');
+        requests.push(request);
+        localStorage.setItem('toolRequests', JSON.stringify(requests));
+        
+        // Emitir evento para notificar cambios
+        window.dispatchEvent(new CustomEvent('toolRequests:updated'));
+    }
+    
+    // Función para mostrar notificaciones
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
     logout() {
         localStorage.removeItem('currentUser');
         window.location.href = 'login.html';
@@ -1082,10 +1256,26 @@ class TecnicoApp {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new TecnicoApp();
+    // Hacer app disponible globalmente después de inicializar
+    window.app = app;
 });
 
-// Funciones globales
-window.app = app;
+// Funciones globales de respaldo
+window.showToolRequestModal = () => {
+    if (window.app && window.app.showToolRequestModal) {
+        window.app.showToolRequestModal();
+    } else {
+        console.error('App no está inicializada o función no disponible');
+    }
+};
+
+window.submitToolRequest = (event) => {
+    if (window.app && window.app.submitToolRequest) {
+        window.app.submitToolRequest(event);
+    } else {
+        console.error('App no está inicializada o función no disponible');
+    }
+};
 
 // Función para toggle del menú móvil
 window.toggleMobileMenu = () => {

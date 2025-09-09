@@ -95,7 +95,8 @@ class ToolsManager {
         const availableTools = this.tools.filter(tool => tool.status === 'disponible');
         const toolsInUse = this.tools.filter(tool => tool.status === 'en_uso');
         const toolsInMaintenance = this.tools.filter(tool => tool.status === 'mantenimiento');
-        const pendingRequests = this.toolRequests.filter(req => req.status === 'pendiente');
+        const allRequests = JSON.parse(localStorage.getItem('toolRequests') || '[]');
+        const pendingRequests = allRequests.filter(req => req.status === 'pendiente');
 
         return `
             <div class="page-header">
@@ -105,7 +106,7 @@ class ToolsManager {
                         <p>Administración de herramientas y equipos técnicos</p>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn btn-info" onclick="toolsManager.showToolRequests()" title="Ver solicitudes de herramientas">
+                        <button class="btn btn-info" onclick="window.location.href='solicitudes-herramientas.html'" title="Ver solicitudes de herramientas">
                             <i class="fas fa-list"></i> Solicitudes (${pendingRequests.length})
                         </button>
                         <button class="btn btn-success" onclick="toolsManager.showAddToolModal()" title="Agregar nueva herramienta">

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de Herramientas - Empresa Eléctrica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/tickets.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/electrical-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Main Application -->
+    <div class="app-container requests-page">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <i class="fas fa-bolt electrical-logo"></i>
+                <span>Empresa Eléctrica - Admin</span>
+            </div>
+            <div class="nav-user">
+                <span id="user-name">Administrador</span>
+                <button id="logout-btn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="nav-links">
+                <li>
+                    <a href="admin.html#dashboard" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#tickets" class="nav-link">
+                        <i class="fas fa-ticket-alt"></i>
+                        Tickets
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#clientes" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        Clientes
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#tecnicos" class="nav-link">
+                        <i class="fas fa-hard-hat"></i>
+                        Técnicos
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#geolocalizacion" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Geolocalización
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html#herramientas" class="nav-link active">
+                        <i class="fas fa-toolbox"></i>
+                        Herramientas
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="content-area">
+                <!-- Loading Screen -->
+                <div id="loading-screen" class="loading-screen">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando solicitudes...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/shared-functions.js"></script>
+    <script src="js/solicitudes-herramientas-app.js"></script>
+</body>
+</html>
