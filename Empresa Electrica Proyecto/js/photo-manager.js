@@ -358,3 +358,4 @@ class PhotoManager {
 // Instancia global
 window.photoManager = new PhotoManager();
 
+

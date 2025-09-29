@@ -646,3 +646,4 @@ class ViaticosSystem {
 // Instancia global
 window.viaticosSystem = new ViaticosSystem();
 
+

@@ -350,3 +350,4 @@ window.generateGeneralReport = (filters) => {
     window.PDFGenerator.generateGeneralReport(filters);
 };
 
+
